@@ -1,6 +1,9 @@
 """
 LED Animation GUI "POC"
 based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_SypQoGb5I7NjspXkRWqmb5XsHbFEc#/user/GlowScriptDemos/folder/Examples/program/AtomicSolid-VPython
+
+Installation:
+    pip install vpython
 """
 
 from vpython import *
