@@ -36,6 +36,7 @@ class Cube3D(canvas):
         Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
         self.lights = []
 
+        # TODO: WIP work on light for each wall
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
         distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
