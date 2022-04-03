@@ -13,8 +13,9 @@ stream = p.open(
     format = pyaudio.paFloat32,
     channels = 1,
     rate = RATE,
-    input = True,
-    output = False,
+    #input = True,
+    output = True,
+    #output = False,
     frames_per_buffer = BUFFER
 )
 
@@ -50,11 +51,15 @@ def update_line(i):
     global SAMPLE
 
     try:
+        #print("1st step")
         b = numpy.fromstring(stream.read(BUFFER), dtype=numpy.float32)
+        #print("2nd step")
         data = numpy.fft.rfft(b)
-    except IOError:
-        print('error')
-        pass
+    except Exception as e:
+        print('Failed, reason: '+ str(e))
+        line1.set_data(r, [0])
+        line2.set_data(r, [0])
+        return line1, line2
 
     #data = numpy.log10(numpy.sqrt(numpy.real(data) ** 2 + numpy.imag(data) ** 2) / BUFFER) * 10
     data = data * -1

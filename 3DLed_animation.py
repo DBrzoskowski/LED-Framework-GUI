@@ -62,6 +62,8 @@ class Cube3D(canvas):
         # Create lines between LED
         for led in self.leds:
             if led.visible:
+                pass
+                """
                 if led.pos.x == 0:
                     self.make_line(self.leds[led.index - 1], led)
                     self.make_line(led, self.leds[led.index + 1])
@@ -85,7 +87,7 @@ class Cube3D(canvas):
                     self.make_line(led, self.leds[led.index + (size + 2) ** 2])
                 else:
                     self.make_line(led, self.leds[led.index + (size + 2) ** 2])
-
+                """
     # Create line between LEDs
 
     def visible_leds(self):
@@ -157,7 +159,7 @@ def click(evt):
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 
 while True:
-    sleep(fps_to_milliseconds(30))
+    sleep(fps_to_milliseconds(10))
     # c.layers_change()
     c.random_color()
 
