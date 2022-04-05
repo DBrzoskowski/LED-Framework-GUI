@@ -2,22 +2,27 @@ import pyaudio
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib.animation
+import matplotlib as mpl
+
+mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
 RATE = 44100
 BUFFER = 882
 
 p = pyaudio.PyAudio()
-
+SPEAKERS = p.get_default_output_device_info()["hostApi"]
 stream = p.open(
     input_device_index= 2, # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
     format = pyaudio.paFloat32,
     channels = 1,
     rate = RATE,
-    #input = True,
-    output = True,
+    input = True,
+    #input = False,
     #output = False,
-    frames_per_buffer = BUFFER
+    #output = True,
+    frames_per_buffer = BUFFER,
 )
+
 
 fig = plt.figure()
 line1 = plt.plot([],[])[0]
@@ -31,9 +36,8 @@ PRINT_SPECTRUM_LINE = True
 
 # Tuning values
 STARTING_VALUE = 0
-SAMPLE = 5              # Higher - lower number of spectrum's, 1 sample = 50Hz
+SAMPLE = 12              # Higher - lower number of spectrum's, 1 sample = 50Hz
 FADE_SPEED = 0.4        # Higher - faster fading
-
 
 
 SAMPLE_AVERAGE = 0
@@ -113,8 +117,8 @@ def update_line(i):
     return line1, line2
 
 
-plt.xlim([0, 14000])
-plt.ylim(0, 70)
+plt.xlim([0, 10000])
+plt.ylim(0, 20)
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('dB')
 plt.title('Spectrometer')
