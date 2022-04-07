@@ -1,30 +1,23 @@
+import math
+
 class Led:
-    def __init__(self):
-        # one led 32 bits
-        self.red = format(0, '08b')
-        self.green = format(0, '08b')
-        self.blue = format(0, '08b')
-        self.brightness = format(0, '08b')
-
-    def updateLed(self, red, green, blue, brightness):
-        self.red = format(min([red, 255]), '08b')
-        self.green = format(min([green, 255]), '08b')
-        self.blue = format(min([blue, 255]), '08b')
-        self.brightness = format(min([brightness, 15]), '08b')
-
-    def updateBrightness(self, brightness):
-        self.brightness = format(min([brightness, 15]), '08b')
-
-    def offLed(self):
-        self.brightness = format(0, '04b')
+    def __init__(self, *args):
+        # one led 16 bits
+        if len(args) == 3:
+            self.red = format(min([args[0], 15]), '04b')
+            self.green = format(min([args[1], 15]), '04b')
+            self.blue = format(min([args[2], 15]), '04b')
+        else:
+            self.red = format(0, '04b')
+            self.green = format(0, '04b')
+            self.blue = format(0, '04b')
 
     def translateBinary(self):
-        return f"{self.red}{self.green}{self.blue}{self.brightness}"
+        return f"{self.red}{self.green}{self.blue}"
 
 
 class Layer:
     def __init__(self):
-        # layer contains 64 leds 2048 bits
         self.leds = [Led() for _ in range(64)]
 
     def updateLed(self, led, position):
@@ -53,6 +46,41 @@ class Frame:
             framesBinary += layer.translateBinary()
         return framesBinary
 
+    def updateColumn(self, level, xCord, yCord, turnOn):
+        """ view on top of matrix. Each 2x2 matrix will map one sound frequency range
+
+                            00 01
+                            10 11
+
+           0    1        2   3       4   5       6    7
+           8    9       10  11      12  13      14   15
+
+           16  17       18  19      20  21      22   23
+           24  25       26  27      28  29      30   31
+
+           32  33       34  35      36  37      38   39
+           40  41       42  43      44  45      46   47
+
+           48  49       50  51      52  53      54   55
+           56  57       58  59      60  61      62   63
+
+           """
+        pos_00 = 0 + xCord * 2 + (yCord * 16)
+        pos_01 = 1 + xCord * 2 + (yCord * 16)
+        pos_10 = 8 + xCord * 2 + (yCord * 16)
+        pos_11 = 9 + xCord * 2 + (yCord * 16)
+
+        if turnOn:
+            brightness = 15
+        else:
+            brightness = 0
+
+        # this should be modified to contain color values
+        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_00)
+        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_01)
+        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_10)
+        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_11)
+
 
 class Animation:
     def __init__(self):
@@ -68,34 +96,14 @@ class Animation:
         return animationBinary
 
 
-
-def updateColumn(layer, xCord, yCord):
-    """ view on top of matrix. Each 2x2 matrix will map one sound frequency range
-
-                        00 01
-                        10 00
-
-       0    1        2   3       4   5       6    7
-       8    9       10  11      12  13      14   15
-
-       16  17       18  19      20  21      22   23
-       24  25       26  27      28  29      30   31
-
-       32  33       34  35      36  37      38   39
-       40  41       42  43      44  45      46   47
-
-       48  49       50  51      52  53      54   55
-       56  57       58  59      60  61      62   63
-
-       """
-    pos_00 = 0 + xCord * 2 + (yCord * 16)
-    pos_01 = 1 + xCord * 2 + (yCord * 16)
-    pos_10 = 8 + xCord * 2 + (yCord * 16)
-    pos_11 = 9 + xCord * 2 + (yCord * 16)
-
-    layer.updateLed(Led(), pos_00)
-    layer.updateLed(Led(), pos_01)
-    layer.updateLed(Led(), pos_10)
-    layer.updateLed(Led(), pos_11)
+def frequencyToMatrix(frequency):
+    frequency_map = {0: {0, 0}, 1: {0, 1}, 2: {0, 2}, 3: {0, 3}, 4: {1, 0}, 5: {1, 1}, 6: {1, 2}, 7: {1, 3}, 8: {2, 0},
+                     9: {2, 1}, 10: {2, 2}, 11: {2, 3}, 12: {2, 3}, 13: {3, 0}, 14: {3, 1}, 15: {3, 2}, 16: {3, 3}}
+    matrixNumber = math.floor(min(frequency / 625, 16))
+    return frequency_map[matrixNumber]
 
 
+def spectrumVisualize(frame, frequency, power):
+    xCord, yCord = frequencyToMatrix(frequency)
+    for level in range(8):
+        frame.updateColumn(level, xCord, yCord, level <= power)
