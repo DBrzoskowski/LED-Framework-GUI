@@ -7,8 +7,7 @@ Installation:
 """
 from random import uniform
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light
-
-
+import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
 scene.background = color.black  # scene color
 N = 8  # N by N by N array of leds
@@ -43,19 +42,35 @@ class Cube3D(canvas):
         distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
 
         # Create (N+2)^3 LED in a grid; the outermost LED is fixed and invisible
-        for z in range(-1, size + 1, 1):
-            for y in range(-1, size + 1, 1):
-                for x in range(-1, size + 1, 1):
+        # for z in range(-1, size + 1, 1):
+        #     for y in range(-1, size + 1, 1):
+        #         for x in range(-1, size + 1, 1):
+        #             led = sphere()
+        #             led.pos = vector(x, y, z) * spacing
+        #             led.radius = led_radius
+        #             led.color = vector(0, 0.58, 0.69)
+        #             if 0 <= x < size and 0 <= y < size and 0 <= z < size:
+        #                 p = vec.random()
+        #                 led.momentum = momentumRange * p
+        #                 led.color = color.black
+        #             else:
+        #                 led.visible = False
+        #                 led.momentum = vec(0, 0, 0)
+        #             led.index = len(self.leds)
+        #             self.leds.append(led)
+
+        for z in range(0, size, 1):
+            for x in range(0, size, 1):
+                for y in range(0, size, 1):
                     led = sphere()
-                    led.pos = vector(x, y, z) * spacing
+                    led.pos = vector(z, y, x) * spacing
                     led.radius = led_radius
-                    led.color = vector(0, 0.58, 0.69)
                     if 0 <= x < size and 0 <= y < size and 0 <= z < size:
                         p = vec.random()
                         led.momentum = momentumRange * p
                         led.color = color.black
                     else:
-                        led.visible = False
+                        # led.visible = False
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
@@ -127,6 +142,157 @@ class Cube3D(canvas):
         for i in leds:
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
+    def get_led_from_visible(self, position):
+        return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
+
+    def test_whole_layer(self):
+        for y in range(0, 8):
+            get_all = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
+            for i in get_all:
+                i.color = vector(1, 1, 1)
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in range(0, 8):
+            get_all = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
+            for i in get_all:
+                i.color = vector(1, 1, 1)
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in reversed(range(0, 8)):
+            get_all = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
+            for i in get_all:
+                i.color = vector(1, 1, 1)
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in reversed(range(0, 8)):
+            get_all = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
+            for i in get_all:
+                i.color = vector(1, 1, 1)
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+    def test_whole_inside_layer(self, color):
+        for y in range(2, 6):
+            get_all = [self.get_led_from_visible((2, y, i)) for i in range(2, 6)]
+            for i in get_all:
+                i.color = color
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in range(2, 6):
+            get_all = [self.get_led_from_visible((y, 6, i)) for i in range(2, 6)]
+            for i in get_all:
+                i.color = color
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in reversed(range(2, 6)):
+            get_all = [self.get_led_from_visible((6, y, i)) for i in range(2, 6)]
+            for i in get_all:
+                i.color = color
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+        for y in reversed(range(2, 6)):
+            get_all = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6)]
+            for i in get_all:
+                i.color = color
+            sleep(0.2)
+
+            for i in get_all:
+                i.color = vector(0, 0, 0)
+
+    def comibne_2_tests(self, color):
+        for y in range(0, 8):
+            get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
+            get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
+
+            for i in get_all_1:
+                i.color = vector(1, 1, 1)
+
+            for i in get_all_2:
+                i.color = color
+
+            sleep(0.2)
+
+            # clear row after color showed
+            # for i in get_all_1:
+            #     i.color = vector(0, 0, 0)
+            #
+            # for i in get_all_2:
+            #     i.color = vector(0, 0, 0)
+
+        for y in range(0, 8):
+            get_all_1 = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
+            get_all_2 = [self.get_led_from_visible((y, 5, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
+
+            for i in get_all_1:
+                i.color = vector(1, 1, 1)
+
+            for i in get_all_2:
+                i.color = color
+
+            sleep(0.2)
+
+            # for i in get_all_1:
+            #     i.color = vector(0, 0, 0)
+            #
+            # for i in get_all_2:
+            #     i.color = vector(0, 0, 0)
+
+        for y in reversed(range(0, 8)):
+            get_all_1 = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
+            get_all_2 = [self.get_led_from_visible((6, y, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
+
+            for i in get_all_1:
+                i.color = vector(1, 1, 1)
+
+            for i in get_all_2:
+                i.color = color
+
+            sleep(0.2)
+
+            # for i in get_all_1:
+            #     i.color = vector(0, 0, 0)
+            #
+            # for i in get_all_2:
+            #     i.color = vector(0, 0, 0)
+
+        for y in reversed(range(0, 8)):
+            get_all_1 = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
+            get_all_2 = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
+
+            for i in get_all_1:
+                i.color = vector(1, 1, 1)
+
+            for i in get_all_2:
+                i.color = color
+
+            sleep(0.2)
+
+            # for i in get_all_1:
+            #     i.color = vector(0, 0, 0)
+            #
+            # for i in get_all_2:
+            #     i.color = vector(0, 0, 0)
+
     def layers_change(self):
         # WIP function
         leds = self.visible_leds()
@@ -159,7 +325,9 @@ def click(evt):
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 
 while True:
-    sleep(fps_to_milliseconds(10))
-    # c.layers_change()
-    c.random_color()
+    c.comibne_2_tests(color=vector(1, 0, 0))
 
+    # clear whole cube after test finish
+    for i in c.visible_leds():
+        i.color = vector(0, 0, 0)
+    sleep(0.2)
