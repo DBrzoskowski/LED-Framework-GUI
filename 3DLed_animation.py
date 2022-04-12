@@ -220,6 +220,8 @@ class Cube3D(canvas):
                 i.color = vector(0, 0, 0)
 
     def comibne_2_tests(self, color):
+        # TODO: 1. This need to be re-write
+        # TODO: 2. Bad layers show in simulations need to be corrected 
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
