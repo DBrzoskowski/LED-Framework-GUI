@@ -5,16 +5,18 @@ based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_Syp
 Installation:
     pip install vpython
 """
+import time
 from random import uniform
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light
 import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
-scene.background = color.black  # scene color
+scene.background = color.white  # scene color
 N = 8  # N by N by N array of leds
 k = 1
 m = 1
 spacing = 1
 led_radius = 0.15 * spacing
+old_led_color = {}
 
 
 def fps_to_milliseconds(fps):
@@ -34,6 +36,8 @@ class Cube3D(canvas):
         To pan left/right and up/down, Shift-drag.
         Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
         self.lights = []
+
+        # self.old_led_color = {}
 
         # TODO: WIP work on light for each wall
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
@@ -221,7 +225,6 @@ class Cube3D(canvas):
 
     def comibne_2_tests(self, color):
         # TODO: 1. This need to be re-write
-        # TODO: 2. Bad layers show in simulations need to be corrected 
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
@@ -316,20 +319,29 @@ class Cube3D(canvas):
 
         leds[448].color = color.yellow
 
-# TODO This need to be re-writed
-def click(evt):
-    led_to_change = [i for i in c.leds if
-                     int(i.pos.x) == int(evt.pos.x) and int(i.pos.y) == int(evt.pos.y) and int(i.pos.z) == int(
-                         evt.pos.z)]
-    led_to_change[0].color = color.red
+    def drawing(self, drawing_color=color.red, default_color=color.black):
+        self.waitfor('click')
+        hit = self.mouse.pick
+
+        if hit:
+            if hit.color != drawing_color:
+                old_led_color[hit.idx] = default_color
+
+            hit.color = drawing_color if hit.color == old_led_color[hit.idx] else old_led_color[hit.idx]
 
 
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
+c.background = color.white  # temporarily to see the leds better
 
 while True:
-    c.comibne_2_tests(color=vector(1, 0, 0))
+    drawing = True
 
-    # clear whole cube after test finish
-    for i in c.visible_leds():
-        i.color = vector(0, 0, 0)
-    sleep(0.2)
+    if not drawing:
+        c.comibne_2_tests(color=vector(1, 0, 0))
+
+        # clear whole cube after test finish
+        for i in c.visible_leds():
+            i.color = vector(0, 0, 0)
+        sleep(0.2)
+    else:
+        c.drawing()
