@@ -261,7 +261,7 @@ class Cube3D(canvas):
 
         for y in reversed(range(0, 8)):
             get_all_1 = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
-            get_all_2 = [self.get_led_from_visible((6, y, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
+            get_all_2 = [self.get_led_from_visible((6, y, i)) for i in range(2, 6) if y in [3, 4, 5]]
 
             for i in get_all_1:
                 i.color = vector(1, 1, 1)
@@ -278,7 +278,7 @@ class Cube3D(canvas):
             #     i.color = vector(0, 0, 0)
 
         for y in reversed(range(0, 8)):
-            get_all_1 = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
+            get_all_1 = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)] 
             get_all_2 = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
 
             for i in get_all_1:
