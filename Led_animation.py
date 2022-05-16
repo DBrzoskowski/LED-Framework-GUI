@@ -7,9 +7,11 @@ Installation:
 """
 import time
 from random import uniform
+import txaio
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light
 import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
+txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 scene.background = color.white  # scene color
 N = 8  # N by N by N array of leds
 k = 1
@@ -332,7 +334,9 @@ class Cube3D(canvas):
 
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 c.background = color.white  # temporarily to see the leds better
-
+# time.sleep(2)
+# c.comibne_2_tests(color=vector(1, 0, 0))
+# While it's unnecessary
 while True:
     drawing = True
 
