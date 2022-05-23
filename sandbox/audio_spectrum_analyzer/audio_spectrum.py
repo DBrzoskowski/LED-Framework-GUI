@@ -2,22 +2,27 @@ import pyaudio
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib.animation
+import matplotlib as mpl
+
+mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
 RATE = 44100
 BUFFER = 882
 
 p = pyaudio.PyAudio()
-
+SPEAKERS = p.get_default_output_device_info()["hostApi"]
 stream = p.open(
     input_device_index= 2, # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
     format = pyaudio.paFloat32,
     channels = 1,
     rate = RATE,
-    #input = True,
-    output = True,
+    input = True,
+    #input = False,
     #output = False,
-    frames_per_buffer = BUFFER
+    #output = True,
+    frames_per_buffer = BUFFER,
 )
+
 
 fig = plt.figure()
 line1 = plt.plot([],[])[0]
@@ -26,17 +31,16 @@ line2 = plt.plot([],[])[0]
 r = range(0,int(RATE/2+1),int(RATE/BUFFER))
 l = len(r)
 
-PRINT_BLUE_LINE = True
+PRINT_BLUE_LINE = False
 PRINT_SPECTRUM_LINE = True
 
 # Tuning values
 STARTING_VALUE = 0
-SAMPLE = 5              # Higher - lower number of spectrum's, 1 sample = 50Hz
+SAMPLE = 12              # Higher - lower number of spectrum's, 1 sample = 50Hz
 FADE_SPEED = 0.4        # Higher - faster fading
 
 
-
-SAMPLE_AVERAGE = 0
+SAMPLE_MAX = 0
 
 
 def init_line():
@@ -46,7 +50,7 @@ def init_line():
 
 
 def update_line(i):
-    global SAMPLE_AVERAGE
+    global SAMPLE_MAX
     global STARTING_VALUE
     global SAMPLE
 
@@ -74,15 +78,16 @@ def update_line(i):
     for i, point in enumerate(test[1]):
         # get SAMPLE_AVERAGE of first (STARTING_VALUE)..(SAMPLE) elements
         if i % SAMPLE == 0:
-            SAMPLE_AVERAGE = 0
+            SAMPLE_MAX = 0
             sample_points = test[1][STARTING_VALUE:min((STARTING_VALUE + SAMPLE), len(test[1]) - 1)]
             for v in sample_points:
-                if v > SAMPLE_AVERAGE:
-                    SAMPLE_AVERAGE = v
+                if v > SAMPLE_MAX:
+                    SAMPLE_MAX = v
+                    print(v)
 
             # replace SAMPLE_AVERAGE value for (STARTING_VALUE)..(SAMPLE) elements
             for index in range(STARTING_VALUE, min(STARTING_VALUE + SAMPLE, len(test[1]) - 1)):
-                test[1][index] = SAMPLE_AVERAGE
+                test[1][index] = SAMPLE_MAX
 
             STARTING_VALUE += SAMPLE
             if STARTING_VALUE >= len(test[1]):
@@ -113,8 +118,8 @@ def update_line(i):
     return line1, line2
 
 
-plt.xlim([0, 14000])
-plt.ylim(0, 70)
+plt.xlim([0, 10000])
+plt.ylim(-20, 20)
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('dB')
 plt.title('Spectrometer')
