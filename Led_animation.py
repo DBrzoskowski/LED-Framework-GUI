@@ -9,16 +9,15 @@ import time
 from random import uniform
 import txaio
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light
-import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 scene.background = color.white  # scene color
+from sandbox.audio_spectrum_analyzer.cube import Led, Layer, Frame, Animation
 N = 8  # N by N by N array of leds
 k = 1
 m = 1
 spacing = 1
 led_radius = 0.15 * spacing
-old_led_color = {}
 
 
 def fps_to_milliseconds(fps):
@@ -38,14 +37,20 @@ class Cube3D(canvas):
         To pan left/right and up/down, Shift-drag.
         Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
         self.lights = []
+        self.old_led_color = {}
 
-        # self.old_led_color = {}
+        self.led_obj = []  # this is a Led() obj list
 
-        # TODO: WIP work on light for each wall
+        # add some light to walls
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
         distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
         distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
+        distant_light(direction=vector(2.9, 2.8, 3.5), color=color.gray(0.3))
+        distant_light(direction=vector(-2.9, -2.8, -3.5), color=color.gray(0.8))
+        distant_light(direction=vector(1.6, 1.6, 2), color=color.gray(0.3))
+        distant_light(direction=vector(-1.6, -1.6, -2), color=color.gray(0.8))
+
 
         # Create (N+2)^3 LED in a grid; the outermost LED is fixed and invisible
         # for z in range(-1, size + 1, 1):
@@ -158,8 +163,8 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
             sleep(0.2)
 
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+            # for i in get_all:
+            #     i.color = vector(0, 0, 0)
 
         for y in range(0, 8):
             get_all = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
@@ -167,8 +172,8 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
             sleep(0.2)
 
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+            # for i in get_all:
+            #     i.color = vector(0, 0, 0)
 
         for y in reversed(range(0, 8)):
             get_all = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
@@ -176,8 +181,8 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
             sleep(0.2)
 
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+            # for i in get_all:
+            #     i.color = vector(0, 0, 0)
 
         for y in reversed(range(0, 8)):
             get_all = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
@@ -185,8 +190,8 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
             sleep(0.2)
 
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+            # for i in get_all:
+            #     i.color = vector(0, 0, 0)
 
     def test_whole_inside_layer(self, color):
         for y in range(2, 6):
@@ -327,25 +332,28 @@ class Cube3D(canvas):
 
         if hit:
             if hit.color != drawing_color:
-                old_led_color[hit.idx] = default_color
+                self.old_led_color[hit.idx] = default_color
+                led_obj = Led(drawing_color.value)
+                print(f'Translate binary -> {led_obj.translate_binary()}')
 
-            hit.color = drawing_color if hit.color == old_led_color[hit.idx] else old_led_color[hit.idx]
+            hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
 
 
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
-c.background = color.white  # temporarily to see the leds better
+c.background = color.black  # temporarily to see the LEDs better
 # time.sleep(2)
 # c.comibne_2_tests(color=vector(1, 0, 0))
 # While it's unnecessary
 while True:
-    drawing = True
+    drawing = False
 
     if not drawing:
-        c.comibne_2_tests(color=vector(1, 0, 0))
+        c.test_whole_layer()
+        # c.comibne_2_tests(color=vector(1, 0, 0))
 
         # clear whole cube after test finish
-        for i in c.visible_leds():
-            i.color = vector(0, 0, 0)
-        sleep(0.2)
+        # for i in c.visible_leds():
+        #     i.color = vector(0, 0, 0)
+        # sleep(0.2)
     else:
         c.drawing()
