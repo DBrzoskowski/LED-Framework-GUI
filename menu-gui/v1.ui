@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>510</y>
-      <width>141</width>
-      <height>41</height>
+      <x>30</x>
+      <y>400</y>
+      <width>201</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -36,10 +36,10 @@
    <widget class="QPushButton" name="pauseButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>510</y>
-      <width>141</width>
-      <height>41</height>
+      <x>550</x>
+      <y>400</y>
+      <width>201</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="text">
@@ -49,10 +49,10 @@
    <widget class="QPushButton" name="stopButton">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>510</y>
-      <width>141</width>
-      <height>41</height>
+      <x>290</x>
+      <y>400</y>
+      <width>201</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="text">
@@ -62,22 +62,22 @@
    <widget class="QPushButton" name="openButton">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>510</y>
-      <width>141</width>
-      <height>41</height>
+      <x>430</x>
+      <y>130</y>
+      <width>191</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="text">
-     <string>Open file</string>
+     <string>Open animation from file</string>
     </property>
    </widget>
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>480</y>
-      <width>551</width>
+      <x>30</x>
+      <y>360</y>
+      <width>751</width>
       <height>23</height>
      </rect>
     </property>
@@ -85,52 +85,13 @@
      <number>24</number>
     </property>
    </widget>
-   <widget class="QSlider" name="blueVerticalSlider">
-    <property name="geometry">
-     <rect>
-      <x>780</x>
-      <y>390</y>
-      <width>22</width>
-      <height>160</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QSlider" name="greenVerticalSlider">
-    <property name="geometry">
-     <rect>
-      <x>720</x>
-      <y>390</y>
-      <width>22</width>
-      <height>160</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QSlider" name="redVerticalSlider">
-    <property name="geometry">
-     <rect>
-      <x>660</x>
-      <y>390</y>
-      <width>22</width>
-      <height>160</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
    <widget class="QPushButton" name="loadButton">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>650</x>
       <y>10</y>
-      <width>141</width>
-      <height>41</height>
+      <width>151</width>
+      <height>71</height>
      </rect>
     </property>
     <property name="text">
@@ -140,20 +101,103 @@
    <widget class="QComboBox" name="readyAnimationBox">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>60</y>
-      <width>141</width>
+      <x>650</x>
+      <y>90</y>
+      <width>151</width>
       <height>21</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="redLabel">
+   <widget class="QPushButton" name="createButton">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>530</y>
-      <width>21</width>
+      <x>10</x>
+      <y>10</y>
+      <width>191</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Create animation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>10</y>
+      <width>191</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save animation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="endButton">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>191</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>End creating animation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="colorChooseButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>130</y>
+      <width>191</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Choose color</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="frequencyChooseButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>130</y>
+      <width>191</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Choose frequency</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="frequencyLabel">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>250</y>
+      <width>191</width>
       <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Your frequency is: &lt;frequency&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="colorLabel">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>250</y>
+      <width>51</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -162,43 +206,7 @@
      </font>
     </property>
     <property name="text">
-     <string>R</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="greenLabel">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>530</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>G</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="blueLabel">
-    <property name="geometry">
-     <rect>
-      <x>760</x>
-      <y>530</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>B</string>
+     <string>Color</string>
     </property>
    </widget>
   </widget>

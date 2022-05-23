@@ -12,12 +12,11 @@ class AppWindow(QMainWindow):
         self.setGeometry(400, 200, 1000, 600)
         self.setWindowTitle("3D LED Framework")
         self.ui()
-        self.UiComponents()
 
     def ui(self):
         self.btn1 = QtWidgets.QPushButton(self)
         self.btn1.setText("Start")
-        self.btn1.clicked.connect(self.clicked)
+        self.btn1.clicked.connect(self.UiComponents)
 
     def clicked(self):
         self.btn1.setText("Exit")
@@ -31,22 +30,22 @@ class AppWindow(QMainWindow):
         color = QColorDialog.getColor()
 
         # creating label to display the color
-        label = QLabel(self)
+        self.label1 = QLabel(self)
 
         # setting geometry to the label
-        label.setGeometry(100, 100, 200, 60)
+        self.label1.setGeometry(100, 100, 200, 60)
 
         # making label multi line
-        label.setWordWrap(True)
+        self.label1.setWordWrap(True)
 
         # setting stylesheet of the label
-        label.setStyleSheet("QLabel"
+        self.label1.setStyleSheet("QLabel"
                             "{"
                             "border : 5px solid black;"
                             "}")
 
         # setting text to the label
-        label.setText(str(color))
+        self.label1.setText(str(color))
 
         # setting graphic effect to the label
         graphic = QGraphicsColorizeEffect(self)
@@ -55,7 +54,7 @@ class AppWindow(QMainWindow):
         graphic.setColor(color)
 
         # setting graphic to the label
-        label.setGraphicsEffect(graphic)
+        self.label1.setGraphicsEffect(graphic)
 
 
 def window():
