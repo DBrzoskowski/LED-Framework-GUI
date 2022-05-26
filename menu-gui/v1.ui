@@ -176,9 +176,9 @@
    <widget class="QLabel" name="frequencyLabel">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>230</x>
       <y>250</y>
-      <width>191</width>
+      <width>171</width>
       <height>21</height>
      </rect>
     </property>
@@ -207,6 +207,19 @@
     </property>
     <property name="text">
      <string>Color</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="pathLabel">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>250</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Path: </string>
     </property>
    </widget>
   </widget>

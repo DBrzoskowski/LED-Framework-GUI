@@ -332,20 +332,20 @@ class Cube3D(canvas):
             hit.color = drawing_color if hit.color == old_led_color[hit.idx] else old_led_color[hit.idx]
 
 
-c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
-c.background = color.white  # temporarily to see the leds better
-# time.sleep(2)
-# c.comibne_2_tests(color=vector(1, 0, 0))
-# While it's unnecessary
-while True:
-    drawing = True
-
-    if not drawing:
-        c.comibne_2_tests(color=vector(1, 0, 0))
-
-        # clear whole cube after test finish
-        for i in c.visible_leds():
-            i.color = vector(0, 0, 0)
-        sleep(0.2)
-    else:
+# c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
+# c.background = color.white  # temporarily to see the leds better
+# # time.sleep(2)
+# # c.comibne_2_tests(color=vector(1, 0, 0))
+# # While it's unnecessary
+# while True:
+#     drawing = True
+#
+#     if not drawing:
+#         c.comibne_2_tests(color=vector(1, 0, 0))
+#
+#         # clear whole cube after test finish
+#         for i in c.visible_leds():
+#             i.color = vector(0, 0, 0)
+#         sleep(0.2)
+#     else:
         c.drawing()

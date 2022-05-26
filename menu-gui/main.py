@@ -1,11 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
+from Led_animation import Cube3D
+import math
+from vpython import color
 
-class Ui_MainWindow(object):
+class Ui_MainWindow(QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(819, 605)
+        MainWindow.setFixedSize(819, 605)
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.startButton = QtWidgets.QPushButton(self.centralwidget)
@@ -30,6 +34,11 @@ class Ui_MainWindow(object):
         self.openButton = QtWidgets.QPushButton(self.centralwidget)
         self.openButton.setGeometry(QtCore.QRect(430, 130, 191, 101))
         self.openButton.setObjectName("openButton")
+        self.openButton.clicked.connect(self.showPath)
+
+        self.pathLabel = QtWidgets.QLabel(self.centralwidget)
+        self.pathLabel.setGeometry(QtCore.QRect(440, 250, 171, 21))
+        self.pathLabel.setObjectName("pathLabel")
 
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar.setGeometry(QtCore.QRect(30, 360, 751, 23))
@@ -47,6 +56,7 @@ class Ui_MainWindow(object):
         self.createButton = QtWidgets.QPushButton(self.centralwidget)
         self.createButton.setGeometry(QtCore.QRect(10, 10, 191, 101))
         self.createButton.setObjectName("createButton")
+        self.createButton.clicked.connect(self.createAnimation)
 
         self.saveButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveButton.setGeometry(QtCore.QRect(220, 10, 191, 101))
@@ -71,6 +81,7 @@ class Ui_MainWindow(object):
         self.frequencyChooseButton = QtWidgets.QPushButton(self.centralwidget)
         self.frequencyChooseButton.setGeometry(QtCore.QRect(220, 130, 191, 101))
         self.frequencyChooseButton.setObjectName("frequencyChooseButton")
+        self.frequencyChooseButton.clicked.connect(self.inputFreq)
 
         self.frequencyLabel = QtWidgets.QLabel(self.centralwidget)
         self.frequencyLabel.setGeometry(QtCore.QRect(220, 250, 191, 21))
@@ -124,6 +135,7 @@ class Ui_MainWindow(object):
         self.pauseButton.setText(_translate("MainWindow", "Pause"))
         self.stopButton.setText(_translate("MainWindow", "Stop"))
         self.openButton.setText(_translate("MainWindow", "Open animation from file"))
+        self.pathLabel.setText(_translate("MainWindow", "Path: "))
         self.loadButton.setText(_translate("MainWindow", "Load animation"))
         self.createButton.setText(_translate("MainWindow", "Create animation"))
         self.saveButton.setText(_translate("MainWindow", "Save animation"))
@@ -147,6 +159,24 @@ class Ui_MainWindow(object):
         self.colorLabel.setStyleSheet("background-color: " + color_name)
         self.colorLabel.setText(color_name)
         self.colorLabel.adjustSize()
+
+    def showPath(self):
+        # open file dialog
+        file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
+
+        if file:
+            self.pathLabel.setText("Path: " + file[0])
+            self.pathLabel.adjustSize()
+
+    def inputFreq(self):
+        freq_input = QInputDialog.getText(self, "Input frequency", "Frequency: ")
+        if input:
+            self.frequencyLabel.setText("Your frequency is: " + freq_input[0])
+            self.pathLabel.adjustSize()
+
+    def createAnimation(self):
+        c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+        c.background = color.white
 
 
 if __name__ == "__main__":
