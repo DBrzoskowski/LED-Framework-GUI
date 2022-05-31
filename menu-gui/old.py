@@ -5,6 +5,7 @@ from Led_animation import Cube3D
 import math
 from vpython import color
 
+
 class Ui_MainWindow(QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
