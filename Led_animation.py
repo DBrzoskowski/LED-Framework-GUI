@@ -8,7 +8,8 @@ Installation:
 import time
 from random import uniform
 import txaio
-from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light
+from colormap import hex2rgb, rgb2hsv
+from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light, rate
 # scene.background = vector(0.95, 1, 1) # white background
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 scene.background = color.white  # scene color
@@ -39,36 +40,18 @@ class Cube3D(canvas):
         self.lights = []
         self.old_led_color = {}
 
-        self.led_obj = []  # this is a Led() obj list
+        self.default_state_list = []
+        self.led_objects = []  # this is a Led() obj list
 
         # add some light to walls
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
-        distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
-        distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
-        distant_light(direction=vector(2.9, 2.8, 3.5), color=color.gray(0.3))
-        distant_light(direction=vector(-2.9, -2.8, -3.5), color=color.gray(0.8))
-        distant_light(direction=vector(1.6, 1.6, 2), color=color.gray(0.3))
-        distant_light(direction=vector(-1.6, -1.6, -2), color=color.gray(0.8))
-
-
-        # Create (N+2)^3 LED in a grid; the outermost LED is fixed and invisible
-        # for z in range(-1, size + 1, 1):
-        #     for y in range(-1, size + 1, 1):
-        #         for x in range(-1, size + 1, 1):
-        #             led = sphere()
-        #             led.pos = vector(x, y, z) * spacing
-        #             led.radius = led_radius
-        #             led.color = vector(0, 0.58, 0.69)
-        #             if 0 <= x < size and 0 <= y < size and 0 <= z < size:
-        #                 p = vec.random()
-        #                 led.momentum = momentumRange * p
-        #                 led.color = color.black
-        #             else:
-        #                 led.visible = False
-        #                 led.momentum = vec(0, 0, 0)
-        #             led.index = len(self.leds)
-        #             self.leds.append(led)
+        # distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
+        # distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
+        # distant_light(direction=vector(2.9, 2.8, 3.5), color=color.gray(0.3))
+        # distant_light(direction=vector(-2.9, -2.8, -3.5), color=color.gray(0.8))
+        # distant_light(direction=vector(1.6, 1.6, 2), color=color.gray(0.3))
+        # distant_light(direction=vector(-1.6, -1.6, -2), color=color.gray(0.8))
 
         for z in range(0, size, 1):
             for x in range(0, size, 1):
@@ -116,7 +99,7 @@ class Cube3D(canvas):
                 """
     # Create line between LEDs
 
-    def visible_leds(self):
+    def get_visible_leds(self):
         return [i for i in self.leds if i.visible is True]
 
     def make_line(self, start, end):
@@ -124,7 +107,7 @@ class Cube3D(canvas):
         return curve(pos=test_list)
 
     def change_color(self, v):
-        leds = self.visible_leds()
+        leds = self.get_visible_leds()
         if isinstance(v, str):
             color_picker = {
                 'black': vector(0, 0, 0),
@@ -148,8 +131,21 @@ class Cube3D(canvas):
         for i in leds:
             i.color = cp
 
+    def default_state(self):
+        if not self.default_state_list:
+            for visiable_led in self.get_visible_leds():
+                led = Led(visiable_led)
+                self.default_state_list.append(led)
+        else:
+            return self.default_state_list
+
+    def reset_cube_state(self):
+        for led in self.leds:
+            led.color = vector(0, 0, 0)
+        sleep(0.5)
+
     def random_color(self):
-        leds = self.visible_leds()  # 512 visible LEDs
+        leds = self.get_visible_leds()  # 512 visible LEDs
         for i in leds:
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
@@ -307,7 +303,7 @@ class Cube3D(canvas):
 
     def layers_change(self):
         # WIP function
-        leds = self.visible_leds()
+        leds = self.get_visible_leds
         leds[0].color = color.orange
         leds[1].color = color.white
         # leds[2].color = color.red
@@ -330,11 +326,16 @@ class Cube3D(canvas):
         self.waitfor('click')
         hit = self.mouse.pick
 
+        if isinstance(drawing_color, str) and drawing_color.startswith('#'):
+            r, g, b = hex2rgb(drawing_color)
+            r, g, b = rgb2hsv(r, g, b, False)
+            drawing_color = vector(r, g, b)
+
         if hit:
             if hit.color != drawing_color:
                 self.old_led_color[hit.idx] = default_color
-                led_obj = Led(drawing_color.value)
-                print(f'Translate binary -> {led_obj.translate_binary()}')
+                # led_obj = Led(drawing_color.value)
+                # print(f'Translate binary -> {led_obj.translate_binary()}')
 
             hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
 
@@ -345,15 +346,16 @@ c.background = color.black  # temporarily to see the LEDs better
 # c.comibne_2_tests(color=vector(1, 0, 0))
 # While it's unnecessary
 while True:
-    drawing = False
+    drawing = True
 
     if not drawing:
+        c.default_state()
         c.test_whole_layer()
-        # c.comibne_2_tests(color=vector(1, 0, 0))
+        c.reset_cube_state()
 
         # clear whole cube after test finish
-        # for i in c.visible_leds():
+        # for i in c.get_visible_leds():
         #     i.color = vector(0, 0, 0)
         # sleep(0.2)
     else:
-        c.drawing()
+        c.drawing(drawing_color='#aa55ff')
