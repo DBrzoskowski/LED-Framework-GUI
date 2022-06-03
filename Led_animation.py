@@ -5,9 +5,9 @@ based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_Syp
 Installation:
     pip install vpython
 """
-import time
-from random import uniform
+
 import txaio
+from random import uniform
 from colormap import hex2rgb, rgb2hsv
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light, rate
 # scene.background = vector(0.95, 1, 1) # white background
@@ -46,8 +46,8 @@ class Cube3D(canvas):
         # add some light to walls
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
-        # distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
-        # distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
+        distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
+        distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
         # distant_light(direction=vector(2.9, 2.8, 3.5), color=color.gray(0.3))
         # distant_light(direction=vector(-2.9, -2.8, -3.5), color=color.gray(0.8))
         # distant_light(direction=vector(1.6, 1.6, 2), color=color.gray(0.3))
@@ -152,82 +152,57 @@ class Cube3D(canvas):
     def get_led_from_visible(self, position):
         return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
 
-    def test_whole_layer(self):
+    def test_whole_layer(self, col=vector(1, 1, 1), fps=30):
         for y in range(0, 8):
             get_all = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             for i in get_all:
-                i.color = vector(1, 1, 1)
-            sleep(0.2)
-
-            # for i in get_all:
-            #     i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in range(0, 8):
             get_all = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
             for i in get_all:
-                i.color = vector(1, 1, 1)
-            sleep(0.2)
-
-            # for i in get_all:
-            #     i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in reversed(range(0, 8)):
             get_all = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
             for i in get_all:
-                i.color = vector(1, 1, 1)
-            sleep(0.2)
-
-            # for i in get_all:
-            #     i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in reversed(range(0, 8)):
             get_all = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
             for i in get_all:
-                i.color = vector(1, 1, 1)
-            sleep(0.2)
+                i.color = col
+            rate(fps)
 
-            # for i in get_all:
-            #     i.color = vector(0, 0, 0)
-
-    def test_whole_inside_layer(self, color):
+    def test_whole_inside_layer(self, col, fps=30):
         for y in range(2, 6):
             get_all = [self.get_led_from_visible((2, y, i)) for i in range(2, 6)]
             for i in get_all:
-                i.color = color
-            sleep(0.2)
-
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in range(2, 6):
             get_all = [self.get_led_from_visible((y, 6, i)) for i in range(2, 6)]
             for i in get_all:
-                i.color = color
-            sleep(0.2)
-
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in reversed(range(2, 6)):
             get_all = [self.get_led_from_visible((6, y, i)) for i in range(2, 6)]
             for i in get_all:
-                i.color = color
-            sleep(0.2)
-
-            for i in get_all:
-                i.color = vector(0, 0, 0)
+                i.color = col
+            rate(fps)
 
         for y in reversed(range(2, 6)):
             get_all = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6)]
             for i in get_all:
-                i.color = color
-            sleep(0.2)
+                i.color = col
+            rate(fps)
 
-            for i in get_all:
-                i.color = vector(0, 0, 0)
-
-    def comibne_2_tests(self, color):
-        # TODO: 1. This need to be re-write
+    def merge_2_animation(self, col, fps=30):
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
@@ -236,16 +211,9 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
 
             for i in get_all_2:
-                i.color = color
+                i.color = col
 
-            sleep(0.2)
-
-            # clear row after color showed
-            # for i in get_all_1:
-            #     i.color = vector(0, 0, 0)
-            #
-            # for i in get_all_2:
-            #     i.color = vector(0, 0, 0)
+            rate(fps)
 
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
@@ -255,15 +223,9 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
 
             for i in get_all_2:
-                i.color = color
+                i.color = col
 
-            sleep(0.2)
-
-            # for i in get_all_1:
-            #     i.color = vector(0, 0, 0)
-            #
-            # for i in get_all_2:
-            #     i.color = vector(0, 0, 0)
+            rate(fps)
 
         for y in reversed(range(0, 8)):
             get_all_1 = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
@@ -273,15 +235,9 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
 
             for i in get_all_2:
-                i.color = color
+                i.color = col
 
-            sleep(0.2)
-
-            # for i in get_all_1:
-            #     i.color = vector(0, 0, 0)
-            #
-            # for i in get_all_2:
-            #     i.color = vector(0, 0, 0)
+            rate(fps)
 
         for y in reversed(range(0, 8)):
             get_all_1 = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)] 
@@ -291,15 +247,9 @@ class Cube3D(canvas):
                 i.color = vector(1, 1, 1)
 
             for i in get_all_2:
-                i.color = color
+                i.color = col
 
-            sleep(0.2)
-
-            # for i in get_all_1:
-            #     i.color = vector(0, 0, 0)
-            #
-            # for i in get_all_2:
-            #     i.color = vector(0, 0, 0)
+            rate(fps)
 
     def layers_change(self):
         # WIP function
@@ -343,10 +293,10 @@ class Cube3D(canvas):
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 c.background = color.black  # temporarily to see the LEDs better
 # time.sleep(2)
-# c.comibne_2_tests(color=vector(1, 0, 0))
+# c.merge_2_animation(color=vector(1, 0, 0))
 # While it's unnecessary
 while True:
-    drawing = True
+    drawing = False
 
     if not drawing:
         c.default_state()
