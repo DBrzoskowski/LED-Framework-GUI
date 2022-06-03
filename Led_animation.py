@@ -3,26 +3,22 @@ LED Animation GUI "POC"
 based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_SypQoGb5I7NjspXkRWqmb5XsHbFEc#/user/GlowScriptDemos/folder/Examples/program/AtomicSolid-VPython
 
 Installation:
-    pip install vpython
+    pip install -r requirements.txt
 """
 
 import txaio
 from random import uniform
 from colormap import hex2rgb, rgb2hsv
 from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light, rate
-# scene.background = vector(0.95, 1, 1) # white background
+from sandbox.audio_spectrum_analyzer.cube import Led, Layer, Frame, Animation
+
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 scene.background = color.white  # scene color
-from sandbox.audio_spectrum_analyzer.cube import Led, Layer, Frame, Animation
 N = 8  # N by N by N array of leds
 k = 1
 m = 1
 spacing = 1
 led_radius = 0.15 * spacing
-
-
-def fps_to_milliseconds(fps):
-    return 1.0/fps
 
 
 class Cube3D(canvas):
@@ -109,20 +105,20 @@ class Cube3D(canvas):
         else:
             return self.default_state_list
 
+    def get_led_from_visible(self, position):
+        return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
+
     def reset_cube_state(self):
         for led in self.leds:
             led.color = vector(0, 0, 0)
         sleep(0.5)
 
-    def random_color(self):
+    def random_color_animation(self):
         leds = self.get_visible_leds()  # 512 visible LEDs
         for i in leds:
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
-    def get_led_from_visible(self, position):
-        return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
-
-    def test_whole_layer(self, col=vector(1, 1, 1), fps=30):
+    def outer_layer_animation(self, col=vector(1, 1, 1), fps=30):
         for y in range(0, 8):
             get_all = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             for i in get_all:
@@ -147,7 +143,7 @@ class Cube3D(canvas):
                 i.color = col
             rate(fps)
 
-    def test_whole_inside_layer(self, col, fps=30):
+    def outline_inside_ankle_animation(self, col, fps=30):
         for y in range(2, 6):
             get_all = [self.get_led_from_visible((2, y, i)) for i in range(2, 6)]
             for i in get_all:
@@ -172,7 +168,7 @@ class Cube3D(canvas):
                 i.color = col
             rate(fps)
 
-    def merge_2_animation(self, col, fps=30):
+    def double_outline_animation(self, col, fps=30):
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
@@ -242,19 +238,14 @@ class Cube3D(canvas):
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 c.background = color.black  # temporarily to see the LEDs better
 # time.sleep(2)
-# c.merge_2_animation(color=vector(1, 0, 0))
+# c.double_outline_animation(color=vector(1, 0, 0))
 # While it's unnecessary
 while True:
     drawing = False
 
     if not drawing:
         c.default_state()
-        c.test_whole_layer()
+        c.outer_layer_animation()
         c.reset_cube_state()
-
-        # clear whole cube after test finish
-        # for i in c.get_visible_leds():
-        #     i.color = vector(0, 0, 0)
-        # sleep(0.2)
     else:
         c.drawing(drawing_color='#aa55ff')
