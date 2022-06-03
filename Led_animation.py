@@ -68,36 +68,6 @@ class Cube3D(canvas):
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
-        # Create lines between LED
-        for led in self.leds:
-            if led.visible:
-                pass
-                """
-                if led.pos.x == 0:
-                    self.make_line(self.leds[led.index - 1], led)
-                    self.make_line(led, self.leds[led.index + 1])
-                elif led.pos.x == size - 1:
-                    self.make_line(led, self.leds[led.index + 1])
-                else:
-                    self.make_line(led, self.leds[led.index + 1])
-
-                if led.pos.y == 0:
-                    self.make_line(self.leds[led.index - (size + 2)], led)
-                    self.make_line(led, self.leds[led.index + (size + 2)])
-                elif led.pos.y == size - 1:
-                    self.make_line(led, self.leds[led.index + (size + 2)])
-                else:
-                    self.make_line(led, self.leds[led.index + (size + 2)])
-
-                if led.pos.z == 0:
-                    self.make_line(self.leds[led.index - (size + 2) ** 2], led)
-                    self.make_line(led, self.leds[led.index + (size + 2) ** 2])
-                elif led.pos.z == size - 1:
-                    self.make_line(led, self.leds[led.index + (size + 2) ** 2])
-                else:
-                    self.make_line(led, self.leds[led.index + (size + 2) ** 2])
-                """
-    # Create line between LEDs
 
     def get_visible_leds(self):
         return [i for i in self.leds if i.visible is True]
@@ -250,27 +220,6 @@ class Cube3D(canvas):
                 i.color = col
 
             rate(fps)
-
-    def layers_change(self):
-        # WIP function
-        leds = self.get_visible_leds
-        leds[0].color = color.orange
-        leds[1].color = color.white
-        # leds[2].color = color.red
-        # leds[3].color = color.green
-        # leds[4].color = color.blue
-        # leds[5].color = color.yellow
-        # leds[6].color = color.cyan
-        # leds[7].color = color.magenta
-        # leds[8].color = color.orange
-
-        leds[503].color = color.blue
-        leds[504].color = color.orange
-        leds[505].color = color.red
-        leds[506].color = color.green
-        leds[511].color = color.yellow
-
-        leds[448].color = color.yellow
 
     def drawing(self, drawing_color=color.red, default_color=color.black):
         self.waitfor('click')
