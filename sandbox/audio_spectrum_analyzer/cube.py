@@ -2,10 +2,14 @@ import math
 
 
 class Led:
-    def __init__(self, *args):
+    def __init__(self, vector):
+        self.vector = vector
+        self.color = self.vector.color.value
+        self.pos = self.vector.axis.value
+
         # one led 16 bits
-        if len(*args) == 3:
-            r, g, b = map(int, *args)
+        if len(self.color) == 3:
+            r, g, b = map(int, self.color)
             self.red = format(min([r, 15]), '04b')
             self.green = format(min([g, 15]), '04b')
             self.blue = format(min([b, 15]), '04b')
@@ -17,10 +21,17 @@ class Led:
     def translate_binary(self):
         return f"{self.red}{self.green}{self.blue}"
 
+    def change_color(self, color):
+        self.vector.color = color
+
+    def get_led_position(self):
+        return self.pos
+
 
 class Layer:
-    def __init__(self):
-        self.leds = [Led() for _ in range(64)]
+    def __init__(self, leds):
+        self.leds = leds
+        # self.leds = [Led() for _ in range(64)]
 
     def update_led(self, led, position):
         self.leds[position] = led
@@ -35,6 +46,9 @@ class Layer:
 class Frame:
     def __init__(self):
         self.layers = [Layer() for _ in range(8)]
+
+    def get_layer(self, level):
+        return self.layers[level]
 
     def add_layer(self, layer, level):
         self.layers[level] = layer
