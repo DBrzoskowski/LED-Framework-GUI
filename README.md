@@ -1,5 +1,5 @@
 # LED-Framework-GUI
-## Example view (06.01.2022)
+## Final view v1.2 (05.06.2022)
 
 ![img_1.png](img_1.png)
 
