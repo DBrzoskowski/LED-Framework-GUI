@@ -30,6 +30,8 @@ QPushButton:hover {
     transition: background .3s 0.5s;
 }"""
 
+c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+c.background = color.white
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -88,6 +90,7 @@ class AppWindow(QMainWindow):
         self.saveButton.setFont(font)
         self.saveButton.setObjectName("saveButton")
         self.saveButton.setStyleSheet(QPushButton_style)
+        self.fpsButton.clicked.connect(self.saveAnimation)
 
         self.endButton.setGeometry(QtCore.QRect(640, 30, 191, 101))
         font = QtGui.QFont()
@@ -134,6 +137,7 @@ class AppWindow(QMainWindow):
         self.startButton.setFont(font)
         self.startButton.setStyleSheet(QPushButton_style)
         self.startButton.setObjectName("startButton")
+        self.startButton.clicked.connect(self.startAnimation)
 
         self.stopButton.setGeometry(QtCore.QRect(220, 340, 191, 101))
         font = QtGui.QFont()
@@ -141,6 +145,7 @@ class AppWindow(QMainWindow):
         self.stopButton.setFont(font)
         self.stopButton.setStyleSheet(QPushButton_style)
         self.stopButton.setObjectName("stopButton")
+        self.stopButton.clicked.connect(self.stopAnimation)
 
         self.loadButton.setGeometry(QtCore.QRect(510, 340, 321, 41))
         font = QtGui.QFont()
@@ -148,6 +153,7 @@ class AppWindow(QMainWindow):
         self.loadButton.setFont(font)
         self.loadButton.setObjectName("loadButton")
         self.loadButton.setStyleSheet(QPushButton_style)
+        # self.loadButton.clicked.connect(self.loadFromBox(x))
 
         # labels
         self.pathLabel.setGeometry(QtCore.QRect(20, 260, 171, 31))
@@ -191,6 +197,12 @@ class AppWindow(QMainWindow):
         # boxes
         self.readyAnimationBox.setGeometry(QtCore.QRect(510, 410, 151, 21))
         self.readyAnimationBox.setObjectName("readyAnimationBox")
+        self.readyAnimationBox.addItem("Double Outline")
+        self.readyAnimationBox.addItem("Outline Inside Ankle")
+        self.readyAnimationBox.addItem("Outer Layer")
+        self.readyAnimationBox.addItem("Random Color")
+        self.readyAnimationBox.activated[str].connect(self.chooseFromReadyBox)
+        # self.loadButton.clicked.connect(self.loadFromBox(str(current)))
 
         self.recentAnimationBox.setGeometry(QtCore.QRect(680, 410, 151, 21))
         self.recentAnimationBox.setObjectName("recentAnimationBox")
@@ -232,18 +244,28 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
         # return color_name
         # Cube3D.drawing(self, color_name)
+        # c.drawing(color_name)
 
     def showPath(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
+        # create file name
+        file_path = file[0]
+        file_path_list = file_path.split("/")
+        file_name = file_path_list[-1]
 
         if file:
-            self.pathLabel.setText("Path: " + file[0])
+            self.pathLabel.setText("Path: " + file_path)
             self.pathLabel.setWordWrap(True)
             # font = QtGui.QFont()
             # font.setPointSize(8)
             # self.pathLabel.setFont(font)
             self.pathLabel.adjustSize()
+
+            self.recentAnimationBox.addItem(file_name)
+
+#        Cube3D.load_sim_animation_from_file(self, str(file[0]))
+#        c.load_sim_animation_from_file(self, file_name)
 
     def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
@@ -259,9 +281,53 @@ class AppWindow(QMainWindow):
                 msg.exec_()
 
     def createAnimation(self):
-        c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        c.background = color.white
-        # c.drawing()
+        pass
+        # return c
+
+    def chooseFromReadyBox(self):
+        current = self.readyAnimationBox.currentText()
+        # self.pathLabel.setText(str(asd))
+        # return current
+        if current == "Double Outline":
+            self.pathLabel.setText("1")
+#            c.double_outline_animation(self, (1, 1, 1))
+        elif current == "Outline Inside Ankle":
+            self.pathLabel.setText("2")
+        elif current == "Outer Layer":
+            self.pathLabel.setText("3")
+        elif current == "Random Color":
+            self.pathLabel.setText("4")
+        else:
+            self.pathLabel.setText("outofscope")
+
+    def loadFromBox(self, current):
+        pass
+#         if current == "Double Outline":
+#             self.pathLabel.setText("1")
+# #            Cube3D.double_outline_animation(self, (1, 1, 1), fps=30)
+#         elif current == "Outline Inside Ankle":
+#             self.pathLabel.setText("2")
+#         elif current == "Outer Layer":
+#             self.pathLabel.setText("3")
+#         elif current == "Random Color":
+#             self.pathLabel.setText("4")
+#         else:
+#             self.pathLabel.setText("outofscope")
+
+    def saveAnimation(self):
+        pass
+        # Cube3D.save_sim_animation(self)
+
+    def loadAnimationFromTheBox(self):
+        pass
+
+    def startAnimation(self):
+        self.animationStateLabel.setText("Animation state: Active")
+        self.animationStateLabel.update()
+
+    def stopAnimation(self):
+        self.animationStateLabel.setText("Animation state: Inactive")
+        self.animationStateLabel.update()
 
 
 if __name__ == "__main__":
