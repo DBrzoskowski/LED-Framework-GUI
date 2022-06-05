@@ -33,6 +33,7 @@ QPushButton:hover {
 c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
 c.background = color.white
 
+
 class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
