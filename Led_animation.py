@@ -135,6 +135,10 @@ class Cube3D(canvas):
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
     def outer_layer_animation(self, col=vector(1, 1, 1), fps=30):
+        if self.drawing_color and self.drawing_fps:
+            col = self.drawing_color
+            fps = self.drawing_fps
+
         for y in range(0, 8):
             get_all = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             for i in get_all:
@@ -160,6 +164,10 @@ class Cube3D(canvas):
             rate(fps)
 
     def outline_inside_ankle_animation(self, col, fps=30):
+        if self.drawing_color and self.drawing_fps:
+            col = self.drawing_color
+            fps = self.drawing_fps
+
         for y in range(2, 6):
             get_all = [self.get_led_from_visible((2, y, i)) for i in range(2, 6)]
             for i in get_all:
@@ -185,6 +193,10 @@ class Cube3D(canvas):
             rate(fps)
 
     def double_outline_animation(self, col, fps=30):
+        if self.drawing_color and self.drawing_fps:
+            col = self.drawing_color
+            fps = self.drawing_fps
+
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((0, y, i)) for i in range(0, 8)]
             get_all_2 = [self.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
