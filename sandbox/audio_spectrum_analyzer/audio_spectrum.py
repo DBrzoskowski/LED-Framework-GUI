@@ -1,7 +1,5 @@
 import pyaudio
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation
 import matplotlib as mpl
 import serial
 from cube import *
@@ -23,99 +21,6 @@ SAMPLE_MAX = 0
 
 p = pyaudio.PyAudio()
 SPEAKERS = p.get_default_output_device_info()["hostApi"]
-stream = p.open(
-    input_device_index=0,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
-    format=pyaudio.paFloat32,
-    channels=1,
-    rate=RATE,
-    input=True,
-    frames_per_buffer=BUFFER,
-)
-
-fig = plt.figure()
-line1 = plt.plot([], [])[0]
-line2 = plt.plot([], [])[0]
-
-r = range(0, int(RATE / 2 + 1), int(RATE / BUFFER))
-l = len(r)
-
-
-def sectorsValue(list):
-    return list[1][::CUBE_SECTORS].real.round()
-
-
-def init_line():
-    line1.set_data(r, [-1000] * l)
-    line2.set_data(r, [-1000] * l)
-    return line1, line2
-
-
-def update_line(i):
-    global SAMPLE_MAX
-    global STARTING_VALUE
-    global SAMPLE
-
-    try:
-        # print("1st step")
-        b = np.fromstring(stream.read(BUFFER), dtype=np.float32)
-        print("2nd step")
-        data = np.fft.rfft(b)
-    except Exception as e:
-        print('Failed, reason: ' + str(e))
-        line1.set_data(r, [0])
-        line2.set_data(r, [0])
-        return line1, line2
-
-    data = data * -1
-
-    if PRINT_BLUE_LINE:
-        line1.set_data(r, data)
-    else:
-        line1.set_data(r, [0])
-
-    test = np.maximum(data, line2.get_data())
-
-    for i, point in enumerate(test[1]):
-        # get SAMPLE_AVERAGE of first (STARTING_VALUE)..(SAMPLE) elements
-        if i % SAMPLE == 0:
-            SAMPLE_MAX = 0
-            sample_points = test[1][STARTING_VALUE:min((STARTING_VALUE + SAMPLE), len(test[1]) - 1)]
-            for v in sample_points:
-                if v > SAMPLE_MAX:
-                    SAMPLE_MAX = v
-                    # print('dd'+v)
-
-            # replace SAMPLE_AVERAGE value for (STARTING_VALUE)..(SAMPLE) elements
-            for index in range(STARTING_VALUE, min(STARTING_VALUE + SAMPLE, len(test[1]) - 1)):
-                test[1][index] = SAMPLE_MAX
-
-            STARTING_VALUE += SAMPLE
-            if STARTING_VALUE >= len(test[1]):
-                STARTING_VALUE = 0
-
-    for index in range(0, len(test[1]) - 1):
-        if test[1][index] >= FADE_SPEED:
-            if test[1][index] >= 70:
-                test[1][index] = test[1][index] - (FADE_SPEED * 16)
-            elif test[1][index] >= 60:
-                test[1][index] = test[1][index] - (FADE_SPEED * 12)
-            elif test[1][index] >= 50:
-                test[1][index] = test[1][index] - (FADE_SPEED * 8)
-            elif test[1][index] >= 40:
-                test[1][index] = test[1][index] - (FADE_SPEED * 6)
-            elif test[1][index] >= 30:
-                test[1][index] = test[1][index] - (FADE_SPEED * 4)
-            elif test[1][index] >= 20:
-                test[1][index] = test[1][index] - (FADE_SPEED * 2)
-            else:
-                test[1][index] = test[1][index] - FADE_SPEED
-        else:
-            test[1][index] = 0
-
-    if PRINT_SPECTRUM_LINE:
-        line2.set_data(test)
-
-    return line1, line2
 
 
 class SpectrumVisualizer:
@@ -147,13 +52,13 @@ class SpectrumVisualizer:
 
     def startVisualisation(self):
         self.isActive = True
-        """self.stream = p.open(
+        self.stream = p.open(
             input_device_index=2,
             format=pyaudio.paFloat32,
             channels=1,
             rate=RATE,
             input=True,
-            frames_per_buffer=BUFFER)"""
+            frames_per_buffer=BUFFER)
         self.startSoundAnalysis()
 
     def stopVisualisation(self):
@@ -167,13 +72,13 @@ class SpectrumVisualizer:
             global SAMPLE
 
             try:
-                b = np.fromstring(stream.read(BUFFER), dtype=np.float32)
+                b = np.fromstring(self.stream.read(BUFFER), dtype=np.float32)
                 print()
-                self.rfft = np.fft.rfft(b) * -1
+                self.rfft = np.fft.rfft(b) * -10000
             except Exception as e:
                 print('Failed, reason: ' + str(e))
 
-            test = np.maximum(self.rfft[::CUBE_SECTORS].real.round(), self.maxSectorsValue)
+            test = self.rfft[::]
 
             for i, point in enumerate(test):
                 # get SAMPLE_AVERAGE of first (STARTING_VALUE)..(SAMPLE) elements
@@ -183,7 +88,6 @@ class SpectrumVisualizer:
                     for v in sample_points:
                         if v > SAMPLE_MAX:
                             SAMPLE_MAX = v
-                            # print('dd'+v)
 
                     # replace SAMPLE_AVERAGE value for (STARTING_VALUE)..(SAMPLE) elements
                     for index in range(STARTING_VALUE, min(STARTING_VALUE + SAMPLE, len(test) - 1)):
@@ -193,10 +97,11 @@ class SpectrumVisualizer:
                     if STARTING_VALUE >= len(test):
                         STARTING_VALUE = 0
 
+            test = np.maximum(test[::CUBE_SECTORS].real, self.maxSectorsValue)
+
             self.fadeCount(test)
+            self.visualise(test)
             self.serialSend()
-
-
 
     def fadeCount(self, test):
         for index in range(0, len(test) - 1):
@@ -218,7 +123,7 @@ class SpectrumVisualizer:
             else:
                 test[index] = 0
 
-        self.maxSectorsValue = test
+        self.maxSectorsValue = test.round()
 
     def serialSend(self):
         print(self.frame.translateBinary().count('1'))
@@ -228,19 +133,6 @@ class SpectrumVisualizer:
 def wirelessSend():
     pass
 
-
-plt.xlim([0, 10000])
-plt.ylim(-10, 30)
-plt.xlabel('Frequency [Hz]')
-plt.ylabel('dB')
-plt.title('Spectrometer')
-plt.grid()
-
-"""line_ani = matplotlib.animation.FuncAnimation(
-    fig, update_line, init_func=init_line, interval=0, blit=True
-)"""
-
-#plt.show()
 
 visualiser = SpectrumVisualizer()
 visualiser.startVisualisation()
