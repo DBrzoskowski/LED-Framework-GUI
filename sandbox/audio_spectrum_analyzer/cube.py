@@ -1,5 +1,6 @@
 import math
 
+
 class Led:
     def __init__(self, *args):
         # one led 16 bits
@@ -47,7 +48,7 @@ class Frame:
         return framesBinary
 
     def updateColumn(self, level, xCord, yCord, turnOn):
-        """ view on top of matrix. Each 2x2 matrix will map one sound frequency range
+        """ view from top of the matrix. Each 2x2 matrix will map one sound frequency range
 
                             00 01
                             10 11
@@ -94,16 +95,3 @@ class Animation:
         for frame in self.frames:
             animationBinary = frame.translateBinary()
         return animationBinary
-
-
-def frequencyToMatrix(frequency):
-    frequency_map = {0: {0, 0}, 1: {0, 1}, 2: {0, 2}, 3: {0, 3}, 4: {1, 0}, 5: {1, 1}, 6: {1, 2}, 7: {1, 3}, 8: {2, 0},
-                     9: {2, 1}, 10: {2, 2}, 11: {2, 3}, 12: {2, 3}, 13: {3, 0}, 14: {3, 1}, 15: {3, 2}, 16: {3, 3}}
-    matrixNumber = math.floor(min(frequency / 625, 16))
-    return frequency_map[matrixNumber]
-
-
-def spectrumVisualize(frame, frequency, power):
-    xCord, yCord = frequencyToMatrix(frequency)
-    for level in range(8):
-        frame.updateColumn(level, xCord, yCord, level <= power)
