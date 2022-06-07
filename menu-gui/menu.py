@@ -50,8 +50,13 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
+        # Cube
         self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         self.c.background = color.black
+
+        # variable
+        self.fps = None
+        self.color_name = None
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -236,16 +241,17 @@ class AppWindow(QMainWindow):
     # need fps and color method by Damian
     # TODO
     def createAnimation(self):
-        pass
+        self.c.drawing()
 
     # TODO
     def saveFrame(self):
-        pass
+        self.c.save_animation_to_file()
 
-    # TODO
+    # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
-        self.c.save_animation_to_file()
+        pass
+        # self.c.save_animation_to_file()
 
     def resetAnimation(self):
         self.c.reset_cube_state()
@@ -267,14 +273,14 @@ class AppWindow(QMainWindow):
 
             self.readyAnimationBox.addItem(file_name)
             # TODO
-            self.c.load_animation_from_file()
+            self.c.load_animation_from_file(file_path)
 
     # TODO
     def loadSpectrum(self):
         pass
 
     # TODO color to method
-    def colorPicker(self):
+    def colorPicker(self, color_name=None):
         # opening color dialog
         color = QColorDialog.getColor()
         color_name = color.name()
@@ -286,12 +292,16 @@ class AppWindow(QMainWindow):
         else:
             self.colorLabel.setText("Color: ")
 
+        self.color_name = color_name
+        # return color_name
+
     # TODO fps to method
-    def inputFps(self):
+    def inputFps(self, fps=None):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
+        fps = fps_input[0]
         if input:
             if 10 <= int(fps_input[0]) <= 60:
-                self.fpsLabel.setText("FPS: " + str(fps_input[0]))
+                self.fpsLabel.setText("FPS: " + str(fps))
                 self.pathLabel.adjustSize()
             else:
                 msg = QMessageBox()
@@ -300,9 +310,12 @@ class AppWindow(QMainWindow):
                 msg.setText("FPS value should be between 10 to 60.")
                 msg.exec_()
 
+        self.fps = fps
+        # return fps
+
     # TODO
     def colorAndFps(self):
-        pass
+        self.c.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
@@ -322,10 +335,10 @@ class AppWindow(QMainWindow):
         # return current
         if current == "Double Outline":
             self.pathLabel.setText("1")
-            # self.c.double_outline_animation()
+            self.c.double_outline_animation()
         elif current == "Outline Inside Ankle":
             self.pathLabel.setText("2")
-            # self.c.outline_inside_ankle_animation()
+            self.c.outline_inside_ankle_animation()
         elif current == "Outer Layer":
             self.pathLabel.setText("3")
             self.c.outer_layer_animation()
