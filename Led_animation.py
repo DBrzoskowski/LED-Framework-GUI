@@ -15,14 +15,8 @@ from vpython import canvas, scene, vector, sqrt, sphere, vec, color, sleep, dist
 
 # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 txaio.use_asyncio()
-scene.background = color.white  # scene color
-N = 8  # N by N by N array of leds
-k = 1
-m = 1
-spacing = 1
-led_radius = 0.15 * spacing
 
-ANIMATION_FILE = 'sim_cube.txt'
+ANIMATION_FILE = 'animation_path.txt'
 
 
 def fps_to_milliseconds(fps):
@@ -308,27 +302,3 @@ class Cube3D(canvas):
 
             self.drawing_path['pos'].append(hit.pos.value)
             self.drawing_path['color'].append(hit.color.value)
-
-
-c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
-c.background = color.black  # temporarily to see the LEDs better
-
-while True:
-    drawing = True
-
-    if not drawing:
-        # c.outer_layer_animation()
-        c.load_animation_from_file()
-        # c.outline_inside_ankle_animation()
-        # c.save_real_animation()
-        # c.double_outline_animation()
-        # it'
-        # sleep(fps_to_milliseconds(10))
-        sleep(1)
-        c.reset_cube_state()
-    else:
-        c.drawing(drawing_color='#aa55ff')
-        print(c.drawing_path)
-        # c.save_animation_to_file()
-
-
