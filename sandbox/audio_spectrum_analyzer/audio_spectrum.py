@@ -1,3 +1,5 @@
+import socket
+import time
 import pyaudio
 import numpy as np
 import matplotlib as mpl
@@ -53,7 +55,7 @@ class SpectrumVisualizer:
     def startVisualisation(self):
         self.isActive = True
         self.stream = p.open(
-            input_device_index=2,
+            input_device_index=0,
             format=pyaudio.paFloat32,
             channels=1,
             rate=RATE,
@@ -101,7 +103,8 @@ class SpectrumVisualizer:
 
             self.fadeCount(test)
             self.visualise(test)
-            self.serialSend()
+#            self.serialSend()
+            self.wirelessSend()
 
     def fadeCount(self, test):
         for index in range(0, len(test) - 1):
@@ -126,12 +129,31 @@ class SpectrumVisualizer:
         self.maxSectorsValue = test.round()
 
     def serialSend(self):
-        print(self.frame.translateBinary().count('1'))
+        print(self.frame.translateBinary())
         #self.serialcomm.write(self.frame)
 
 
-def wirelessSend():
-    pass
+    def wirelessSend(self):
+        test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
+        red = bytes(test)
+
+        #red = bytes([0xFF] * 255)
+        green = bytes(self.frame.translateBinary()[255:511], 'utf-8')
+        blue = bytes(self.frame.translateBinary()[511:767], 'utf-8')
+        UDP_IP = "192.168.0.10"
+        UDP_PORT = 4210
+        print("UDP target IP:", UDP_IP)
+        print("UDP target port:", UDP_PORT)
+        print("Red:", red)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        sock.sendto(red, (UDP_IP, UDP_PORT))
+        time.sleep(3)
+#        print("Green:", green)
+#        sock.sendto(green, (UDP_IP, UDP_PORT))
+#        time.sleep(1)
+ #       print("Blue:", blue)
+  #      sock.sendto(blue, (UDP_IP, UDP_PORT))
 
 
 visualiser = SpectrumVisualizer()

@@ -5,16 +5,12 @@ class Led:
     def __init__(self, *args):
         # one led 16 bits
         if len(args) == 3:
-            self.red = format(min([args[0], 15]), '04b')
-            self.green = format(min([args[1], 15]), '04b')
-            self.blue = format(min([args[2], 15]), '04b')
+            self.led = [format(min([args[_], 15]), '04b') for _ in range(3)]
         else:
-            self.red = format(0, '04b')
-            self.green = format(0, '04b')
-            self.blue = format(0, '04b')
+            self.led = [format(0, '04b') for _ in range(3)]
 
-    def translateBinary(self):
-        return f"{self.red}{self.green}{self.blue}"
+    def translateBinary(self, color, bit):
+        return f"{self.led[color][bit]}"
 
 
 class Layer:
@@ -24,12 +20,11 @@ class Layer:
     def updateLed(self, led, position):
         self.leds[position] = led
 
-    def translateBinary(self):
-        layersBinary = ''
+    def translateBinary(self, color, bamBit):
+        colorBinary = ''
         for led in self.leds:
-            layersBinary += led.translateBinary()
-        return layersBinary
-
+            colorBinary += led.translateBinary(color, bamBit)
+        return colorBinary
 
 class Frame:
     def __init__(self):
@@ -43,8 +38,10 @@ class Frame:
 
     def translateBinary(self):
         framesBinary = ''
-        for layer in self.layers:
-            framesBinary += layer.translateBinary()
+        for bamBit in reversed(range(4)):
+            for color in range(3):
+                for layer in self.layers:
+                    framesBinary += layer.translateBinary(color, bamBit)
         return framesBinary
 
     def updateColumn(self, level, xCord, yCord, turnOn):
@@ -77,10 +74,10 @@ class Frame:
             brightness = 0
 
         # this should be modified to contain color values
-        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_00)
-        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_01)
-        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_10)
-        self.layers[level].updateLed(Led(brightness, brightness, brightness), pos_11)
+        self.layers[level].updateLed(Led(brightness, 0, 0), pos_00)
+        self.layers[level].updateLed(Led(brightness, 0, 0), pos_01)
+        self.layers[level].updateLed(Led(brightness, 0, 0), pos_10)
+        self.layers[level].updateLed(Led(brightness, 0, 0), pos_11)
 
 
 class Animation:
