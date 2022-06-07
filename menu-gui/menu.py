@@ -5,6 +5,8 @@ import sys
 from Led_animation import Cube3D
 import math
 from vpython import color
+from threading import *
+
 
 # css
 background_style = """AppWindow {
@@ -38,10 +40,6 @@ animationStateLabel_green = """QLabel {
     color: green;
 }"""
 
-# create Cube3D
-# c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-# c.background = color.white
-
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -50,13 +48,17 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
-        # Cube
+        # cube vpython
         self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         self.c.background = color.black
 
-        # variable
+        # variables
         self.fps = None
         self.color_name = None
+        self.currentNameBox = None
+        self.file_name = None
+        self.files = []
+        self.files_path = []
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -72,7 +74,7 @@ class AppWindow(QMainWindow):
         self.loadButton = QtWidgets.QPushButton(self)
 
         # create labels
-        self.pathLabel = QtWidgets.QLabel(self)
+        self.lastOpenFileLabel = QtWidgets.QLabel(self)
         self.colorLabel = QtWidgets.QLabel(self)
         self.fpsLabel = QtWidgets.QLabel(self)
         self.animationStateLabel = QtWidgets.QLabel(self)
@@ -91,6 +93,7 @@ class AppWindow(QMainWindow):
         self.createButton.setFont(font)
         self.createButton.setObjectName("createButton")
         self.createButton.setStyleSheet(QPushButton_style)
+        self.createButton.setCheckable(True)
         self.createButton.clicked.connect(self.createAnimation)
 
         self.saveFrameButton.setGeometry(QtCore.QRect(220, 30, 191, 101))
@@ -99,6 +102,7 @@ class AppWindow(QMainWindow):
         self.saveFrameButton.setFont(font)
         self.saveFrameButton.setObjectName("saveFrameButton")
         self.saveFrameButton.setStyleSheet(QPushButton_style)
+        self.saveFrameButton.setCheckable(True)
 
         self.saveButton.setGeometry(QtCore.QRect(430, 30, 191, 101))
         font = QtGui.QFont()
@@ -170,16 +174,16 @@ class AppWindow(QMainWindow):
         self.loadButton.setFont(font)
         self.loadButton.setObjectName("loadButton")
         self.loadButton.setStyleSheet(QPushButton_style)
-        # self.loadButton.clicked.connect(self.loadFromBox(x))
+        self.loadButton.clicked.connect(self.loadAnimationFromTheBox)
 
         # labels
-        self.pathLabel.setGeometry(QtCore.QRect(20, 260, 171, 31))
+        self.lastOpenFileLabel.setGeometry(QtCore.QRect(20, 260, 171, 31))
         # self.pathLabel.setMaximumSize(QtCore.QSize(350, 65))
         font = QtGui.QFont()
         font.setPointSize(14)
-        self.pathLabel.setFont(font)
-        self.pathLabel.setWordWrap(True)
-        self.pathLabel.setObjectName("pathLabel")
+        self.lastOpenFileLabel.setFont(font)
+        self.lastOpenFileLabel.setWordWrap(True)
+        self.lastOpenFileLabel.setObjectName("pathLabel")
 
         self.colorLabel.setGeometry(QtCore.QRect(440, 260, 171, 31))
         font = QtGui.QFont()
@@ -226,7 +230,7 @@ class AppWindow(QMainWindow):
         self.saveButton.setText(_translate("AppWindow", "Save animation"))
         self.resetButton.setText(_translate("AppWindow", "Reset animation"))
         self.openButton.setText(_translate("AppWindow", "Open"))
-        self.pathLabel.setText(_translate("AppWindow", "Path: "))
+        self.lastOpenFileLabel.setText(_translate("AppWindow", "Last open file: "))
         self.loadSpectrumButton.setText(_translate("AppWindow", "Load spectrum"))
         self.colorButton.setText(_translate("AppWindow", "Color"))
         self.colorLabel.setText(_translate("AppWindow", "Color:"))
@@ -242,7 +246,11 @@ class AppWindow(QMainWindow):
     # TODO threading
     def createAnimation(self):
         self.colorAndFps()
-        self.c.drawing()
+    #     self.thread()
+    #
+    # def thread(self):
+    #     t1 = Thread(target=self.c.drawing())
+    #     t1.start()
 
     # TODO - needed createAnimation
     def saveFrame(self):
@@ -252,36 +260,33 @@ class AppWindow(QMainWindow):
     # need drawing function
     def saveAnimation(self):
         pass
-        # self.c.save_animation_to_file()
 
     def resetAnimation(self):
         self.c.reset_cube_state()
-        # self.c.delete()
-        # add close tab
 
     def openFile(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
-        # create file name
+        # create file name and path
         file_path = file[0]
-        file_path_list = file_path.split("/")
-        file_name = file_path_list[-1]
+        file_name = file_path.split("/")[-1]
 
         if file:
-            self.pathLabel.setText("Path: " + file_path)
-            self.pathLabel.setWordWrap(True)
-            self.pathLabel.adjustSize()
-
-            self.readyAnimationBox.addItem(file_name)
-            # TODO
+            self.lastOpenFileLabel.setText("Last open file: " + file_name)
+            self.lastOpenFileLabel.setWordWrap(True)
+            self.lastOpenFileLabel.adjustSize()
+            # self.readyAnimationBox.addItem(file_name)
+            self.readyAnimationBox.insertItem(0, file_name)
             self.c.load_animation_from_file(file_path)
+
+        self.files.append(file_name)
+        self.files_path.append(file_path)
 
     # TODO
     def loadSpectrum(self):
         pass
 
-    # TODO color to method
-    def colorPicker(self, color_name=None):
+    def colorPicker(self):
         # opening color dialog
         color = QColorDialog.getColor()
         color_name = color.name()
@@ -294,16 +299,15 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
 
         self.color_name = color_name
-        # return color_name
 
-    # TODO fps to method
-    def inputFps(self, fps=None):
+    def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
         fps = fps_input[0]
+
         if input:
             if 10 <= int(fps_input[0]) <= 60:
                 self.fpsLabel.setText("FPS: " + str(fps))
-                self.pathLabel.adjustSize()
+                self.lastOpenFileLabel.adjustSize()
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle("Error")
@@ -312,9 +316,7 @@ class AppWindow(QMainWindow):
                 msg.exec_()
 
         self.fps = fps
-        # return fps
 
-    # TODO
     def colorAndFps(self):
         self.c.gui_args_builder(self.color_name, self.fps)
 
@@ -332,26 +334,22 @@ class AppWindow(QMainWindow):
 
     def chooseFromReadyBox(self):
         current = self.readyAnimationBox.currentText()
-        # self.pathLabel.setText(str(asd))
-        # return current
-        if current == "Double Outline":
-            self.pathLabel.setText("1")
-            self.c.double_outline_animation()
-        elif current == "Outline Inside Ankle":
-            self.pathLabel.setText("2")
-            self.c.outline_inside_ankle_animation()
-        elif current == "Outer Layer":
-            self.pathLabel.setText("3")
-            self.c.outer_layer_animation()
-        elif current == "Random Color":
-            self.pathLabel.setText("4")
-            self.c.random_color_animation()
-        else:
-            self.pathLabel.setText("outofscope")
+        self.currentNameBox = current
 
-    # TODO
     def loadAnimationFromTheBox(self):
-        pass
+        if self.currentNameBox == "Double Outline":
+            self.c.double_outline_animation()
+        elif self.currentNameBox == "Outline Inside Ankle":
+            self.c.outline_inside_ankle_animation()
+        elif self.currentNameBox == "Outer Layer":
+            self.c.outer_layer_animation()
+        elif self.currentNameBox == "Random Color":
+            self.c.random_color_animation()
+        elif self.currentNameBox in self.files:
+            x = self.files.index(self.currentNameBox)
+            self.c.load_animation_from_file(self.files_path[x])
+        else:
+            pass
 
 
 if __name__ == "__main__":

@@ -282,23 +282,23 @@ class Cube3D(canvas):
         except ReferenceError as err:
             print(f"One of the arguments hasn't been defined -> {err}")
 
-    def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
+    def drawing(self, drawing_color=color.red, default_color=color.black, fps=30, rysuj=True):
         # Get info from GUI about color and fps
         if self.drawing_color and self.drawing_fps:
             drawing_color = self.drawing_color
             fps = self.drawing_fps
+        while rysuj:
+            self.waitfor('click')
+            hit = self.mouse.pick
+            self.drawing_path['fps'] = fps
 
-        self.waitfor('click')
-        hit = self.mouse.pick
-        self.drawing_path['fps'] = fps
+            drawing_color = self.hex2vector(drawing_color)
 
-        drawing_color = self.hex2vector(drawing_color)
+            if hit:
+                if hit.color != drawing_color:
+                    self.old_led_color[hit.idx] = default_color
 
-        if hit:
-            if hit.color != drawing_color:
-                self.old_led_color[hit.idx] = default_color
+                hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
 
-            hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
-
-            self.drawing_path['pos'].append(hit.pos.value)
-            self.drawing_path['color'].append(hit.color.value)
+                self.drawing_path['pos'].append(hit.pos.value)
+                self.drawing_path['color'].append(hit.color.value)
