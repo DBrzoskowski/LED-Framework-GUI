@@ -10,11 +10,11 @@ import os
 import txaio
 import json
 from random import uniform
-from colormap import hex2rgb, rgb2hsv, hsv2rgb
-from vpython import canvas, scene, vector, sqrt, sphere, vec, color, curve, sleep, distant_light, rate, cos, sin
-from sandbox.audio_spectrum_analyzer.cube import Led, Layer, Frame, Animation
+from colormap import hex2rgb
+from vpython import canvas, scene, vector, sqrt, sphere, vec, color, sleep, distant_light, rate
 
-txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
+# resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
+txaio.use_asyncio()
 scene.background = color.white  # scene color
 N = 8  # N by N by N array of leds
 k = 1
@@ -58,10 +58,6 @@ class Cube3D(canvas):
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
         distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
         distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
-        # distant_light(direction=vector(2.9, 2.8, 3.5), color=color.gray(0.3))
-        # distant_light(direction=vector(-2.9, -2.8, -3.5), color=color.gray(0.8))
-        # distant_light(direction=vector(1.6, 1.6, 2), color=color.gray(0.3))
-        # distant_light(direction=vector(-1.6, -1.6, -2), color=color.gray(0.8))
 
         # Remove file after object init
         if os.path.exists(ANIMATION_FILE):
@@ -88,7 +84,7 @@ class Cube3D(canvas):
         try:
             if isinstance(drawing_color, str) and drawing_color.startswith('#'):
                 r, g, b = hex2rgb(drawing_color)
-                r, g, b = rgb2hsv(r, g, b, False)
+                r, g, b = r / 255, g / 255, b / 255
                 return vector(r, g, b)
         except TypeError as err:
             print(f"Wrong type {err}")
@@ -163,7 +159,7 @@ class Cube3D(canvas):
                 i.color = col
             rate(fps)
 
-    def outline_inside_ankle_animation(self, col, fps=30):
+    def outline_inside_ankle_animation(self, col=vector(1, 0, 0), fps=30):
         if self.drawing_color and self.drawing_fps:
             col = self.drawing_color
             fps = self.drawing_fps
@@ -175,13 +171,13 @@ class Cube3D(canvas):
             rate(fps)
 
         for y in range(2, 6):
-            get_all = [self.get_led_from_visible((y, 6, i)) for i in range(2, 6)]
+            get_all = [self.get_led_from_visible((y, 5, i)) for i in range(2, 6)]
             for i in get_all:
                 i.color = col
             rate(fps)
 
         for y in reversed(range(2, 6)):
-            get_all = [self.get_led_from_visible((6, y, i)) for i in range(2, 6)]
+            get_all = [self.get_led_from_visible((5, y, i)) for i in range(2, 6)]
             for i in get_all:
                 i.color = col
             rate(fps)
@@ -192,7 +188,7 @@ class Cube3D(canvas):
                 i.color = col
             rate(fps)
 
-    def double_outline_animation(self, col, fps=30):
+    def double_outline_animation(self, col=vector(1, 0, 0), fps=30):
         if self.drawing_color and self.drawing_fps:
             col = self.drawing_color
             fps = self.drawing_fps
@@ -211,8 +207,7 @@ class Cube3D(canvas):
 
         for y in range(0, 8):
             get_all_1 = [self.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
-            get_all_2 = [self.get_led_from_visible((y, 5, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
-
+            get_all_2 = [self.get_led_from_visible((y, 5, i)) for i in range(2, 6) if y in [3, 4, 5]]
             for i in get_all_1:
                 i.color = vector(1, 1, 1)
 
@@ -223,8 +218,7 @@ class Cube3D(canvas):
 
         for y in reversed(range(0, 8)):
             get_all_1 = [self.get_led_from_visible((7, y, i)) for i in range(0, 8)]
-            get_all_2 = [self.get_led_from_visible((6, y, i)) for i in range(2, 6) if y in [3, 4, 5]]
-
+            get_all_2 = [self.get_led_from_visible((5, y, i)) for i in range(2, 6) if y in [3, 4, 5]]
             for i in get_all_1:
                 i.color = vector(1, 1, 1)
 
@@ -235,8 +229,7 @@ class Cube3D(canvas):
 
         for y in reversed(range(0, 8)):
             get_all_1 = [self.get_led_from_visible((y, 0, i)) for i in range(0, 8)] 
-            get_all_2 = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6) if y in [3, 4, 5, 6]]
-
+            get_all_2 = [self.get_led_from_visible((y, 2, i)) for i in range(2, 6) if y in [3, 4, 5]]
             for i in get_all_1:
                 i.color = vector(1, 1, 1)
 
@@ -255,18 +248,12 @@ class Cube3D(canvas):
                 self.drawing_path['color'] = []
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
-        # with open(file_path', 'r') as f:
-        with open('sim_cube_test_2.txt', 'r') as f:
+        with open(file_path, 'r') as f:
             for i in f.readlines():
                 line = json.loads(i)
-                converted_colors = []
 
                 if line.get('color'):
                     colors = line.get('color')
-                    for col in colors:
-                        r, g, b = col
-                        hsv_color = rgb2hsv(r, g, b, False)
-                        converted_colors.append(hsv_color)
 
                 if line.get('pos'):
                     for pos in line.get('pos'):
@@ -279,7 +266,7 @@ class Cube3D(canvas):
                     fps = line.get('fps')
 
                 # animation process
-                for led, col in zip(self.animation_step, converted_colors):
+                for led, col in zip(self.animation_step, colors):
                     r, g, b = col
                     led.color = vector(r, g, b)
 
@@ -288,7 +275,6 @@ class Cube3D(canvas):
 
                 # fps after chunk of animation end and waiting for next part
                 rate(fps)
-
         # it's sleep because rate working based on windows time
         # (resolve problem with unexpected speed-up animation)
         sleep(fps_to_milliseconds(fps))
@@ -312,9 +298,6 @@ class Cube3D(canvas):
         hit = self.mouse.pick
         self.drawing_path['fps'] = fps
 
-        # Prepare RGB 256bits before normalize in self.hex2vector
-        col_to_save = list(hex2rgb(drawing_color))
-
         drawing_color = self.hex2vector(drawing_color)
 
         if hit:
@@ -324,22 +307,25 @@ class Cube3D(canvas):
             hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
 
             self.drawing_path['pos'].append(hit.pos.value)
-            self.drawing_path['color'].append(col_to_save)
+            self.drawing_path['color'].append(hit.color.value)
 
 
 c = Cube3D(N, led_radius, spacing, 0.1 * spacing * sqrt(k / m))
 c.background = color.black  # temporarily to see the LEDs better
 
 while True:
-    drawing = False
+    drawing = True
 
     if not drawing:
         # c.outer_layer_animation()
         c.load_animation_from_file()
+        # c.outline_inside_ankle_animation()
         # c.save_real_animation()
+        # c.double_outline_animation()
         # it'
         # sleep(fps_to_milliseconds(10))
-        # c.reset_cube_state()
+        sleep(1)
+        c.reset_cube_state()
     else:
         c.drawing(drawing_color='#aa55ff')
         print(c.drawing_path)
