@@ -239,11 +239,12 @@ class AppWindow(QMainWindow):
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
     # need fps and color method by Damian
-    # TODO
+    # TODO threading
     def createAnimation(self):
+        self.colorAndFps()
         self.c.drawing()
 
-    # TODO
+    # TODO - needed createAnimation
     def saveFrame(self):
         self.c.save_animation_to_file()
 
