@@ -27,7 +27,7 @@ class Cube3D(canvas):
     def __init__(self, size, led_radius, spacing, momentumRange, **args):
         super().__init__(**args)
         self.leds = []
-        self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
+        self.center = 0.5 * (N - 1) * vector(1, 1, 1)  # camera start view
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
 
         To rotate "camera", drag with right button or Ctrl-drag.
@@ -282,23 +282,23 @@ class Cube3D(canvas):
         except ReferenceError as err:
             print(f"One of the arguments hasn't been defined -> {err}")
 
-    def drawing(self, drawing_color=color.red, default_color=color.black, fps=30, rysuj=True):
+    def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
         # Get info from GUI about color and fps
         if self.drawing_color and self.drawing_fps:
             drawing_color = self.drawing_color
             fps = self.drawing_fps
-        while rysuj:
-            self.waitfor('click')
-            hit = self.mouse.pick
-            self.drawing_path['fps'] = fps
 
-            drawing_color = self.hex2vector(drawing_color)
+        self.waitfor('click')
+        hit = self.mouse.pick
+        self.drawing_path['fps'] = fps
 
-            if hit:
-                if hit.color != drawing_color:
-                    self.old_led_color[hit.idx] = default_color
+        drawing_color = self.hex2vector(drawing_color)
 
-                hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
+        if hit:
+            if hit.color != drawing_color:
+                self.old_led_color[hit.idx] = default_color
 
-                self.drawing_path['pos'].append(hit.pos.value)
-                self.drawing_path['color'].append(hit.color.value)
+            hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
+
+            self.drawing_path['pos'].append(hit.pos.value)
+            self.drawing_path['color'].append(hit.color.value)
