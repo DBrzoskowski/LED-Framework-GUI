@@ -11,7 +11,7 @@ import txaio
 import json
 from random import uniform
 from colormap import hex2rgb
-from vpython import canvas, scene, vector, sqrt, sphere, vec, color, sleep, distant_light, rate
+from vpython import canvas, vector, sphere, vec, color, sleep, distant_light, rate
 
 # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 txaio.use_asyncio()
