@@ -27,7 +27,7 @@ class Cube3D(canvas):
     def __init__(self, size, led_radius, spacing, momentumRange, **args):
         super().__init__(**args)
         self.leds = []
-        self.center = 0.5 * (N - 1) * vector(1, 1, 1)  # camera start view
+        self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
 
         To rotate "camera", drag with right button or Ctrl-drag.
