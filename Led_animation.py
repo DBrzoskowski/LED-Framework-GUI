@@ -247,8 +247,8 @@ class Cube3D(canvas):
             binary_cube_state = ''.join([Led(i).translate_binary() for i in self.get_visible_leds()])
             f.writelines(binary_cube_state)
 
-    def load_sim_animation_from_file(self, file_path):
-        with open(str(file_path), 'r') as f:
+    def load_sim_animation_from_file(self, file_path=SIM_CUBE_FILE):
+        with open('sim_cube_test.txt', 'r') as f:
             for i in f.readlines():
                 line = json.loads(i)
 

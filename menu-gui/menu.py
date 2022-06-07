@@ -6,7 +6,7 @@ from Led_animation import Cube3D
 import math
 from vpython import color
 
-
+# css
 background_style = """AppWindow {
     background-image: url(background.png);
     background-repeat: no-repeat;
@@ -30,8 +30,17 @@ QPushButton:hover {
     transition: background .3s 0.5s;
 }"""
 
-c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-c.background = color.white
+animationStateLabel_red = """QLabel {
+    color: red;
+}"""
+
+animationStateLabel_green = """QLabel {
+    color: green;
+}"""
+
+# create Cube3D
+# c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+# c.background = color.white
 
 
 class AppWindow(QMainWindow):
@@ -40,6 +49,9 @@ class AppWindow(QMainWindow):
         self.setFixedSize(843, 549)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
+
+        self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+        self.c.background = color.black
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -99,6 +111,7 @@ class AppWindow(QMainWindow):
         self.endButton.setFont(font)
         self.endButton.setObjectName("endButton")
         self.endButton.setStyleSheet(QPushButton_style)
+        self.endButton.clicked.connect(self.deleteAnimation)
 
         self.openButton.setGeometry(QtCore.QRect(10, 150, 191, 101))
         font = QtGui.QFont()
@@ -182,6 +195,7 @@ class AppWindow(QMainWindow):
         font.setPointSize(24)
         self.animationStateLabel.setFont(font)
         self.animationStateLabel.setObjectName("animationStateLabel")
+        self.animationStateLabel.setStyleSheet(animationStateLabel_red)
 
         self.readyAnimationLabel.setGeometry(QtCore.QRect(510, 390, 151, 21))
         font = QtGui.QFont()
@@ -245,7 +259,7 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
         # return color_name
         # Cube3D.drawing(self, color_name)
-        # c.drawing(color_name)
+        # self.c.drawing(color_name)
 
     def showPath(self):
         # open file dialog
@@ -264,9 +278,10 @@ class AppWindow(QMainWindow):
             self.pathLabel.adjustSize()
 
             self.recentAnimationBox.addItem(file_name)
+#            self.c.load_sim_animation_from_file()
 
 #        Cube3D.load_sim_animation_from_file(self, str(file[0]))
-#        c.load_sim_animation_from_file(self, file_name)
+#        self.c.load_sim_animation_from_file(file_path)
 
     def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
@@ -281,7 +296,9 @@ class AppWindow(QMainWindow):
                 msg.setText("FPS value should be between 10 to 60.")
                 msg.exec_()
 
+    # need fps and color method by Damian
     def createAnimation(self):
+        # self.c.drawing()
         pass
         # return c
 
@@ -291,11 +308,12 @@ class AppWindow(QMainWindow):
         # return current
         if current == "Double Outline":
             self.pathLabel.setText("1")
-#            c.double_outline_animation(self, (1, 1, 1))
+#            self.c.double_outline_animation(self, 1)
         elif current == "Outline Inside Ankle":
             self.pathLabel.setText("2")
         elif current == "Outer Layer":
             self.pathLabel.setText("3")
+            self.c.outer_layer_animation()
         elif current == "Random Color":
             self.pathLabel.setText("4")
         else:
@@ -315,20 +333,27 @@ class AppWindow(QMainWindow):
 #         else:
 #             self.pathLabel.setText("outofscope")
 
+    # need drawing function
     def saveAnimation(self):
         pass
-        # Cube3D.save_sim_animation(self)
+        # self.c.save_sim_animation()
 
     def loadAnimationFromTheBox(self):
         pass
 
     def startAnimation(self):
         self.animationStateLabel.setText("Animation state: Active")
+        self.animationStateLabel.setStyleSheet(animationStateLabel_green)
         self.animationStateLabel.update()
 
     def stopAnimation(self):
         self.animationStateLabel.setText("Animation state: Inactive")
+        self.animationStateLabel.setStyleSheet(animationStateLabel_red)
         self.animationStateLabel.update()
+
+    def deleteAnimation(self):
+        self.c.delete()
+        # add close tab
 
 
 if __name__ == "__main__":
