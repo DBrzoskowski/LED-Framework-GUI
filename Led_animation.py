@@ -46,6 +46,7 @@ class Cube3D(canvas):
         self.drawing_color = None
         self.drawing_fps = None
         self.animation_step = []
+        self.animation_frame = []
 
         # add some light to walls
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
@@ -232,14 +233,9 @@ class Cube3D(canvas):
 
             rate(fps)
 
-    def save_animation_to_file(self, file_path=ANIMATION_FILE):
+    def save_animation_to_frame(self, file_path=ANIMATION_FILE, to_file=False):
         if self.drawing_path['pos'] and self.drawing_path['color']:
-            with open(file_path, 'a') as f:
-                f.write(json.dumps(self.drawing_path) + '\n')
-
-                # reset data after save
-                self.drawing_path['pos'] = []
-                self.drawing_path['color'] = []
+            return self.drawing_path
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
         with open(file_path, 'r') as f:

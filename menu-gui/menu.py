@@ -59,6 +59,7 @@ class AppWindow(QMainWindow):
         self.color_name = None
         self.currentNameBox = None
         self.file_name = None
+        self.one_frame = None
         self.files = []
         self.files_path = []
 
@@ -95,7 +96,7 @@ class AppWindow(QMainWindow):
         self.createButton.setFont(font)
         self.createButton.setObjectName("createButton")
         self.createButton.setStyleSheet(QPushButton_style)
-        self.createButton.setCheckable(True)
+        # self.createButton.setCheckable(True)
         self.createButton.clicked.connect(self.createAnimation)
 
         self.saveFrameButton.setGeometry(QtCore.QRect(220, 30, 191, 101))
@@ -104,8 +105,7 @@ class AppWindow(QMainWindow):
         self.saveFrameButton.setFont(font)
         self.saveFrameButton.setObjectName("saveFrameButton")
         self.saveFrameButton.setStyleSheet(QPushButton_style)
-        self.saveFrameButton.setCheckable(True)
-        self.saveFrameButton.setShortcut("Ctrl+S")
+        # self.saveFrameButton.setShortcut("Ctrl+S")
         self.saveFrameButton.clicked.connect(self.saveFrame)
 
         self.saveButton.setGeometry(QtCore.QRect(430, 30, 191, 101))
@@ -114,7 +114,7 @@ class AppWindow(QMainWindow):
         self.saveButton.setFont(font)
         self.saveButton.setObjectName("saveButton")
         self.saveButton.setStyleSheet(QPushButton_style)
-        self.saveButton.setShortcut("Ctrl+Shift+S")
+        # self.saveButton.setShortcut("Ctrl+Shift+S")
         self.saveButton.clicked.connect(self.saveAnimation)
 
         self.resetButton.setGeometry(QtCore.QRect(640, 30, 191, 101))
@@ -251,23 +251,28 @@ class AppWindow(QMainWindow):
     # TODO threading
     def createAnimation(self):
         self.colorAndFps()
-    #     self.thread()
-    #
-    # def thread(self):
-    #     t1 = Thread(target=self.c.drawing())
-    #     t1.start()
+        self.thread()
+
+    def thread(self):
+        t1 = Thread(target=self.c.drawing())
+        t1.start()
 
     # TODO - needed createAnimation
     def saveFrame(self):
-        self.c.save_animation_to_file()
+        self.one_frame = self.c.save_animation_to_frame()
 
     # TODO - need drawing function
     def saveAnimation(self):
         file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
         file_name = file[0]
-        # file_save = open(file_name, 'w')
-        with open(file_name, 'w') as file_name:
-            file_name.write(json.dumps(self.c.drawing_path) + '\n')
+        save = open(file_name, 'w')
+        save.write(str(self.one_frame))
+        # with open(file_name, 'w') as file_name:
+        #     for i in self.file_save:
+        #         file_name.write(json.dumps(i) + '\n')
+        self.c.drawing_path['pos'] = []
+        self.c.drawing_path['color'] = []
+
 
     def resetAnimation(self):
         self.c.reset_cube_state()
@@ -335,6 +340,8 @@ class AppWindow(QMainWindow):
         self.animationStateLabel.setText("Animation state: Active")
         self.animationStateLabel.setStyleSheet(animationStateLabel_green)
         self.animationStateLabel.update()
+        # audio_spectrum.SpectrumVisualizer.serialSend(self)
+        # audio_spectrum.SpectrumVisualizer.wirelessSend(self)
 
     # TODO connect it with hardware cube
     def stopAnimation(self):
