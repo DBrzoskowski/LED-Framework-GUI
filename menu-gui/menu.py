@@ -1,8 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 import sys
+import json
 
 from Led_animation import Cube3D
+# from sandbox.audio_spectrum_analyzer import audio_spectrum
 import math
 from vpython import color
 from threading import *
@@ -50,7 +52,7 @@ class AppWindow(QMainWindow):
 
         # cube vpython
         self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        self.c.background = color.black
+        self.c.background = color.yellow
 
         # variables
         self.fps = None
@@ -103,6 +105,8 @@ class AppWindow(QMainWindow):
         self.saveFrameButton.setObjectName("saveFrameButton")
         self.saveFrameButton.setStyleSheet(QPushButton_style)
         self.saveFrameButton.setCheckable(True)
+        self.saveFrameButton.setShortcut("Ctrl+S")
+        self.saveFrameButton.clicked.connect(self.saveFrame)
 
         self.saveButton.setGeometry(QtCore.QRect(430, 30, 191, 101))
         font = QtGui.QFont()
@@ -110,7 +114,8 @@ class AppWindow(QMainWindow):
         self.saveButton.setFont(font)
         self.saveButton.setObjectName("saveButton")
         self.saveButton.setStyleSheet(QPushButton_style)
-        self.fpsButton.clicked.connect(self.saveAnimation)
+        self.saveButton.setShortcut("Ctrl+Shift+S")
+        self.saveButton.clicked.connect(self.saveAnimation)
 
         self.resetButton.setGeometry(QtCore.QRect(640, 30, 191, 101))
         font = QtGui.QFont()
@@ -256,10 +261,13 @@ class AppWindow(QMainWindow):
     def saveFrame(self):
         self.c.save_animation_to_file()
 
-    # TODO check it in pyqt5
-    # need drawing function
+    # TODO - need drawing function
     def saveAnimation(self):
-        pass
+        file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
+        file_name = file[0]
+        # file_save = open(file_name, 'w')
+        with open(file_name, 'w') as file_name:
+            file_name.write(json.dumps(self.c.drawing_path) + '\n')
 
     def resetAnimation(self):
         self.c.reset_cube_state()
@@ -284,6 +292,8 @@ class AppWindow(QMainWindow):
 
     # TODO
     def loadSpectrum(self):
+        # self.s = audio_spectrum.SpectrumVisualizer()
+        # self.s.startVisualisation()
         pass
 
     def colorPicker(self):
