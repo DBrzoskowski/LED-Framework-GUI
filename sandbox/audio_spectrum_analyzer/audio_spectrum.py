@@ -1,3 +1,6 @@
+import socket
+import time
+
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +27,7 @@ SAMPLE_MAX = 0
 p = pyaudio.PyAudio()
 SPEAKERS = p.get_default_output_device_info()["hostApi"]
 stream = p.open(
-    input_device_index=0,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
+    input_device_index=2,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
     format=pyaudio.paFloat32,
     channels=1,
     rate=RATE,
@@ -117,6 +120,24 @@ def update_line(i):
 
     return line1, line2
 
+def CLIEqualiser(klatka):
+    klatka = klatka[:2049]
+    print("sector1: " + '#' * int(klatka[::64].count('1')/4))
+    print("sector2: " + '#' * int(klatka[2::64].count('1')/4))
+    print("sector3: " + '#' * int(klatka[4::64].count('1')/4))
+    print("sector4: " + '#' * int(klatka[6::64].count('1')/4))
+    print("sector5: " + '#' * int(klatka[16::64].count('1')/4))
+    print("sector6: " + '#' * int(klatka[18::64].count('1')/4))
+    print("sector7: " + '#' * int(klatka[20::64].count('1')/4))
+    print("sector8: " + '#' * int(klatka[22::64].count('1')/4))
+    print("sector9: " + '#' * int(klatka[32::64].count('1')/4))
+    print("sector10: " + '#' * int(klatka[34::64].count('1')/4))
+    print("sector11: " + '#' * int(klatka[36::64].count('1')/4))
+    print("sector12: " + '#' * int(klatka[38::64].count('1')/4))
+    print("sector13: " + '#' * int(klatka[48::64].count('1')/4))
+    print("sector14: " + '#' * int(klatka[50::64].count('1')/4))
+    print("sector15: " + '#' * int(klatka[52::64].count('1')/4))
+    print("sector16: " + '#' * int(klatka[54::64].count('1')/4))
 
 class SpectrumVisualizer:
     def __init__(self):
@@ -128,7 +149,7 @@ class SpectrumVisualizer:
         self.stream = None
         self.recordedSamples = None
         self.maxSectorsValue = [0 for i in range(28)]
-        self.rfft = None
+        self.rfft = [0 for i in range(442)]
         #self.serialcomm = serial.Serial('COM7', 9600)
         #self.serialcomm.timeout = 1
 
@@ -143,7 +164,7 @@ class SpectrumVisualizer:
     def updateSector(self, frequency, power):
         xCord, yCord = self.frequencyMap[frequency]
         for level in range(8):
-            self.frame.updateColumn(level, xCord, yCord, level <= power)
+            self.frame.updateColumn(level, xCord, yCord, level < power)
 
     def startVisualisation(self):
         self.isActive = True
@@ -173,28 +194,28 @@ class SpectrumVisualizer:
             except Exception as e:
                 print('Failed, reason: ' + str(e))
 
-            test = np.maximum(self.rfft[::CUBE_SECTORS].real.round(), self.maxSectorsValue)
-
-            for i, point in enumerate(test):
+            for i, point in enumerate(self.rfft):
                 # get SAMPLE_AVERAGE of first (STARTING_VALUE)..(SAMPLE) elements
                 if i % SAMPLE == 0:
                     SAMPLE_MAX = 0
-                    sample_points = test[STARTING_VALUE:min((STARTING_VALUE + SAMPLE), len(test) - 1)]
+                    sample_points = self.rfft[STARTING_VALUE:min((STARTING_VALUE + SAMPLE), len(self.rfft) - 1)]
                     for v in sample_points:
                         if v > SAMPLE_MAX:
                             SAMPLE_MAX = v
                             # print('dd'+v)
 
                     # replace SAMPLE_AVERAGE value for (STARTING_VALUE)..(SAMPLE) elements
-                    for index in range(STARTING_VALUE, min(STARTING_VALUE + SAMPLE, len(test) - 1)):
-                        test[index] = SAMPLE_MAX
+                    for index in range(STARTING_VALUE, min(STARTING_VALUE + SAMPLE, len(self.rfft) - 1)):
+                        self.rfft[index] = SAMPLE_MAX
 
                     STARTING_VALUE += SAMPLE
-                    if STARTING_VALUE >= len(test):
+                    if STARTING_VALUE >= len(self.rfft):
                         STARTING_VALUE = 0
-
-            self.fadeCount(test)
+            maxSamples = np.maximum(self.rfft[::CUBE_SECTORS].real * 10, self.maxSectorsValue)
+            self.fadeCount(maxSamples)
+            self.visualise(self.maxSectorsValue)
             self.serialSend()
+            #self.wirelessSend()
 
 
 
@@ -220,13 +241,36 @@ class SpectrumVisualizer:
 
         self.maxSectorsValue = test
 
+
     def serialSend(self):
-        print(self.frame.translateBinary().count('1'))
+        test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
+
+        CLIEqualiser(self.frame.translateBinary())
+
         #self.serialcomm.write(self.frame)
 
 
-def wirelessSend():
-    pass
+    def wirelessSend(self):
+        test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
+        red = bytes(test)
+
+        #red = bytes([0xFF] * 255)
+        green = bytes(self.frame.translateBinary()[255:511], 'utf-8')
+        blue = bytes(self.frame.translateBinary()[511:767], 'utf-8')
+        UDP_IP = "192.168.0.10"
+        UDP_PORT = 4210
+        print("UDP target IP:", UDP_IP)
+        print("UDP target port:", UDP_PORT)
+        print("Red:", red)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        sock.sendto(red, (UDP_IP, UDP_PORT))
+        time.sleep(3)
+#        print("Green:", green)
+#        sock.sendto(green, (UDP_IP, UDP_PORT))
+#        time.sleep(1)
+ #       print("Blue:", blue)
+  #      sock.sendto(blue, (UDP_IP, UDP_PORT))
 
 
 plt.xlim([0, 10000])
@@ -236,11 +280,14 @@ plt.ylabel('dB')
 plt.title('Spectrometer')
 plt.grid()
 
-"""line_ani = matplotlib.animation.FuncAnimation(
-    fig, update_line, init_func=init_line, interval=0, blit=True
-)"""
-
-#plt.show()
-
 visualiser = SpectrumVisualizer()
 visualiser.startVisualisation()
+
+line_ani = matplotlib.animation.FuncAnimation(
+    fig, update_line, init_func=init_line, interval=0, blit=True
+)
+
+plt.show()
+
+"""
+"""
