@@ -27,7 +27,7 @@ SAMPLE_MAX = 0
 p = pyaudio.PyAudio()
 SPEAKERS = p.get_default_output_device_info()["hostApi"]
 stream = p.open(
-    input_device_index=2,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
+    input_device_index=3,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
     format=pyaudio.paFloat32,
     channels=1,
     rate=RATE,
@@ -211,11 +211,31 @@ class SpectrumVisualizer:
                     STARTING_VALUE += SAMPLE
                     if STARTING_VALUE >= len(self.rfft):
                         STARTING_VALUE = 0
-            maxSamples = np.maximum(self.rfft[::CUBE_SECTORS].real * 10, self.maxSectorsValue)
+            maxSamples = self.countFrequency()
             self.fadeCount(maxSamples)
             self.visualise(self.maxSectorsValue)
-            #self.serialSend()
+            # self.serialSend()
             self.wirelessSend()
+
+    def countFrequency(self):
+        maxSamples = []
+
+        for i in range(4):
+            maxSamples.append(np.maximum(self.rfft[i:i + 1].real * 10, self.maxSectorsValue))
+
+        maxSamples.append(np.maximum(self.rfft[4:6].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[6:9].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[9:12].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[12:17].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[17:25].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[25:35].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[35:50].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[50:70].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[70:100].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[100:200].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[200:400].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(self.rfft[400:].real * 10, self.maxSectorsValue))
+        return maxSamples
 
 
 
@@ -245,7 +265,7 @@ class SpectrumVisualizer:
 
     def wirelessSend(self):
         sendFrame(self.frame)
-        time.sleep(0.2)
+        time.sleep(0.02)
         self.frame.clear()
 
 

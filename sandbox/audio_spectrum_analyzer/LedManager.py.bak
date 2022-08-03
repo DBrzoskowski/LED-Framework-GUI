@@ -2,7 +2,6 @@ import socket
 import sys
 from enum import Enum
 import time
-import random
 
 # CONFIG
 MAX_PACKETS = 255
@@ -227,97 +226,14 @@ def sendFrame(frame_to_send):
     # send header
     # send bodies
 
-
-def current_milli_time():
-    return round(time.time() * 1000)
-
-
-def color_wheel():
-    frame = LEDFrame()
-    rr = 1
-    gg = 1
-    bb = 1
-    ranx = 0
-    rany = 0
-    swiper = 0
-    xx = 0
-    yy = 0
-    zz = 0
-    ww = 0
-
-    start = current_milli_time()
-
-    while current_milli_time() - start < 100000:
-        swiper = random.randint(0, 3)
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
-
-        for xx in range(0, 8):
-            for yy in range(0, 8):
-                for zz in range(0, 8):
-                    frame.turnOnLed(xx, yy, zz, ranx, 0, rany)
-            sendFrame(frame)
-            time.sleep(0.050)
-
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
-
-        for xx in reversed(range(0, 8)) :
-            for yy in range(0, 8):
-                for zz in range(0, 8):
-                    frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
-            sendFrame(frame)
-            time.sleep(0.050)
-
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
-
-        for xx in range(0, 8):
-            for yy in range(0, 8):
-                for zz in range(0, 8):
-                    frame.turnOnLed(xx, yy, zz, 0, ranx, rany)
-            sendFrame(frame)
-            time.sleep(0.050)
-
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
-        for xx in reversed(range(0, 8)) :
-            for yy in range(0, 8):
-                for zz in range(0, 8):
-                    frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
-            sendFrame(frame)
-            time.sleep(0.050)
-
-
-def brightness_3_colors():
-    frame = LEDFrame()
-    delay = 0.25
-
-    for brightness in range(0, 16):
-        for z in range(0, 8):
-            for y in range(0, 8):
-                for x in range(0, 8):
-                    frame.turnOnLed(x, y, z, brightness, 0, 0)
-        sendFrame(frame)
-        time.sleep(delay)
-
-    for brightness in range(0, 16):
-        for z in range(0, 8):
-            for y in range(0, 8):
-                for x in range(0, 8):
-                    frame.turnOnLed(x, y, z, 0, brightness, 0)
-        sendFrame(frame)
-        time.sleep(delay)
-
-    for brightness in range(0, 16):
-        for z in range(0, 8):
-            for y in range(0, 8):
-                for x in range(0, 8):
-                    frame.turnOnLed(x, y, z, 0, 0, brightness)
-        sendFrame(frame)
-        time.sleep(delay)
-
-
 if __name__ == '__main__':
-    color_wheel()
-    brightness_3_colors()
+    frame = LEDFrame()
+
+    for z in range(0, 8):
+        for y in range(0, 8):
+            for x in range(0, 8):
+                print(f'x={x}, y={y}, z={y}')
+                frame.turnOnLed(x, y, z, 15)
+                sendFrame(frame)
+                time.sleep(0.2)
+                frame.clear()
