@@ -2,7 +2,7 @@ import socket
 import sys
 from enum import Enum
 import time
-import random
+from random import *
 from audio_spectrum import *
 
 # CONFIG
@@ -249,9 +249,9 @@ def color_wheel():
     start = current_milli_time()
 
     while current_milli_time() - start < 15000:
-        swiper = random.randint(0, 3)
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
+        swiper = randint(0, 3)
+        ranx = randint(0, 16)
+        rany = randint(0, 16)
 
         for xx in range(0, 8):
             for yy in range(0, 8):
@@ -260,8 +260,8 @@ def color_wheel():
             sendFrame(frame)
             time.sleep(0.050)
 
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
+        ranx = randint(0, 16)
+        rany = randint(0, 16)
 
         for xx in reversed(range(0, 8)) :
             for yy in range(0, 8):
@@ -270,8 +270,8 @@ def color_wheel():
             sendFrame(frame)
             time.sleep(0.050)
 
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
+        ranx = randint(0, 16)
+        rany = randint(0, 16)
 
         for xx in range(0, 8):
             for yy in range(0, 8):
@@ -280,8 +280,8 @@ def color_wheel():
             sendFrame(frame)
             time.sleep(0.050)
 
-        ranx = random.randint(0, 16)
-        rany = random.randint(0, 16)
+        ranx = randint(0, 16)
+        rany = randint(0, 16)
         for xx in reversed(range(0, 8)) :
             for yy in range(0, 8):
                 for zz in range(0, 8):
@@ -364,21 +364,21 @@ def sinwaveTwo():
             sinewavearray[addr] = sinewavearray[addr] + sinemult[addr]
 
         if sinewavearray[0] == 7:
-            select = random.randint(0, 3)
+            select = randint(0, 3)
             if select == 0:
-                rr = random.randint(1, 16)
-                gg = random.randint(1, 16)
+                rr = randint(1, 16)
+                gg = randint(1, 16)
                 bb = 0
 
             if select == 1:
-                rr = random.randint(1, 16)
+                rr = randint(1, 16)
                 gg = 0
-                bb = random.randint(1, 16)
+                bb = randint(1, 16)
 
             if select == 2:
                 rr = 0
-                gg = random.randint(1, 16)
-                bb = random.randint(1, 16)
+                gg = randint(1, 16)
+                bb = randint(1, 16)
 
         for addr in range(0, 8):
             frame.turnOnLed(sinewavearrayOLD[addr], addr, 0, 0, 0, 0)
@@ -447,12 +447,12 @@ def rainVersionTwo():
     slowdown = 0
 
     for addr in range(0, 64):
-        x[addr] = random.randint(0, 7)
-        y[addr] = random.randint(0, 7)
-        z[addr] = random.randint(0, 7)
-        xx[addr] = random.randint(0, 15)
-        yy[addr] = random.randint(0, 15)
-        zz[addr] = random.randint(0, 15)
+        x[addr] = randint(0, 7)
+        y[addr] = randint(0, 7)
+        z[addr] = randint(0, 7)
+        xx[addr] = randint(0, 15)
+        yy[addr] = randint(0, 15)
+        zz[addr] = randint(0, 15)
 
     start = current_milli_time()
 
@@ -515,26 +515,558 @@ def rainVersionTwo():
         for addr in range(0, leds):
             z[addr] = z[addr] - 1
 
-            if z[addr] < random.randint(-100, 0):
-                x[addr] = random.randint(0, 7)
-                y[addr] = random.randint(0, 7)
-                select = random.randint(0, 2)
+            if z[addr] < randint(-100, 0):
+                x[addr] = randint(0, 7)
+                y[addr] = randint(0, 7)
+                select = randint(0, 2)
                 if select == 0:
                     xx[addr] = 0
-                    zz[addr] = random.randint(0, 15)
-                    yy[addr] = random.randint(0, 15)
+                    zz[addr] = randint(0, 15)
+                    yy[addr] = randint(0, 15)
 
                 if select == 1:
-                    xx[addr] = random.randint(0, 15)
+                    xx[addr] = randint(0, 15)
                     zz[addr] = 0
-                    yy[addr] = random.randint(0, 15)
+                    yy[addr] = randint(0, 15)
 
                 if select == 2:
-                    xx[addr] = random.randint(0, 15)
-                    zz[addr] = random.randint(0, 15)
+                    xx[addr] = randint(0, 15)
+                    zz[addr] = randint(0, 15)
                     yy[addr] = 0
 
                 z[addr] = 7
+
+
+def folder():
+    xx, yy, zz,  = 0,0,0
+    pullback = []
+    state = 0
+    backorfront = 7
+
+    folderaddr = []
+    LED_Old = []
+    oldpullback = []
+    ranx = randint(0, 16)
+    rany = randint(0, 16)
+    ranz = randint(0, 16)
+    ranselect = 0
+    bot = 0
+    top = 1
+    right = 0
+    left = 0
+    back = 0
+    front = 0
+    side = 0
+    side_select = 0
+
+    folderaddr[0] = -7
+    folderaddr[1] = -6
+    folderaddr[2] = -5
+    folderaddr[3] = -4
+    folderaddr[4] = -3
+    folderaddr[5] = -2
+    folderaddr[6] = -1
+    folderaddr[7] = 0
+
+    frame = LEDFrame()
+
+    for xx in range(8):
+        oldpullback[xx] = 0
+        pullback[xx] = 0
+
+    start = current_milli_time()
+    while current_milli_time() - start < 10000:
+        if top == 1:
+            if side == 0:
+                #top to left-side
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(yy - oldpullback[yy], xx, 7 - LED_Old[yy], 0, 0, 0)
+                        frame.turnOnLed(yy - pullback[yy], xx, 7 - folderaddr[yy], ranx, rany, ranz)
+            if side == 2:
+                #top to back-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(xx, yy - oldpullback[yy], 7 - LED_Old[yy], 0, 0, 0)
+                        frame.turnOnLed(xx, yy - pullback[yy], 7 - folderaddr[yy], ranx, rany, ranz)
+
+            if side == 3:
+                #top-side to front-side
+                for yy in range(8):
+                    for xx in range(8):
+                        LED(xx, yy + oldpullback[yy], 7 - LED_Old[7 - yy], 0, 0, 0)
+                        LED(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
+
+            if side == 1:
+                #top-side to right
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(yy + oldpullback[yy], xx, 7 - LED_Old[7 - yy], 0, 0, 0)
+                        frame.turnOnLed(yy + pullback[yy], xx, 7 - folderaddr[7 - yy], ranx, rany, ranz)
+
+         #top
+
+        if right == 1:
+            if side == 4:
+                #right-side to top
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(7 - LED_Old[7 - yy], xx, yy + oldpullback[7 - yy], 0, 0, 0)
+                        frame.turnOnLed(7 - folderaddr[7 - yy], xx, yy + pullback[7 - yy], ranx, rany, ranz)
+
+            if side == 3:
+                #right-side to front-side
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(7 - LED_Old[7 - yy], yy + oldpullback[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(7 - folderaddr[7 - yy], yy + pullback[yy], xx, ranx, rany, ranz)
+
+            if side == 2:
+                #right-side to back-side
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(7 - LED_Old[yy], yy - oldpullback[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(7 - folderaddr[yy], yy - pullback[yy], xx, ranx, rany, ranz)
+
+            if side == 5:
+                #right-side to bottom
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(7 - LED_Old[yy], xx, yy - oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(7 - folderaddr[yy], xx, yy - pullback[yy], ranx, rany, ranz)
+        #right
+
+        if left == 1:
+            if side == 4:
+                #left-side to top
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(LED_Old[7 - yy], xx, yy + oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(folderaddr[7 - yy], xx, yy + pullback[yy], ranx, rany, ranz)
+
+            if side == 3:
+                #left-side to front-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(LED_Old[7 - yy], yy + oldpullback[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(folderaddr[7 - yy], yy + pullback[yy], xx, ranx, rany, ranz)
+
+            if side == 2:
+                #left-side to back-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(LED_Old[yy], yy - oldpullback[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(folderaddr[yy], yy - pullback[yy], xx, ranx, rany, ranz)
+
+            if side == 5:
+                #left-side to bottom
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(LED_Old[yy], xx, yy - oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(folderaddr[yy], xx, yy - pullback[yy], ranx, rany, ranz)
+
+         #left
+
+        if back == 1:
+            if side == 1:
+                #back-side to right-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(yy + oldpullback[yy], LED_Old[7 - yy], xx, 0, 0, 0)
+                        frame.turnOnLed(yy + pullback[yy], folderaddr[7 - yy], xx, ranx, rany, ranz)
+
+            if side == 4:
+                # back-side to top-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(xx, LED_Old[7 - yy], yy + oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(xx, folderaddr[7 - yy], yy + pullback[yy], ranx, rany, ranz)
+
+            if side == 5:
+                # back-side to bottom
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(xx, LED_Old[yy], yy - oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(xx, folderaddr[yy], yy - pullback[yy], ranx, rany, ranz)
+ #state1
+            if side == 0:
+                #back-side to left-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(yy - oldpullback[yy], LED_Old[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(yy - pullback[yy], folderaddr[yy], xx, ranx, rany, ranz)
+ #back
+        if bot == 1:
+            if side == 1:
+                # bottom-side to right-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(yy + oldpullback[yy], xx, LED_Old[7 - yy], 0, 0, 0)
+                        frame.turnOnLed(yy + pullback[yy], xx, folderaddr[7 - yy], ranx, rany, ranz)
+
+            if side == 3:
+                #bottom to front-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(xx, yy + oldpullback[yy], LED_Old[7 - yy], 0, 0, 0)
+                        frame.turnOnLed(xx, yy + pullback[yy], folderaddr[7 - yy], ranx, rany, ranz)
+
+            if side == 2:
+                #bottom to back-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(xx, yy - oldpullback[yy], LED_Old[yy], 0, 0, 0)
+                        frame.turnOnLed(xx, yy - pullback[yy], folderaddr[yy], ranx, rany, ranz)
+
+            if side == 0:
+                #bottom to left-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(yy - oldpullback[yy], xx, LED_Old[yy], 0, 0, 0)
+                        frame.turnOnLed(yy - pullback[yy], xx, folderaddr[yy], ranx, rany, ranz)
+
+         #bot
+
+        if front == 1:
+            if side == 0:
+                #front-side to left-side
+                for yy in range(8):
+                    for  xx in range(8):
+                        frame.turnOnLed(yy - oldpullback[yy], 7 - LED_Old[yy], xx, 0, 0, 0)
+                        frame.turnOnLed(yy - pullback[yy], 7 - folderaddr[yy], xx, ranx, rany, ranz)
+
+            if side == 5:
+                # front-side to bottom
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(xx, 7 - LED_Old[yy], yy - oldpullback[yy], 0, 0, 0)
+                        frame.turnOnLed(xx, 7 - folderaddr[yy], yy - pullback[yy], ranx, rany, ranz)
+
+            if side == 4:
+                # front-side to top-side
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(xx, 7 - LED_Old[7 - yy], yy + oldpullback[yy], 0, 0, 0)
+                        LED(xx, 7 - folderaddr[7 - yy], yy + pullback[yy], ranx, rany, ranz)
+
+            if side == 1:
+                #front-side to right-side
+                for yy in range(8):
+                    for xx in range(8):
+                        frame.turnOnLed(yy + oldpullback[yy], 7 - LED_Old[7 - yy], xx, 0, 0, 0)
+                        frame.turnOnLed(yy + pullback[yy], 7 - folderaddr[7 - yy], xx, ranx, rany, ranz)
+
+         #front
+
+        time.sleep(5) #               time.sleep   time.sleep  time.sleep
+        for  xx in range(8):
+            LED_Old[xx] = folderaddr[xx]
+            oldpullback[xx] = pullback[xx]
+
+
+        if folderaddr[7] == 7:
+            # pullback=8
+            for  zz in range(8):
+                pullback[zz] = pullback[zz] + 1
+
+            if pullback[7] == 8: #finished with fold
+                time.sleep(10)
+                #state++
+                #if(state==4)
+                #state=0
+
+                ranselect = randint(0, 3)
+                if ranselect == 0:
+                    ranx = 0
+                    rany = randint(1, 16)
+                    ranz = randint(1, 16)
+
+                if ranselect == 1:
+                    ranx = randint(1, 16)
+                    rany = 0
+                    ranz = randint(1, 16)
+
+                if ranselect == 2:
+                    ranx = randint(1, 16)
+                    rany = randint(1, 16)
+                    ranz = 0
+
+
+                side_select = randint(0,3)
+
+                if top == 1: #                 TOP
+                    top = 0
+                    if side == 0: #top to left
+                        left = 1
+                        if side_select == 0:
+                            side = 2
+                        if side_select == 1:
+                            side = 3
+                        #ifside_select==2) side=4
+                        if side_select == 2:
+                            side = 5
+
+                    else:
+                        if side == 1: #top to right
+                            right = 1
+                            if side_select == 0:
+                                side = 5
+                            if side_select == 1:
+                                side = 2
+                            if side_select == 2:
+                                side = 3
+                            #ifside_select==3) side=4
+
+                        else:
+                            if side == 2: #top to back
+                                back = 1
+                                if side_select == 0:
+                                    side = 0
+                                if side_select == 1:
+                                    side = 1
+                                if side_select == 2:
+                                    side = 5
+                                #ifside_select==3) side=4
+
+                            else:
+                                if side == 3: #top to front
+                                    front = 1
+                                    if side_select == 0:
+                                        side = 0
+                                    if side_select == 1:
+                                        side = 1
+                                    if side_select == 2:
+                                        side = 5
+                                    #ifside_select==3) side=4
+                else: #top
+                    if bot == 1: #                 BOTTOM
+                        bot = 0
+                        if side == 0: #bot to left
+                            left = 1
+                            if side_select == 0:
+                                side = 2
+                            if side_select == 1:
+                                side = 3
+                            if side_select == 2:
+                                side = 4
+                            #ifside_select==3) side=5
+
+                        else:
+                            if side == 1: #bot to right
+                                right = 1
+                                #ifside_select==0) side=5
+                                if side_select == 0:
+                                    side = 2
+                                if side_select == 1:
+                                    side = 3
+                                if side_select == 2:
+                                    side = 4
+
+                            else:
+                                if side == 2: #bot to back
+                                    back = 1
+                                    if side_select == 0:
+                                        side = 0
+                                    if side_select == 1:
+                                        side = 1
+                                    #ifside_select==2) side=5
+                                    if side_select == 2:
+                                        side = 4
+
+                                else:
+                                    if side == 3: #bot to front
+                                        front = 1
+                                        if side_select == 0:
+                                            side = 0
+                                        if side_select == 1:
+                                            side = 1
+                                        #ifside_select==2) side=5
+                                        if side_select == 2:
+                                            side = 4
+                    else: #bot
+                        if right == 1: #                 RIGHT
+                            right = 0
+                            if side == 4: #right to top
+                                top = 1
+                                if side_select == 0:
+                                    side = 2
+                                if side_select == 1:
+                                    side = 3
+                                if side_select == 2:
+                                    side = 0
+                                #ifside_select==3) side=1
+                            else:
+                                if side == 5: #right to bot
+                                    bot = 1
+                                    if side_select == 0:
+                                        side = 0
+                                    if side_select == 1:
+                                        side = 2
+                                    if side_select == 2:
+                                        side = 3
+                                    #ifside_select==3) side=1
+                                else:
+                                    if side == 2: #right to back
+                                        back = 1
+                                        if side_select == 0:
+                                            side = 0
+                                        #ifside_select==1) side=1
+                                        if side_select == 1:
+                                            side = 5
+                                        if side_select == 2:
+                                            side = 4
+                                    else:
+                                        if side == 3: #right to front
+                                            front = 1
+                                            if side_select == 0:
+                                                side = 0
+                                            #ifside_select==1) side=1
+                                            if side_select == 1:
+                                                side = 5
+                                            if side_select == 2:
+                                                side = 4
+                        else: #bot
+                            if left == 1: #                 LEFT
+                                left = 0
+                                if side == 4: #left to top
+                                    top = 1
+                                    #ifside_select==0) side=2
+                                    if side_select == 0:
+                                        side = 3
+                                    if side_select == 1:
+                                        side = 2
+                                    if side_select == 2:
+                                        side = 1
+                                else:
+                                    if side == 5: #left to bot
+                                        bot = 1
+                                        #ifside_select==0) side=0
+                                        if side_select == 0:
+                                            side = 2
+                                        if side_select == 1:
+                                            side = 3
+                                        if side_select == 2:
+                                            side = 1
+                                    else:
+                                        if side == 2: #left to back
+                                            back = 1
+                                            #ifside_select==0) side=0
+                                            if side_select == 0:
+                                                side = 1
+                                            if side_select == 1:
+                                                side = 5
+                                            if side_select == 2: side = 4
+                                        else:
+                                            if side == 3: #left to front
+                                                front = 1
+                                                #ifside_select==0) side=0
+                                                if side_select == 0:
+                                                    side = 1
+                                                if side_select == 1:
+                                                    side = 5
+                                                if side_select == 2: side = 4
+                            else: #bot
+                                if front == 1: #                 front
+                                    front = 0
+                                    if side == 4: #front to top
+                                        top = 1
+                                        if side_select == 0:
+                                            side = 2
+                                        #ifside_select==1) side=3
+                                        if side_select == 1:
+                                            side = 0
+                                        if side_select == 2:
+                                            side = 1
+                                    else:
+                                        if side == 5: #front to bot
+                                            bot = 1
+                                            if side_select == 0:
+                                                side = 0
+                                            if side_select == 1:
+                                                side = 2
+                                            #ifside_select==2) side=3
+                                            if side_select == 2: side = 1
+                                        else:
+                                            if side == 0: #front to left
+                                                left = 1
+                                                if side_select == 0:
+                                                    side = 2
+                                                # ifside_select==1) side=3
+                                                if side_select == 1:
+                                                    side = 5
+                                                if side_select == 2:
+                                                    side = 4
+                                            else:
+                                                if side == 1: #front to right
+                                                    right = 1
+                                                    if side_select == 0:
+                                                        side = 2
+                                                    # ifside_select==1) side=3
+                                                    if side_select == 1:
+                                                        side = 5
+                                                    if side_select == 2:
+                                                        side = 4
+                                else: #bot
+                                    if back == 1:
+                                        back = 0
+                                        if side == 4: #back to top
+                                            top = 1
+                                            #ifside_select==0) side=2
+                                            if side_select == 0:
+                                                side = 3
+                                            if side_select == 1:
+                                                side = 0
+                                            if side_select == 2:
+                                                side = 1
+                                        else:
+                                            if side == 5: #back to bot
+                                                bot = 1
+                                                if side_select == 0:
+                                                    side = 0
+                                                #ifside_select==1) side=2
+                                                if side_select == 1:
+                                                    side = 3
+                                                if side_select == 2:
+                                                    side = 1
+                                            else:
+                                                if side == 0: #back to left
+                                                    left = 1
+                                                    #ifside_select==0) side=2
+                                                    if side_select == 0:
+                                                        side = 3
+                                                    if side_select == 1:
+                                                        side = 5
+                                                    if side_select == 2:
+                                                        side = 4
+                                                else:
+                                                    if side == 1: #back to right
+                                                        right = 1
+                                                        #ifside_select==0) side=2
+                                                        if side_select == 0:
+                                                            side = 3
+                                                        if side_select == 1:
+                                                            side = 5
+                                                        if side_select == 2:
+                                                            side = 4
+
+                    for xx in range(8):
+                        oldpullback[xx] = 0
+                        pullback[xx] = 0
+
+                    folderaddr[0] = -8
+                    folderaddr[1] = -7
+                    folderaddr[2] = -6
+                    folderaddr[3] = -5
+                    folderaddr[4] = -4
+                    folderaddr[5] = -3
+                    folderaddr[6] = -2
+                    folderaddr[7] = -1
+
+        if folderaddr[7] != 7:
+            for zz in range(8):
+                folderaddr[zz] = folderaddr[zz] + 1
+
+
 
 
 def start_spectrum():
@@ -548,3 +1080,4 @@ if __name__ == '__main__':
     sinwaveTwo()
     color_wheel()
     brightness_3_colors()
+    folder()
