@@ -3,6 +3,7 @@ import sys
 from enum import Enum
 import time
 import random
+from audio_spectrum import *
 
 # CONFIG
 MAX_PACKETS = 255
@@ -127,30 +128,30 @@ class LEDFrame:
 
     def updateColumn(self, level, xCord, yCord):
         """ view from top of the matrix. Each 2x2 matrix will map one sound frequency range
-
                             00 01
                             10 11
-
            00  10     20  30     40  50     60   70
            01  11     21  31     41  51     61   71
-
            02  12     22  32     42  52     62   72
            03  13     23  33     43  53     63   73
-
            04  14     24  34     44  54     64   74
            05  15     25  35     45  55     65   75
-
            06  16     26  36     46  56     66   76
            07  17     27  37     47  57     67   77
-
            """
-
         coordinates = [[xCord * 2, yCord * 2], [xCord * 2 + 1, yCord * 2],
                        [xCord * 2, yCord * 2 + 1], [xCord * 2 + 1, yCord * 2 + 1]]
 
         for pair in coordinates:
             for zCord in range(0, level):
-                self.turnOnLed(pair[0], pair[1], zCord, 15, 0, 0)
+                if zCord == 7:
+                    self.turnOnLed(pair[0], pair[1], zCord, 15, 0, 15)
+                elif zCord >= 5:
+                    self.turnOnLed(pair[0], pair[1], zCord, 15, 0, 0)
+                elif zCord >= 3:
+                    self.turnOnLed(pair[0], pair[1], zCord, 15, 15, 0)
+                else:
+                    self.turnOnLed(pair[0], pair[1], zCord, 0, 15, 0)
 
 
 class LEDHeader:
@@ -247,7 +248,7 @@ def color_wheel():
 
     start = current_milli_time()
 
-    while current_milli_time() - start < 100000:
+    while current_milli_time() - start < 15000:
         swiper = random.randint(0, 3)
         ranx = random.randint(0, 16)
         rany = random.randint(0, 16)
@@ -318,6 +319,232 @@ def brightness_3_colors():
         time.sleep(delay)
 
 
+def sinwaveTwo():
+    sinewavearray = [0] * 8
+    addr = 0
+    sinemult = [0] * 8
+    colselect = 0
+    rr = 0
+    gg = 0
+    bb = 15
+    addrt = 0
+
+    sinewavearrayOLD = [0] * 8
+    select = 0
+    subZ = -7
+    subT = 7
+    multi = 0
+    sinewavearray[0] = 0
+    sinemult[0] = 1
+    sinewavearray[1] = 1
+    sinemult[1] = 1
+    sinewavearray[2] = 2
+    sinemult[2] = 1
+    sinewavearray[3] = 3
+    sinemult[3] = 1
+    sinewavearray[4] = 4
+    sinemult[4] = 1
+    sinewavearray[5] = 5
+    sinemult[5] = 1
+    sinewavearray[6] = 6
+    sinemult[6] = 1
+    sinewavearray[7] = 7
+    sinemult[7] = 1
+
+    frame = LEDFrame()
+
+    start = current_milli_time()
+
+    while (current_milli_time() - start) < 15000:
+        for addr in range(0, 8):
+            if sinewavearray[addr] == 7:
+                sinemult[addr] = -1
+            if sinewavearray[addr] == 0:
+                sinemult[addr] = 1
+            sinewavearray[addr] = sinewavearray[addr] + sinemult[addr]
+
+        if sinewavearray[0] == 7:
+            select = random.randint(0, 3)
+            if select == 0:
+                rr = random.randint(1, 16)
+                gg = random.randint(1, 16)
+                bb = 0
+
+            if select == 1:
+                rr = random.randint(1, 16)
+                gg = 0
+                bb = random.randint(1, 16)
+
+            if select == 2:
+                rr = 0
+                gg = random.randint(1, 16)
+                bb = random.randint(1, 16)
+
+        for addr in range(0, 8):
+            frame.turnOnLed(sinewavearrayOLD[addr], addr, 0, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr], 0, addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr], subT - addr, 7, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr], 7, subT - addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearray[addr], addr, 0, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr], 0, addr, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr], subT - addr, 7, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr], 7, subT - addr, rr, gg, bb)
+
+        for addr in range(1, 7):
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 1], addr, 1, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 1], 1, addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 1], subT - addr, 6, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 1], 6, subT - addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearray[addr + multi * 1], addr, 1, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 1], 1, addr, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 1], subT - addr, 6, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 1], 6, subT - addr, rr, gg, bb)
+
+        for addr in range(2, 6):
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 2], addr, 2, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 2], 2, addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 2], subT - addr, 5, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 2], 5, subT - addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearray[addr + multi * 2], addr, 2, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 2], 2, addr, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 2], subT - addr, 5, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 2], 5, subT - addr, rr, gg, bb)
+
+        for addr in range(3, 6):
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 3], addr, 3, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 3], 3, addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 3], subT - addr, 4, 0, 0, 0)
+            frame.turnOnLed(sinewavearrayOLD[addr + multi * 3], 4, subT - addr, 0, 0, 0)
+            frame.turnOnLed(sinewavearray[addr + multi * 3], addr, 3, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 3], 3, addr, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 3], subT - addr, 4, rr, gg, bb)
+            frame.turnOnLed(sinewavearray[addr + multi * 3], 4, subT - addr, rr, gg, bb)
+
+        for addr in range(0,8):
+            sinewavearrayOLD[addr] = sinewavearray[addr]
+
+        sendFrame(frame)
+        time.sleep(0.050)
+        frame.clear()
+
+
+def rainVersionTwo():
+    x = [0] * 64
+    y = [0] * 64
+    z = [0] * 64
+    addr = 0
+    leds = 64
+    bright = 1
+    ledcolor = 0
+    colowheel = 0
+
+    xx = [0] * 64
+    yy = [0] * 64
+    zz = [0] * 64
+    xold = [0] * 64
+    yold = [0] * 64
+    zold = [0] * 64
+    slowdown = 0
+
+    for addr in range(0, 64):
+        x[addr] = random.randint(0, 7)
+        y[addr] = random.randint(0, 7)
+        z[addr] = random.randint(0, 7)
+        xx[addr] = random.randint(0, 15)
+        yy[addr] = random.randint(0, 15)
+        zz[addr] = random.randint(0, 15)
+
+    start = current_milli_time()
+
+    frame = LEDFrame()
+
+    while (current_milli_time() - start) < 20000:
+        if ledcolor < 200:
+            for addr in range(0, leds):
+                frame.turnOnLed(xold[addr], yold[addr], zold[addr], 0, 0, 0)
+            if z[addr] >= 7:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 0, 5, 15)
+            if z[addr] == 6:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 0, 1, 9)
+            if z[addr] == 5:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 0, 0, 10)
+            if z[addr] == 4:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 1, 0, 11)
+            if z[addr] == 3:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 3, 0, 12)
+            if z[addr] == 2:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 10, 0, 15)
+            if z[addr] == 1:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 10, 0, 10)
+            if z[addr] <= 0:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 10, 0, 1)
+
+        if 200 <= ledcolor < 300:
+            for addr in range(0, leds):
+                frame.turnOnLed(xold[addr], yold[addr], zold[addr], 0, 0, 0)
+            if z[addr] >= 7:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 15, 15, 0)
+            if z[addr] == 6:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 10, 10, 0)
+            if z[addr] == 5:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 15, 5, 0)
+            if z[addr] == 4:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 15, 2, 0)
+            if z[addr] == 3:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 15, 1, 0)
+            if z[addr] == 2:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 15, 0, 0)
+            if z[addr] == 1:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 12, 0, 0)
+            if z[addr] <= 0:
+                frame.turnOnLed(x[addr], y[addr], z[addr], 10, 0, 0)
+
+        ledcolor += 1
+
+        if ledcolor >= 300:
+            ledcolor = 0
+
+        for addr in range(0, leds):
+            xold[addr] = x[addr]
+            yold[addr] = y[addr]
+            zold[addr] = z[addr]
+
+        time.sleep(0.04)
+        sendFrame(frame)
+
+        for addr in range(0, leds):
+            z[addr] = z[addr] - 1
+
+            if z[addr] < random.randint(-100, 0):
+                x[addr] = random.randint(0, 7)
+                y[addr] = random.randint(0, 7)
+                select = random.randint(0, 2)
+                if select == 0:
+                    xx[addr] = 0
+                    zz[addr] = random.randint(0, 15)
+                    yy[addr] = random.randint(0, 15)
+
+                if select == 1:
+                    xx[addr] = random.randint(0, 15)
+                    zz[addr] = 0
+                    yy[addr] = random.randint(0, 15)
+
+                if select == 2:
+                    xx[addr] = random.randint(0, 15)
+                    zz[addr] = random.randint(0, 15)
+                    yy[addr] = 0
+
+                z[addr] = 7
+
+
+def start_spectrum():
+    visualiser = SpectrumVisualizer()
+    visualiser.startVisualisation()
+
+
 if __name__ == '__main__':
+    #start_spectrum()
+    rainVersionTwo()
+    sinwaveTwo()
     color_wheel()
     brightness_3_colors()

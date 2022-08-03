@@ -221,20 +221,20 @@ class SpectrumVisualizer:
         maxSamples = []
 
         for i in range(4):
-            maxSamples.append(np.maximum(self.rfft[i:i + 1].real * 10, self.maxSectorsValue))
+            maxSamples.append(np.maximum(max(self.rfft[i:i + 1].real * 10), self.maxSectorsValue[i]))
 
-        maxSamples.append(np.maximum(self.rfft[4:6].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[6:9].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[9:12].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[12:17].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[17:25].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[25:35].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[35:50].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[50:70].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[70:100].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[100:200].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[200:400].real * 10, self.maxSectorsValue))
-        maxSamples.append(np.maximum(self.rfft[400:].real * 10, self.maxSectorsValue))
+        maxSamples.append(np.maximum(max(self.rfft[4:6].real * 10), self.maxSectorsValue[4]))
+        maxSamples.append(np.maximum(max(self.rfft[6:9].real * 10), self.maxSectorsValue[5]))
+        maxSamples.append(np.maximum(max(self.rfft[9:12].real * 10), self.maxSectorsValue[6]))
+        maxSamples.append(np.maximum(max(self.rfft[12:17].real * 10), self.maxSectorsValue[7]))
+        maxSamples.append(np.maximum(max(self.rfft[17:25].real * 10), self.maxSectorsValue[8]))
+        maxSamples.append(np.maximum(max(self.rfft[25:35].real * 10), self.maxSectorsValue[9]))
+        maxSamples.append(np.maximum(max(self.rfft[35:50].real * 10), self.maxSectorsValue[10]))
+        maxSamples.append(np.maximum(max(self.rfft[50:70].real * 10), self.maxSectorsValue[11]))
+        maxSamples.append(np.maximum(max(self.rfft[70:100].real * 10), self.maxSectorsValue[12]))
+        maxSamples.append(np.maximum(max(self.rfft[100:200].real * 10), self.maxSectorsValue[13]))
+        maxSamples.append(np.maximum(max(self.rfft[200:400].real * 10), self.maxSectorsValue[14]))
+        maxSamples.append(np.maximum(max(self.rfft[400:].real * 10), self.maxSectorsValue[15]))
         return maxSamples
 
 
@@ -268,7 +268,7 @@ class SpectrumVisualizer:
         time.sleep(0.02)
         self.frame.clear()
 
-
+"""
 plt.xlim([0, 10000])
 plt.ylim(-10, 30)
 plt.xlabel('Frequency [Hz]')
@@ -283,7 +283,6 @@ line_ani = matplotlib.animation.FuncAnimation(
     fig, update_line, init_func=init_line, interval=0, blit=True
 )
 
-plt.show()
 
-"""
+plt.show()
 """
