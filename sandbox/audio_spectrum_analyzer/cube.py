@@ -9,8 +9,9 @@ class Led:
         else:
             self.led = [format(0, '04b') for _ in range(3)]
 
-    def translateBinary(self, color, bit):
-        return f"{self.led[color][bit]}"
+    # color: 1 - red, 2 - green, 3 - blue
+    def translateBinary(self, color):
+        return f"{self.led[color]}"
 
 
 class Layer:
@@ -20,10 +21,10 @@ class Layer:
     def updateLed(self, led, position):
         self.leds[position] = led
 
-    def translateBinary(self, color, bamBit):
+    def translateBinary(self, color):
         colorBinary = ''
         for led in self.leds:
-            colorBinary += led.translateBinary(color, bamBit)
+            colorBinary += led.translateBinary(color)
         return colorBinary
 
 class Frame:
@@ -39,9 +40,8 @@ class Frame:
     def translateBinary(self):
         framesBinary = ''
         for color in range(3):
-            for bamBit in reversed(range(4)):
-                for layer in self.layers:
-                    framesBinary += layer.translateBinary(color, bamBit)
+            for layer in self.layers:
+                framesBinary += layer.translateBinary(color)
         return framesBinary
 
     def updateColumn(self, level, xCord, yCord, turnOn):
@@ -92,3 +92,10 @@ class Animation:
         for frame in self.frames:
             animationBinary = frame.translateBinary()
         return animationBinary
+
+
+
+
+
+
+

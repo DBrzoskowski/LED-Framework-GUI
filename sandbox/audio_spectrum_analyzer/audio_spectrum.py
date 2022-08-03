@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation
 import matplotlib as mpl
 import serial
-from cube import *
+from LedManager import *
 
 mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
@@ -18,8 +18,8 @@ PRINT_SPECTRUM_LINE = True
 
 # Tuning values
 STARTING_VALUE = 0
-SAMPLE = 12  # Higher - lower number of spectrum's, 1 sample = 50Hz
-FADE_SPEED = 0.4  # Higher - faster fading
+SAMPLE = 1  # Higher - lower number of spectrum's, 1 sample = 50Hz
+FADE_SPEED = 2   # Higher - faster fading
 CUBE_SECTORS = 16
 
 SAMPLE_MAX = 0
@@ -139,9 +139,12 @@ def CLIEqualiser(klatka):
     print("sector15: " + '#' * int(klatka[52::64].count('1')/4))
     print("sector16: " + '#' * int(klatka[54::64].count('1')/4))
 
+
+
+
 class SpectrumVisualizer:
     def __init__(self):
-        self.frame = Frame()
+        self.frame = LEDFrame()
         self.isActive = False
         self.frequencyMap = {0: (0, 0), 1: (0, 1), 2: (0, 2), 3: (0, 3), 4: (1, 0), 5: (1, 1), 6: (1, 2), 7: (1, 3),
                              8: (2, 0),
@@ -150,21 +153,18 @@ class SpectrumVisualizer:
         self.recordedSamples = None
         self.maxSectorsValue = [0 for i in range(28)]
         self.rfft = [0 for i in range(442)]
-        #self.serialcomm = serial.Serial('COM7', 9600)
-        #self.serialcomm.timeout = 1
 
 
     def visualise(self, spectrumList):
         for index, value in enumerate(spectrumList):
             if index > 15:
                 break
-            power = value / 8 if value < 64 else 8
-            self.updateSector(index, power)
+            level = int(value / 8) if value < 64 else 8
+            self.updateSector(index, level)
 
-    def updateSector(self, frequency, power):
+    def updateSector(self, frequency, level):
         xCord, yCord = self.frequencyMap[frequency]
-        for level in range(8):
-            self.frame.updateColumn(level, xCord, yCord, level < power)
+        self.frame.updateColumn(level, xCord, yCord)
 
     def startVisualisation(self):
         self.isActive = True
@@ -214,8 +214,8 @@ class SpectrumVisualizer:
             maxSamples = np.maximum(self.rfft[::CUBE_SECTORS].real * 10, self.maxSectorsValue)
             self.fadeCount(maxSamples)
             self.visualise(self.maxSectorsValue)
-            self.serialSend()
-            #self.wirelessSend()
+            #self.serialSend()
+            self.wirelessSend()
 
 
 
@@ -242,35 +242,11 @@ class SpectrumVisualizer:
         self.maxSectorsValue = test
 
 
-    def serialSend(self):
-        test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
-
-        CLIEqualiser(self.frame.translateBinary())
-
-        #self.serialcomm.write(self.frame)
-
 
     def wirelessSend(self):
-        test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
-        red = bytes(test)
-
-        #red = bytes([0xFF] * 255)
-        green = bytes(self.frame.translateBinary()[255:511], 'utf-8')
-        blue = bytes(self.frame.translateBinary()[511:767], 'utf-8')
-        UDP_IP = "192.168.0.10"
-        UDP_PORT = 4210
-        print("UDP target IP:", UDP_IP)
-        print("UDP target port:", UDP_PORT)
-        print("Red:", red)
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-        sock.sendto(red, (UDP_IP, UDP_PORT))
-        time.sleep(3)
-#        print("Green:", green)
-#        sock.sendto(green, (UDP_IP, UDP_PORT))
-#        time.sleep(1)
- #       print("Blue:", blue)
-  #      sock.sendto(blue, (UDP_IP, UDP_PORT))
+        sendFrame(self.frame)
+        time.sleep(0.2)
+        self.frame.clear()
 
 
 plt.xlim([0, 10000])
