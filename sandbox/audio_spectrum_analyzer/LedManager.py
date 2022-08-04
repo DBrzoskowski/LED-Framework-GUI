@@ -594,8 +594,9 @@ def folder():
                 #top-side to front-side
                 for yy in range(8):
                     for xx in range(8):
-                        LED(xx, yy + oldpullback[yy], 7 - LED_Old[7 - yy], 0, 0, 0)
-                        LED(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
+                        frame.turnOnLed(xx, yy + oldpullback[yy], 7 - LED_Old[7 - yy], 0, 0, 0)
+                        frame.turnOnLed(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
+                        frame.turnOnLed(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
 
             if side == 1:
                 #top-side to right
@@ -747,7 +748,7 @@ def folder():
                 for yy in range(8):
                     for xx in range(8):
                         frame.turnOnLed(xx, 7 - LED_Old[7 - yy], yy + oldpullback[yy], 0, 0, 0)
-                        LED(xx, 7 - folderaddr[7 - yy], yy + pullback[yy], ranx, rany, ranz)
+                        frame.turnOnLed(xx, 7 - folderaddr[7 - yy], yy + pullback[yy], ranx, rany, ranz)
 
             if side == 1:
                 #front-side to right-side
