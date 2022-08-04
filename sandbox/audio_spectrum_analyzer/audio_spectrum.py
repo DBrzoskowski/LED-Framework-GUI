@@ -40,6 +40,7 @@ class SpectrumVisualizer:
     def __init__(self):
         self.frame = LEDFrame()
         self.isActive = False
+        self.duration = 120000
         self.frequencyMap = {0: (0, 0), 1: (0, 1), 2: (0, 2), 3: (0, 3), 4: (1, 0), 5: (1, 1), 6: (1, 2), 7: (1, 3),
                              8: (2, 0),
                              9: (2, 1), 10: (2, 2), 11: (2, 3), 12: (3, 0), 13: (3, 1), 14: (3, 2), 15: (3, 3)}
@@ -60,8 +61,9 @@ class SpectrumVisualizer:
         xCord, yCord = self.frequencyMap[frequency]
         self.frame.updateColumn(level, xCord, yCord)
 
-    def startVisualisation(self):
+    def startVisualisation(self, duration=120000):
         self.isActive = True
+        self.duration = duration
         """self.stream = p.open(
             input_device_index=2,
             format=pyaudio.paFloat32,
@@ -75,11 +77,20 @@ class SpectrumVisualizer:
         self.isActive = False
         self.stream.close()
 
+    def current_milli_time(self):
+        return round(time.time() * 1000)
+
     def startSoundAnalysis(self):
+        start = self.current_milli_time()
+
         while self.isActive:
             global SAMPLE_MAX
             global STARTING_VALUE
             global SAMPLE
+
+            if (self.current_milli_time() - start) > self.duration:
+                self.isActive = False
+                return
 
             try:
                 b = np.fromstring(stream.read(BUFFER), dtype=np.float32)
