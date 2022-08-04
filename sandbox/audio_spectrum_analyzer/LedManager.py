@@ -1077,30 +1077,30 @@ def start_spectrum():
 
 def folder2(): #****folder****folder****folder****folder****folder****folder****folder****folder****folder
     frame = LEDFrame()
-    xx, yy, zz = 0
-    pullback = []
+    xx, yy, zz = 0,0,0
+    pullback = [0] * 8
     state = 0
     backorfront = 7 #backorfront 7 for back 0 for front
 
-    folderaddr = []
-    LED_Old = []
-    oldpullback = []
+    folderaddr = [0] * 16
+    LED_Old = [0] * 16
+    oldpullback = [0] * 8
     ranx = randint(0,15)
     rany = randint(0,15)
     ranz = randint(0,15)
     ranselect = 0
     bot = 0
     top = 1
-    right, left, back, front, side, side_select = 0
+    right, left, back, front, side, side_select = 0, 0,0,0,0,0
 
-    folderaddr[0] = -7
-    folderaddr[1] = -6
-    folderaddr[2] = -5
-    folderaddr[3] = -4
-    folderaddr[4] = -3
-    folderaddr[5] = -2
-    folderaddr[6] = -1
-    folderaddr[7] = 0
+    folderaddr[0] += -7
+    folderaddr[1] += -6
+    folderaddr[2] += -5
+    folderaddr[3] += -4
+    folderaddr[4] += -3
+    folderaddr[5] += -2
+    folderaddr[6] += -1
+    folderaddr[7] += 0
 
     for xx in range(8):
         oldpullback[xx] = 0
@@ -1289,7 +1289,7 @@ def folder2(): #****folder****folder****folder****folder****folder****folder****
 
         #front
 
-        sleep(5)
+        time.sleep(5)
         for xx in range(8):
             LED_Old[xx] = folderaddr[xx]
             oldpullback[xx] = pullback[xx]
@@ -1299,7 +1299,7 @@ def folder2(): #****folder****folder****folder****folder****folder****folder****
                 pullback[zz] = pullback[zz] + 1
 
             if pullback[7] == 8:
-                sleep(10)
+                time.sleep(10)
 
                 ranselect = randint(0,2)
                 if ranselect == 0:
@@ -1589,11 +1589,11 @@ def folder2(): #****folder****folder****folder****folder****folder****folder****
 
 if __name__ == '__main__':
     #start_spectrum()
-    rainVersionTwo()
-    sinwaveTwo()
-    color_wheel()
-    brightness_3_colors()
-    folder()
+    #rainVersionTwo()
+    #sinwaveTwo()
+    #color_wheel()
+    #brightness_3_colors()
+    folder2()
 
 
 
