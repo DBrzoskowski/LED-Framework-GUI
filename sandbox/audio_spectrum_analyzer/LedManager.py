@@ -538,37 +538,22 @@ def rainVersionTwo():
 
 
 def folder():
-    xx, yy, zz,  = 0,0,0
-    pullback = []
+    frame = LEDFrame()
+    xx, yy, zz = 0,0,0
+    pullback = [0] * 8
     state = 0
-    backorfront = 7
+    backorfront = 7 #backorfront 7 for back 0 for front
 
-    folderaddr = []
-    LED_Old = []
-    oldpullback = []
-    ranx = randint(0, 15)
-    rany = randint(0, 15)
-    ranz = randint(0, 15)
+    folderaddr = [0] * 16
+    LED_Old = [0] * 16
+    oldpullback = [0] * 8
+    ranx = randint(0,15)
+    rany = randint(0,15)
+    ranz = randint(0,15)
     ranselect = 0
     bot = 0
     top = 1
-    right = 0
-    left = 0
-    back = 0
-    front = 0
-    side = 0
-    side_select = 0
-
-    folderaddr[0] = -7
-    folderaddr[1] = -6
-    folderaddr[2] = -5
-    folderaddr[3] = -4
-    folderaddr[4] = -3
-    folderaddr[5] = -2
-    folderaddr[6] = -1
-    folderaddr[7] = 0
-
-    frame = LEDFrame()
+    right, left, back, front, side, side_select = 0,0,0,0,0,0
 
     for xx in range(8):
         oldpullback[xx] = 0
@@ -759,7 +744,7 @@ def folder():
 
          #front
 
-        time.sleep(5) #               time.sleep   time.sleep  time.sleep
+        time.sleep(0.005) #               time.sleep   time.sleep  time.sleep
         for  xx in range(8):
             LED_Old[xx] = folderaddr[xx]
             oldpullback[xx] = pullback[xx]
@@ -771,7 +756,7 @@ def folder():
                 pullback[zz] = pullback[zz] + 1
 
             if pullback[7] == 8: #finished with fold
-                time.sleep(10)
+                time.sleep(0.01)
                 #state++
                 #if(state==4)
                 #state=0
@@ -1289,7 +1274,7 @@ def folder2(): #****folder****folder****folder****folder****folder****folder****
 
         #front
 
-        time.sleep(5)
+        time.sleep(0.005)
         for xx in range(8):
             LED_Old[xx] = folderaddr[xx]
             oldpullback[xx] = pullback[xx]
@@ -1299,7 +1284,7 @@ def folder2(): #****folder****folder****folder****folder****folder****folder****
                 pullback[zz] = pullback[zz] + 1
 
             if pullback[7] == 8:
-                time.sleep(10)
+                time.sleep(0.01)
 
                 ranselect = randint(0,2)
                 if ranselect == 0:
@@ -1593,7 +1578,7 @@ if __name__ == '__main__':
     #sinwaveTwo()
     #color_wheel()
     #brightness_3_colors()
-    folder2()
+    folder()
 
 
 
