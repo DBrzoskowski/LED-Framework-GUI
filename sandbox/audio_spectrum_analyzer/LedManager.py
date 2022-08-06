@@ -1,9 +1,11 @@
+import math
 import socket
 import sys
 from enum import Enum
 import time
 from random import *
 from audio_spectrum import *
+from Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
 
 # CONFIG
 MAX_PACKETS = 255
@@ -13,6 +15,7 @@ UDP_PORT = 4210
 
 TYPE_HEADER = 0xFE
 TYPE_BODY = 0xBB
+TYPE_SPECTRUM = 0xAB
 
 TIME_FOR_1_ANIMATIONS_IN_MS = 5000
 
@@ -55,6 +58,10 @@ class LEDFrame:
 
     def clear(self):
         self.rgb = [0] * 768
+
+    def drawColumn(self, x, y, level, r, g, b):
+        for z in range(0, level + 1):
+            self.turnOnLed(x, y, z, r, g, b)
 
     def turnOnLed(self, x, y, z, r, g, b):
         if x < 0:
@@ -253,6 +260,30 @@ def sendFrame(frame_to_send):
 
     # send header
     # send bodies
+
+
+def sendSpectrum(barsData):
+    data = [0] * (1 + 32)
+    data[0] = TYPE_SPECTRUM
+
+    dataIndex = 1
+    for i in range(0, 63, 2):
+        test1 = barsData[i + 1] & 0b1111
+        test2 = barsData[i] & 0b00001111
+
+        #if test1 < 1 or test1 > 7:
+            #print("[ERROR] Wrong bar level")
+
+        #if test2 < 1 or test2 > 7:
+            #print("[ERROR] Wrong bar level")
+
+        data[dataIndex] = ((barsData[i + 1] & 0b1111) << 4) | (barsData[i] & 0b00001111)
+        dataIndex += 1
+
+    MESSAGE = bytes(data)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+    sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 
 def current_milli_time():
@@ -1164,15 +1195,80 @@ def bouncyvTwo():
           yy[addr] = yy[addr - 1]
           zz[addr] = zz[addr - 1]
 
+
+def rgb(minimum, maximum, value):
+    minimum, maximum = float(minimum), float(maximum)
+    ratio = 2 * (value-minimum) / (maximum - minimum)
+    b = int(max(0, 255*(1 - ratio)))
+    r = int(max(0, 255*(ratio - 1)))
+    g = 255 - b - r
+    return r, g, b
+
+
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)
+
+
+def testAudioSpectrum(infinite=False):
+    ear = Stream_Analyzer(
+        device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
+        rate=None,  # Audio samplerate, None uses the default source settings
+        FFT_window_size_ms=60,  # Window size used for the FFT transform
+        updates_per_second=1000,  # How often to read the audio stream for new data
+        smoothing_length_ms=150,  # Apply some temporal smoothing to reduce noisy features
+        n_frequency_bins=64,  # The FFT features are grouped in bins
+        visualize=1,  # Visualize the FFT features with PyGame
+        verbose=False,  # Print running statistics (latency, fps, ...)
+        height=450,  # Height, in pixels, of the visualizer window,
+        window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
+    )
+
+
+    barsData = [0] * 64
+    start_time = time.time()
+
+    while True:
+        current_time = time.time()
+        if not infinite and (current_time - start_time > 5):
+            return
+
+        raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
+
+        for i, frequency in enumerate(binned_fftx):
+            power = binned_fft[i]
+
+            x = int(i / 8)
+            y = i % 8
+
+            level = translate(power, 0, 30, 0, 7)
+
+            if level > 7:
+                level = 7
+            barsData[i] = int(level + 0.5)
+            #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
+
+        sendSpectrum(barsData)
+        time.sleep(0.01)
+
+
 if __name__ == '__main__':
     while 1:
-        start_spectrum(5000)
-        bouncyvTwo()
-        sinwaveTwo()
-        folder()
-        rainVersionTwo()
-        color_wheel()
-        start_spectrum(TIME_FOR_1_ANIMATIONS_IN_MS)
+        #start_spectrum(5000)
+        #bouncyvTwo()
+        #sinwaveTwo()
+        #folder()
+        #rainVersionTwo()
+        #color_wheel()
+        testAudioSpectrum(infinite=True)
+        #start_spectrum(TIME_FOR_1_ANIMATIONS_IN_MS)
         #brightness_3_colors()
 
 
