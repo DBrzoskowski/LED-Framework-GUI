@@ -1231,7 +1231,7 @@ def testAudioSpectrum(infinite=False):
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
     )
 
-
+    fps = 50
     barsData = [0] * 64
     start_time = time.time()
 
@@ -1240,6 +1240,7 @@ def testAudioSpectrum(infinite=False):
         if not infinite and (current_time - start_time > 5):
             return
 
+        start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
 
         for i, frequency in enumerate(binned_fftx):
@@ -1252,11 +1253,18 @@ def testAudioSpectrum(infinite=False):
 
             if level > 7:
                 level = 7
-            barsData[i] = int(level + 0.5)
+            barsData[i] = int(level + 0.2)
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
         sendSpectrum(barsData)
-        time.sleep(0.01)
+        fft_duration_ms = current_milli_time() - start_time_ms
+
+        if ((fft_duration_ms / 1000) > (1. / fps)):
+            print('continue')
+            time.sleep(0.002)
+            continue
+
+        time.sleep((1. / fps) - (fft_duration_ms / 1000))
 
 
 if __name__ == '__main__':
