@@ -59,10 +59,12 @@ class AppWindow(QMainWindow):
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
-        # variable
+        # variables
         self.fps = None
         self.color_name = None
         self.currentNameBox = None
+        self.files = []
+        self.files_path = []
         self.file_name = None
         self.one_frame = None
         self.all_frames = []
@@ -265,7 +267,6 @@ class AppWindow(QMainWindow):
         self.cube.drawing_path['pos'] = []
         self.cube.drawing_path['color'] = []
 
-
     # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
@@ -290,9 +291,12 @@ class AppWindow(QMainWindow):
             self.lastOpenFileLabel.setText("Last open file: " + file_name)
             self.lastOpenFileLabel.setWordWrap(True)
             self.lastOpenFileLabel.adjustSize()
-            # self.readyAnimationBox.addItem(file_name)
-            self.readyAnimationBox.insertItem(0, file_name)
-            self.cube.load_animation_from_file(file_path)
+            if file_path != '':
+                self.readyAnimationBox.insertItem(0, file_name)
+                self.cube.load_animation_from_file(file_path)
+
+        self.files.append(file_name)
+        self.files_path.append(file_path)
 
     # TODO
     def loadSpectrum(self):
@@ -348,7 +352,6 @@ class AppWindow(QMainWindow):
         self.animationStateLabel.update()
         # audio_spectrum.SpectrumVisualizer.serialSend(self)
         # audio_spectrum.SpectrumVisualizer.wirelessSend(self)
-
 
     # TODO connect it with hardware cube
     def stopAnimation(self):

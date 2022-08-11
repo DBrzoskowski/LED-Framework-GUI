@@ -232,7 +232,9 @@ class Cube3D(canvas):
 
     def save_animation_to_frame(self, file_path=ANIMATION_FILE, to_file=False):
         if self.drawing_path['pos'] and self.drawing_path['color']:
-            return self.drawing_path
+            x = self.drawing_path['pos']
+            y = self.drawing_path['color']
+            return x, y
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
         with open(file_path, 'r') as f:
