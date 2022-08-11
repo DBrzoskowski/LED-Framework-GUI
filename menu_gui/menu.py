@@ -6,7 +6,7 @@ import sys
 
 # css
 background_style = """AppWindow {
-    background-image: url(background.png);
+    background-image: url(menu_gui/background.png);
     background-repeat: no-repeat;
     background-position: center;
     height: 843px;
@@ -37,7 +37,6 @@ animationStateLabel_green = """QLabel {
 }"""
 
 
-
 def start_menu(cube):
     app = QApplication(sys.argv)
     app.setStyleSheet(background_style)
@@ -52,7 +51,7 @@ class AppWindow(QMainWindow):
         super(AppWindow, self).__init__()
         self.setFixedSize(843, 549)
         self.setWindowTitle("3D LED Framework")
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
 
 
         # Cube
@@ -280,7 +279,6 @@ class AppWindow(QMainWindow):
     def resetAnimation(self):
         self.cube.reset_cube_state()
 
-
     def openFile(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
@@ -289,15 +287,12 @@ class AppWindow(QMainWindow):
         file_name = file_path.split("/")[-1]
 
         if file:
-            self.lastOpenFileLabel.setText("Last open file: " + str(file_name))
+            self.lastOpenFileLabel.setText("Last open file: " + file_name)
             self.lastOpenFileLabel.setWordWrap(True)
             self.lastOpenFileLabel.adjustSize()
             # self.readyAnimationBox.addItem(file_name)
             self.readyAnimationBox.insertItem(0, file_name)
             self.cube.load_animation_from_file(file_path)
-
-        self.files.append(file_name)
-        self.files_path.append(file_path)
 
     # TODO
     def loadSpectrum(self):
@@ -384,3 +379,10 @@ class AppWindow(QMainWindow):
         self.cube = cube
         print(self.cube)
 
+
+# app = QApplication(sys.argv)
+# app.setStyleSheet(background_style)
+# win = AppWindow()
+# # win.build_cube(cube)
+# win.show()
+# sys.exit(app.exec_())
