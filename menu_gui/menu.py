@@ -1,13 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
 import sys
-import json
-
-from Led_animation import Cube3D
-# from sandbox.audio_spectrum_analyzer import audio_spectrum
-import math
-from vpython import color
-from threading import *
 
 
 # css
@@ -43,6 +37,15 @@ animationStateLabel_green = """QLabel {
 }"""
 
 
+def start_menu(cube):
+    app = QApplication(sys.argv)
+    app.setStyleSheet(background_style)
+    win = AppWindow()
+    win.build_cube(cube)
+    win.show()
+    sys.exit(app.exec_())
+
+
 class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
@@ -50,18 +53,18 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
-        # cube vpython
-        self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        self.c.background = color.blue
+        # Cube
+        self.cube = None
+        # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+        # self.c.background = color.black
 
-        # variables
+        # variable
         self.fps = None
         self.color_name = None
         self.currentNameBox = None
         self.file_name = None
         self.one_frame = None
-        self.files = []
-        self.files_path = []
+        self.all_frames = []
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -96,7 +99,6 @@ class AppWindow(QMainWindow):
         self.createButton.setFont(font)
         self.createButton.setObjectName("createButton")
         self.createButton.setStyleSheet(QPushButton_style)
-        # self.createButton.setCheckable(True)
         self.createButton.clicked.connect(self.createAnimation)
 
         self.saveFrameButton.setGeometry(QtCore.QRect(220, 30, 191, 101))
@@ -249,50 +251,45 @@ class AppWindow(QMainWindow):
         self.loadButton.setText(_translate("AppWindow", "Load selected"))
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
-    # need fps and color method by Damian
-    # TODO threading
+    # change name
     def createAnimation(self):
         self.colorAndFps()
-        # self.thread()
 
-    # def thread(self):
-    #     t1 = Thread(target=self.c.drawing())
-    #     t1.start()
-
-    # TODO - needed createAnimation
     def saveFrame(self):
-        self.one_frame = self.c.save_animation_to_frame()
+        self.one_frame = self.cube.save_animation_to_frame()
+        self.all_frames.append(self.one_frame)
+        print(self.one_frame)
+        print(self.all_frames)
+        self.cube.drawing_path['pos'] = []
+        self.cube.drawing_path['color'] = []
 
-    # TODO - working only for one led
+    # TODO check it in pyqt5
+    # need drawing function
     def saveAnimation(self):
+        print(self.one_frame)
+        print(self.all_frames)
         file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
         file_name = file[0]
         save = open(file_name, 'w')
-        save.write(str(self.one_frame))
-        # with open(file_name, 'w') as file_name:
-        #     for i in self.file_save:
-        #         file_name.write(json.dumps(i) + '\n')
-        self.c.drawing_path['pos'] = []
-        self.c.drawing_path['color'] = []
-
+        save.write(str(self.all_frames))
 
     def resetAnimation(self):
-        self.c.reset_cube_state()
+        self.cube.reset_cube_state()
 
     def openFile(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
-        # create file name and path
+        # create file name
         file_path = file[0]
         file_name = file_path.split("/")[-1]
 
         if file:
-            self.lastOpenFileLabel.setText("Last open file: " + file_name)
+            self.lastOpenFileLabel.setText("Last open file: " + str(file_name))
             self.lastOpenFileLabel.setWordWrap(True)
             self.lastOpenFileLabel.adjustSize()
             # self.readyAnimationBox.addItem(file_name)
             self.readyAnimationBox.insertItem(0, file_name)
-            self.c.load_animation_from_file(file_path)
+            self.cube.load_animation_from_file(file_path)
 
         self.files.append(file_name)
         self.files_path.append(file_path)
@@ -306,6 +303,7 @@ class AppWindow(QMainWindow):
         # self.s.stopVisualisation()
         pass
 
+    # TODO
     def stopSpectrum(self):
         pass
 
@@ -326,7 +324,6 @@ class AppWindow(QMainWindow):
     def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
         fps = fps_input[0]
-
         if input:
             if 10 <= int(fps_input[0]) <= 60:
                 self.fpsLabel.setText("FPS: " + str(fps))
@@ -341,7 +338,7 @@ class AppWindow(QMainWindow):
         self.fps = fps
 
     def colorAndFps(self):
-        self.c.gui_args_builder(self.color_name, self.fps)
+        self.cube.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
@@ -363,23 +360,19 @@ class AppWindow(QMainWindow):
 
     def loadAnimationFromTheBox(self):
         if self.currentNameBox == "Double Outline":
-            self.c.double_outline_animation()
+            self.cube.double_outline_animation()
         elif self.currentNameBox == "Outline Inside Ankle":
-            self.c.outline_inside_ankle_animation()
+            self.cube.outline_inside_ankle_animation()
         elif self.currentNameBox == "Outer Layer":
-            self.c.outer_layer_animation()
+            self.cube.outer_layer_animation()
         elif self.currentNameBox == "Random Color":
-            self.c.random_color_animation()
+            self.cube.random_color_animation()
         elif self.currentNameBox in self.files:
             x = self.files.index(self.currentNameBox)
-            self.c.load_animation_from_file(self.files_path[x])
+            self.cube.load_animation_from_file(self.files_path[x])
         else:
-            pass
+            self.pathLabel.setText("outofscope")
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyleSheet(background_style)
-    win = AppWindow()
-    win.show()
-    sys.exit(app.exec_())
+    def build_cube(self, cube):
+        self.cube = cube
+        print(self.cube)

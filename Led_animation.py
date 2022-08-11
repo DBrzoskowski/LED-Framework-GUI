@@ -3,18 +3,18 @@ LED Animation GUI "POC"
 based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_SypQoGb5I7NjspXkRWqmb5XsHbFEc#/user/GlowScriptDemos/folder/Examples/program/AtomicSolid-VPython
 
 Installation:
-    pip install -r requirements.txt
+    pip install vpython
 """
-import os
-
-import txaio
+import time
 import json
+import txaio
+import math
 from random import uniform
 from colormap import hex2rgb
-from vpython import canvas, vector, sphere, vec, color, sleep, distant_light, rate
-
-# resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
-txaio.use_asyncio()
+from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
+import asyncio
+# scene.background = vector(0.95, 1, 1) # white background
+txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 
 ANIMATION_FILE = 'animation_path.txt'
 
@@ -45,23 +45,20 @@ class Cube3D(canvas):
         self.drawing_path.setdefault('fps', 30)
         self.drawing_color = None
         self.drawing_fps = None
-        self.animation_step = []
+        self.drawing_button_status = False
         self.animation_frame = []
+        self.animation_step = []
+        self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
 
-        # add some light to walls
         distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
         distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
         distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
 
-        # Remove file after object init
-        if os.path.exists(ANIMATION_FILE):
-            os.remove(ANIMATION_FILE)
-
         for z in range(0, size, 1):
             for x in range(0, size, 1):
                 for y in range(0, size, 1):
-                    led = sphere(make_trail=True)
+                    led = sphere()
                     led.pos = vector(z, y, x) * spacing
                     led.radius = led_radius
                     if 0 <= x < size and 0 <= y < size and 0 <= z < size:
@@ -298,3 +295,49 @@ class Cube3D(canvas):
 
             self.drawing_path['pos'].append(hit.pos.value)
             self.drawing_path['color'].append(hit.color.value)
+
+    # def change_drawing_status_from_gui(self, value):
+    #     self.drawing_button_status = value
+    #     if value:
+    #         self.button_drawing.delete()
+    #         self.button_drawing = button(text="Drawing", pos=self.title_anchor, bind=self.drawing_status)
+    #     else:
+    #         self.button_drawing.delete()
+    #         self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
+
+    # button
+    def drawing_status(self, b):
+        self.drawing_button_status = not self.drawing_button_status
+        if self.drawing_button_status:
+            b.text = "Drawing"
+            while self.drawing_button_status:
+                self.drawing()
+        else:
+            b.text = "Not drawing"
+
+    # def run_drawing(self):
+    #     if not self.drawing_button_status:
+    #         self.double_outline_animation(col=vector(1, 0, 0), fps=10)
+    #
+    #         # clear whole cube after test finish
+    #         for i in self.get_visible_leds():
+    #             i.color = vector(0, 0, 0)
+    #         sleep(0.2)
+    #     else:
+    #         if self.drawing_button_status:
+    #             self.drawing()
+
+
+from menu_gui.menu import start_menu, AppWindow
+from threading import Thread
+from multiprocessing import Process
+
+if __name__ == '__main__':
+    c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+    c.background = color.black  # temporarily to see the leds better
+    # d1 = Thread(target=c.run_drawing())
+    # d1.daemon = True
+    # d1.start()
+    t1 = Thread(target=start_menu(c))
+    # t1.daemon = True
+    t1.start()
