@@ -52,7 +52,7 @@ class AppWindow(QMainWindow):
 
         # cube vpython
         self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        self.c.background = color.yellow
+        self.c.background = color.blue
 
         # variables
         self.fps = None
@@ -139,6 +139,8 @@ class AppWindow(QMainWindow):
         self.loadSpectrumButton.setFont(font)
         self.loadSpectrumButton.setObjectName("loadSpectrumButton")
         self.loadSpectrumButton.setStyleSheet(QPushButton_style)
+        self.loadSpectrumButton.setCheckable(True)
+        self.loadSpectrumButton.clicked.connect(self.loadSpectrum)
 
         self.colorButton.setGeometry(QtCore.QRect(430, 150, 191, 101))
         font = QtGui.QFont()
@@ -251,17 +253,17 @@ class AppWindow(QMainWindow):
     # TODO threading
     def createAnimation(self):
         self.colorAndFps()
-        self.thread()
+        # self.thread()
 
-    def thread(self):
-        t1 = Thread(target=self.c.drawing())
-        t1.start()
+    # def thread(self):
+    #     t1 = Thread(target=self.c.drawing())
+    #     t1.start()
 
     # TODO - needed createAnimation
     def saveFrame(self):
         self.one_frame = self.c.save_animation_to_frame()
 
-    # TODO - need drawing function
+    # TODO - working only for one led
     def saveAnimation(self):
         file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
         file_name = file[0]
@@ -298,7 +300,13 @@ class AppWindow(QMainWindow):
     # TODO
     def loadSpectrum(self):
         # self.s = audio_spectrum.SpectrumVisualizer()
-        # self.s.startVisualisation()
+        # if isChecked() -> True
+        #       setEnabled() -> False #disable button
+        #       self.s.startVisualisation()
+        # self.s.stopVisualisation()
+        pass
+
+    def stopSpectrum(self):
         pass
 
     def colorPicker(self):
