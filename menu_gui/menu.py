@@ -1,12 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
-import time
 import sys
 
-# from Led_animation import Cube3D
-import math
-from vpython import color
 
 # css
 background_style = """AppWindow {
@@ -40,15 +36,13 @@ animationStateLabel_green = """QLabel {
     color: green;
 }"""
 
-# create Cube3D
-# c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-# c.background = color.white
 
-def start_menu(kostka):
+
+def start_menu(cube):
     app = QApplication(sys.argv)
     app.setStyleSheet(background_style)
     win = AppWindow()
-    win.build_kostka(kostka)
+    win.build_cube(cube)
     win.show()
     sys.exit(app.exec_())
 
@@ -60,15 +54,17 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
-        self.kostka = None
 
         # Cube
+        self.cube = None
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
         # variable
         self.fps = None
         self.color_name = None
+        self.currentNameBox = None
+        self.file_name = None
         self.one_frame = None
         self.all_frames = []
 
@@ -86,7 +82,7 @@ class AppWindow(QMainWindow):
         self.loadButton = QtWidgets.QPushButton(self)
 
         # create labels
-        self.pathLabel = QtWidgets.QLabel(self)
+        self.lastOpenFileLabel = QtWidgets.QLabel(self)
         self.colorLabel = QtWidgets.QLabel(self)
         self.fpsLabel = QtWidgets.QLabel(self)
         self.animationStateLabel = QtWidgets.QLabel(self)
@@ -113,6 +109,7 @@ class AppWindow(QMainWindow):
         self.saveFrameButton.setFont(font)
         self.saveFrameButton.setObjectName("saveFrameButton")
         self.saveFrameButton.setStyleSheet(QPushButton_style)
+        # self.saveFrameButton.setShortcut("Ctrl+S")
         self.saveFrameButton.clicked.connect(self.saveFrame)
 
         self.saveButton.setGeometry(QtCore.QRect(430, 30, 191, 101))
@@ -121,6 +118,7 @@ class AppWindow(QMainWindow):
         self.saveButton.setFont(font)
         self.saveButton.setObjectName("saveButton")
         self.saveButton.setStyleSheet(QPushButton_style)
+        # self.saveButton.setShortcut("Ctrl+Shift+S")
         self.saveButton.clicked.connect(self.saveAnimation)
 
         self.resetButton.setGeometry(QtCore.QRect(640, 30, 191, 101))
@@ -145,6 +143,8 @@ class AppWindow(QMainWindow):
         self.loadSpectrumButton.setFont(font)
         self.loadSpectrumButton.setObjectName("loadSpectrumButton")
         self.loadSpectrumButton.setStyleSheet(QPushButton_style)
+        self.loadSpectrumButton.setCheckable(True)
+        self.loadSpectrumButton.clicked.connect(self.loadSpectrum)
 
         self.colorButton.setGeometry(QtCore.QRect(430, 150, 191, 101))
         font = QtGui.QFont()
@@ -185,16 +185,16 @@ class AppWindow(QMainWindow):
         self.loadButton.setFont(font)
         self.loadButton.setObjectName("loadButton")
         self.loadButton.setStyleSheet(QPushButton_style)
-        # self.loadButton.clicked.connect(self.loadFromBox(x))
+        self.loadButton.clicked.connect(self.loadAnimationFromTheBox)
 
         # labels
-        self.pathLabel.setGeometry(QtCore.QRect(20, 260, 171, 31))
+        self.lastOpenFileLabel.setGeometry(QtCore.QRect(20, 260, 171, 31))
         # self.pathLabel.setMaximumSize(QtCore.QSize(350, 65))
         font = QtGui.QFont()
         font.setPointSize(14)
-        self.pathLabel.setFont(font)
-        self.pathLabel.setWordWrap(True)
-        self.pathLabel.setObjectName("pathLabel")
+        self.lastOpenFileLabel.setFont(font)
+        self.lastOpenFileLabel.setWordWrap(True)
+        self.lastOpenFileLabel.setObjectName("pathLabel")
 
         self.colorLabel.setGeometry(QtCore.QRect(440, 260, 171, 31))
         font = QtGui.QFont()
@@ -241,7 +241,8 @@ class AppWindow(QMainWindow):
         self.saveButton.setText(_translate("AppWindow", "Save animation"))
         self.resetButton.setText(_translate("AppWindow", "Reset animation"))
         self.openButton.setText(_translate("AppWindow", "Open"))
-        self.pathLabel.setText(_translate("AppWindow", "Path: "))
+        self.lastOpenFileLabel.setText(_translate("AppWindow", "Last open file: "))
+
         self.loadSpectrumButton.setText(_translate("AppWindow", "Load spectrum"))
         self.colorButton.setText(_translate("AppWindow", "Color"))
         self.colorLabel.setText(_translate("AppWindow", "Color:"))
@@ -258,12 +259,12 @@ class AppWindow(QMainWindow):
         self.colorAndFps()
 
     def saveFrame(self):
-        self.one_frame = self.kostka.save_animation_to_frame()
+        self.one_frame = self.cube.save_animation_to_frame()
         self.all_frames.append(self.one_frame)
         print(self.one_frame)
         print(self.all_frames)
-        self.kostka.drawing_path['pos'] = []
-        self.kostka.drawing_path['color'] = []
+        self.cube.drawing_path['pos'] = []
+        self.cube.drawing_path['color'] = []
 
 
     # TODO check it in pyqt5
@@ -277,33 +278,41 @@ class AppWindow(QMainWindow):
         save.write(str(self.all_frames))
 
     def resetAnimation(self):
-        self.kostka.reset_cube_state()
-        # self.c.delete()
-        # add close tab
+        self.cube.reset_cube_state()
+
 
     def openFile(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
         # create file name
         file_path = file[0]
-        file_path_list = file_path.split("/")
-        file_name = file_path_list[-1]
+        file_name = file_path.split("/")[-1]
 
         if file:
-            self.pathLabel.setText("Path: " + file_path)
-            self.pathLabel.setWordWrap(True)
-            self.pathLabel.adjustSize()
+            self.lastOpenFileLabel.setText("Last open file: " + str(file_name))
+            self.lastOpenFileLabel.setWordWrap(True)
+            self.lastOpenFileLabel.adjustSize()
+            # self.readyAnimationBox.addItem(file_name)
+            self.readyAnimationBox.insertItem(0, file_name)
+            self.cube.load_animation_from_file(file_path)
 
-            self.readyAnimationBox.addItem(file_name)
-            # TODO
-            self.kostka.load_animation_from_file(file_path)
+        self.files.append(file_name)
+        self.files_path.append(file_path)
 
     # TODO
     def loadSpectrum(self):
+        # self.s = audio_spectrum.SpectrumVisualizer()
+        # if isChecked() -> True
+        #       setEnabled() -> False #disable button
+        #       self.s.startVisualisation()
+        # self.s.stopVisualisation()
         pass
 
-    # TODO color to method
-    def colorPicker(self, color_name=None):
+    # TODO
+    def stopSpectrum(self):
+        pass
+
+    def colorPicker(self):
         # opening color dialog
         color = QColorDialog.getColor()
         color_name = color.name()
@@ -316,16 +325,15 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
 
         self.color_name = color_name
-        # return color_name
 
-    # TODO fps to method
-    def inputFps(self, fps=None):
+    def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
         fps = fps_input[0]
         if input:
             if 10 <= int(fps_input[0]) <= 60:
                 self.fpsLabel.setText("FPS: " + str(fps))
-                self.pathLabel.adjustSize()
+                self.lastOpenFileLabel.adjustSize()
+
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle("Error")
@@ -334,17 +342,18 @@ class AppWindow(QMainWindow):
                 msg.exec_()
 
         self.fps = fps
-        # return fps
 
-    # TODO
     def colorAndFps(self):
-        self.kostka.gui_args_builder(self.color_name, self.fps)
+        self.cube.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
         self.animationStateLabel.setText("Animation state: Active")
         self.animationStateLabel.setStyleSheet(animationStateLabel_green)
         self.animationStateLabel.update()
+        # audio_spectrum.SpectrumVisualizer.serialSend(self)
+        # audio_spectrum.SpectrumVisualizer.wirelessSend(self)
+
 
     # TODO connect it with hardware cube
     def stopAnimation(self):
@@ -354,27 +363,24 @@ class AppWindow(QMainWindow):
 
     def chooseFromReadyBox(self):
         current = self.readyAnimationBox.currentText()
-        # self.pathLabel.setText(str(asd))
-        # return current
-        if current == "Double Outline":
-            self.pathLabel.setText("1")
-            self.kostka.double_outline_animation()
-        elif current == "Outline Inside Ankle":
-            self.pathLabel.setText("2")
-            self.kostka.outline_inside_ankle_animation()
-        elif current == "Outer Layer":
-            self.pathLabel.setText("3")
-            self.kostka.outer_layer_animation()
-        elif current == "Random Color":
-            self.pathLabel.setText("4")
-            self.kostka.random_color_animation()
+        self.currentNameBox = current
+
+    def loadAnimationFromTheBox(self):
+        if self.currentNameBox == "Double Outline":
+            self.cube.double_outline_animation()
+        elif self.currentNameBox == "Outline Inside Ankle":
+            self.cube.outline_inside_ankle_animation()
+        elif self.currentNameBox == "Outer Layer":
+            self.cube.outer_layer_animation()
+        elif self.currentNameBox == "Random Color":
+            self.cube.random_color_animation()
+        elif self.currentNameBox in self.files:
+            x = self.files.index(self.currentNameBox)
+            self.cube.load_animation_from_file(self.files_path[x])
         else:
             self.pathLabel.setText("outofscope")
 
-    # TODO
-    def loadAnimationFromTheBox(self):
-        pass
+    def build_cube(self, cube):
+        self.cube = cube
+        print(self.cube)
 
-    def build_kostka(self, kostka):
-        self.kostka = kostka
-        print(self.kostka)
