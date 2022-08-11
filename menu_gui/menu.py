@@ -261,21 +261,22 @@ class AppWindow(QMainWindow):
 
     def saveFrame(self):
         self.one_frame = self.cube.save_animation_to_frame()
+        # self.cube.drawing_path['pos'] = []
+        # self.cube.drawing_path['color'] = []
         self.all_frames.append(self.one_frame)
-        print(self.one_frame)
-        print(self.all_frames)
-        self.cube.drawing_path['pos'] = []
-        self.cube.drawing_path['color'] = []
 
     # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
         print(self.one_frame)
         print(self.all_frames)
-        file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
-        file_name = file[0]
-        save = open(file_name, 'w')
-        save.write(str(self.all_frames))
+        file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
+        file_path = file[0]
+        file_name = file_path.split("/")[-1]
+
+        if file:
+            save = open(file_path, 'w')
+            save.write(str(self.all_frames))
 
     def resetAnimation(self):
         self.cube.reset_cube_state()

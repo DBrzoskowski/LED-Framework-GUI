@@ -27,6 +27,7 @@ class Cube3D(canvas):
     def __init__(self, size, led_radius, spacing, momentumRange, **args):
         super().__init__(**args)
         self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+        # self.unbind('click') # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
@@ -250,9 +251,7 @@ class Cube3D(canvas):
 
     def save_animation_to_frame(self, file_path=ANIMATION_FILE, to_file=False):
         if self.drawing_path['pos'] and self.drawing_path['color']:
-            x = self.drawing_path['pos']
-            y = self.drawing_path['color']
-            return x, y
+            return self.drawing_path
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
         with open(file_path, 'r') as f:
