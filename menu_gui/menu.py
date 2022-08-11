@@ -325,6 +325,7 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
 
         self.color_name = color_name
+        self.cube.set_drawing_color(self.color_name)
 
     def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
