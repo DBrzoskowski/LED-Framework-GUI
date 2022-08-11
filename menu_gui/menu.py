@@ -1,9 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
+import time
 import sys
 
-from Led_animation import Cube3D
+# from Led_animation import Cube3D
 import math
 from vpython import color
 
@@ -43,6 +44,14 @@ animationStateLabel_green = """QLabel {
 # c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
 # c.background = color.white
 
+def start_menu(kostka):
+    app = QApplication(sys.argv)
+    app.setStyleSheet(background_style)
+    win = AppWindow()
+    win.build_kostka(kostka)
+    win.show()
+    sys.exit(app.exec_())
+
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -51,9 +60,11 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
+        self.kostka = None
+
         # Cube
-        self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        self.c.background = color.black
+        # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+        # self.c.background = color.black
 
         # variable
         self.fps = None
@@ -243,14 +254,7 @@ class AppWindow(QMainWindow):
     # TODO threading
     def createAnimation(self):
         self.colorAndFps()
-        print(self.c.drawing_button_status)
-        if not self.c.drawing_button_status:
-            self.c.change_drawing_status_from_gui(True)
-        while self.c.drawing_button_status:
-            self.c.drawing()
-            from time import sleep
-            sleep(2)
-            print('dalej rysuje')
+        self.kostka.change_drawing_status_from_gui(True)
 
     # TODO - needed createAnimation
     def saveFrame(self):
@@ -264,7 +268,7 @@ class AppWindow(QMainWindow):
         # self.c.save_animation_to_file()
 
     def resetAnimation(self):
-        self.c.reset_cube_state()
+        self.kostka.reset_cube_state()
         # self.c.delete()
         # add close tab
 
@@ -283,7 +287,7 @@ class AppWindow(QMainWindow):
 
             self.readyAnimationBox.addItem(file_name)
             # TODO
-            self.c.load_animation_from_file(file_path)
+            self.kostka.load_animation_from_file(file_path)
 
     # TODO
     def loadSpectrum(self):
@@ -325,7 +329,7 @@ class AppWindow(QMainWindow):
 
     # TODO
     def colorAndFps(self):
-        self.c.gui_args_builder(self.color_name, self.fps)
+        self.kostka.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
@@ -345,16 +349,16 @@ class AppWindow(QMainWindow):
         # return current
         if current == "Double Outline":
             self.pathLabel.setText("1")
-            # self.c.double_outline_animation()
+            self.kostka.double_outline_animation()
         elif current == "Outline Inside Ankle":
             self.pathLabel.setText("2")
-            # self.c.outline_inside_ankle_animation()
+            self.kostka.outline_inside_ankle_animation()
         elif current == "Outer Layer":
             self.pathLabel.setText("3")
-            # self.c.outer_layer_animation()
+            self.kostka.outer_layer_animation()
         elif current == "Random Color":
             self.pathLabel.setText("4")
-            # self.c.random_color_animation()
+            self.kostka.random_color_animation()
         else:
             self.pathLabel.setText("outofscope")
 
@@ -362,10 +366,6 @@ class AppWindow(QMainWindow):
     def loadAnimationFromTheBox(self):
         pass
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyleSheet(background_style)
-    win = AppWindow()
-    win.show()
-    sys.exit(app.exec_())
+    def build_kostka(self, kostka):
+        self.kostka = kostka
+        print(self.kostka)

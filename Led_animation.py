@@ -8,6 +8,7 @@ Installation:
 import time
 import json
 import txaio
+import math
 from random import uniform
 from colormap import hex2rgb
 from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
@@ -310,3 +311,31 @@ class Cube3D(canvas):
             b.text = "Drawing"
         else:
             b.text = "Not drawing"
+
+    def run_drawing(self):
+        while True:
+            if not self.drawing_button_status:
+                self.double_outline_animation(col=vector(1, 0, 0), fps=10)
+
+                # clear whole cube after test finish
+                for i in self.get_visible_leds():
+                    i.color = vector(0, 0, 0)
+                sleep(0.2)
+            else:
+                if self.drawing_button_status:
+                    self.drawing()
+
+
+from menu_gui.menu import start_menu, AppWindow
+from threading import Thread
+from multiprocessing import Process
+
+if __name__ == '__main__':
+    c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
+    c.background = color.black  # temporarily to see the leds better
+    d1 = Thread(target=c.run_drawing())
+    d1.daemon = True
+    d1.start()
+    t1 = Thread(target=start_menu(c))
+    t1.daemon = True
+    t1.start()
