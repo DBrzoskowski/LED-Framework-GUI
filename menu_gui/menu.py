@@ -37,6 +37,7 @@ animationStateLabel_green = """QLabel {
 }"""
 
 
+
 def start_menu(cube):
     app = QApplication(sys.argv)
     app.setStyleSheet(background_style)
@@ -52,6 +53,7 @@ class AppWindow(QMainWindow):
         self.setFixedSize(843, 549)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
+
 
         # Cube
         self.cube = None
@@ -240,6 +242,7 @@ class AppWindow(QMainWindow):
         self.resetButton.setText(_translate("AppWindow", "Reset animation"))
         self.openButton.setText(_translate("AppWindow", "Open"))
         self.lastOpenFileLabel.setText(_translate("AppWindow", "Last open file: "))
+
         self.loadSpectrumButton.setText(_translate("AppWindow", "Load spectrum"))
         self.colorButton.setText(_translate("AppWindow", "Color"))
         self.colorLabel.setText(_translate("AppWindow", "Color:"))
@@ -263,6 +266,7 @@ class AppWindow(QMainWindow):
         self.cube.drawing_path['pos'] = []
         self.cube.drawing_path['color'] = []
 
+
     # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
@@ -275,6 +279,7 @@ class AppWindow(QMainWindow):
 
     def resetAnimation(self):
         self.cube.reset_cube_state()
+
 
     def openFile(self):
         # open file dialog
@@ -328,6 +333,7 @@ class AppWindow(QMainWindow):
             if 10 <= int(fps_input[0]) <= 60:
                 self.fpsLabel.setText("FPS: " + str(fps))
                 self.lastOpenFileLabel.adjustSize()
+
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle("Error")
@@ -347,6 +353,7 @@ class AppWindow(QMainWindow):
         self.animationStateLabel.update()
         # audio_spectrum.SpectrumVisualizer.serialSend(self)
         # audio_spectrum.SpectrumVisualizer.wirelessSend(self)
+
 
     # TODO connect it with hardware cube
     def stopAnimation(self):
@@ -376,3 +383,4 @@ class AppWindow(QMainWindow):
     def build_cube(self, cube):
         self.cube = cube
         print(self.cube)
+
