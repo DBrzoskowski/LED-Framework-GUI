@@ -69,6 +69,8 @@ class AppWindow(QMainWindow):
         # variable
         self.fps = None
         self.color_name = None
+        self.one_frame = None
+        self.all_frames = []
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -111,6 +113,7 @@ class AppWindow(QMainWindow):
         self.saveFrameButton.setFont(font)
         self.saveFrameButton.setObjectName("saveFrameButton")
         self.saveFrameButton.setStyleSheet(QPushButton_style)
+        self.saveFrameButton.clicked.connect(self.saveFrame)
 
         self.saveButton.setGeometry(QtCore.QRect(430, 30, 191, 101))
         font = QtGui.QFont()
@@ -118,7 +121,7 @@ class AppWindow(QMainWindow):
         self.saveButton.setFont(font)
         self.saveButton.setObjectName("saveButton")
         self.saveButton.setStyleSheet(QPushButton_style)
-        self.fpsButton.clicked.connect(self.saveAnimation)
+        self.saveButton.clicked.connect(self.saveAnimation)
 
         self.resetButton.setGeometry(QtCore.QRect(640, 30, 191, 101))
         font = QtGui.QFont()
@@ -250,22 +253,28 @@ class AppWindow(QMainWindow):
         self.loadButton.setText(_translate("AppWindow", "Load selected"))
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
-    # need fps and color method by Damian
-    # TODO threading
+    # change name
     def createAnimation(self):
         self.colorAndFps()
-        self.kostka.change_drawing_status_from_gui(True)
 
-    # TODO - needed createAnimation
     def saveFrame(self):
-        pass
-        # self.c.save_animation_to_file()
+        self.one_frame = self.kostka.save_animation_to_frame()
+        self.all_frames.append(self.one_frame)
+        print(self.one_frame)
+        print(self.all_frames)
+        self.kostka.drawing_path['pos'] = []
+        self.kostka.drawing_path['color'] = []
+
 
     # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
-        pass
-        # self.c.save_animation_to_file()
+        print(self.one_frame)
+        print(self.all_frames)
+        file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
+        file_name = file[0]
+        save = open(file_name, 'w')
+        save.write(str(self.all_frames))
 
     def resetAnimation(self):
         self.kostka.reset_cube_state()
