@@ -26,6 +26,8 @@ def fps_to_milliseconds(fps):
 class Cube3D(canvas):
     def __init__(self, size, led_radius, spacing, momentumRange, **args):
         super().__init__(**args)
+        # self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+        # self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
@@ -70,6 +72,29 @@ class Cube3D(canvas):
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
+
+    def binding(self):
+        self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+
+    def unbinding(self):
+        self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
+
+    def LEDs_on_click_event(self, ev):
+        #print(ev.event, ev.which)
+        print(ev)
+        hit = self.mouse.pick
+        self.drawing_path['fps'] = 30
+
+        drawing_color = self.hex2vector(self.drawing_color)
+
+        if hit:
+            if hit.color != drawing_color:
+                self.old_led_color[hit.idx] = drawing_color
+
+            hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
+
+            self.drawing_path['pos'].append(hit.pos.value)
+            self.drawing_path['color'].append(hit.color.value)
 
     @staticmethod
     def hex2vector(drawing_color):
@@ -266,6 +291,9 @@ class Cube3D(canvas):
         # (resolve problem with unexpected speed-up animation)
         sleep(fps_to_milliseconds(fps))
 
+    def set_drawing_color(self, drawing_color):
+        self.drawing_color = drawing_color
+
     def gui_args_builder(self, drawing_color, fps):
         self.drawing_color = drawing_color
         self.drawing_fps = fps
@@ -310,8 +338,8 @@ class Cube3D(canvas):
         self.drawing_button_status = not self.drawing_button_status
         if self.drawing_button_status:
             b.text = "Drawing"
-            while self.drawing_button_status:
-                self.drawing()
+            # while self.drawing_button_status:
+            #     self.drawing()
         else:
             b.text = "Not drawing"
 
@@ -334,7 +362,7 @@ from multiprocessing import Process
 
 if __name__ == '__main__':
     c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-    c.background = color.black  # temporarily to see the leds better
+    c.background = color.white  # temporarily to see the leds better
     # d1 = Thread(target=c.run_drawing())
     # d1.daemon = True
     # d1.start()

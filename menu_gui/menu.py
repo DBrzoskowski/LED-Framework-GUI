@@ -1,12 +1,14 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
+
+# from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
 import sys
 
 
 # css
 background_style = """AppWindow {
-    background-image: url(background.png);
+    background-image: url(menu_gui/background.png);
     background-repeat: no-repeat;
     background-position: center;
     height: 843px;
@@ -37,7 +39,6 @@ animationStateLabel_green = """QLabel {
 }"""
 
 
-
 def start_menu(cube):
     app = QApplication(sys.argv)
     app.setStyleSheet(background_style)
@@ -52,18 +53,23 @@ class AppWindow(QMainWindow):
         super(AppWindow, self).__init__()
         self.setFixedSize(843, 549)
         self.setWindowTitle("3D LED Framework")
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
 
 
         # Cube
         self.cube = None
+        self.draw_status = False
+        self.spectrum_status = False
+        self.animation_status = False
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
-        # variable
+        # variables
         self.fps = None
         self.color_name = None
         self.currentNameBox = None
+        self.files = []
+        self.files_path = []
         self.file_name = None
         self.one_frame = None
         self.all_frames = []
@@ -255,31 +261,38 @@ class AppWindow(QMainWindow):
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
     # change name
+    # TODO check binding/unbinding
     def createAnimation(self):
-        self.colorAndFps()
+        if self.draw_status:
+            self.cube.unbinding()
+            self.createButton.setText("Create animation")
+        elif not self.draw_status:
+            self.cube.binding()
+            self.createButton.setText("Stop animation")
+        # self.colorAndFps()
+        self.draw_status = not self.draw_status
 
     def saveFrame(self):
         self.one_frame = self.cube.save_animation_to_frame()
+        # self.cube.drawing_path['pos'] = []
+        # self.cube.drawing_path['color'] = []
         self.all_frames.append(self.one_frame)
-        print(self.one_frame)
-        print(self.all_frames)
-        self.cube.drawing_path['pos'] = []
-        self.cube.drawing_path['color'] = []
-
 
     # TODO check it in pyqt5
     # need drawing function
     def saveAnimation(self):
         print(self.one_frame)
         print(self.all_frames)
-        file = QFileDialog.getSaveFileName(self, 'Save File', "", "Text Files (*.txt)")
-        file_name = file[0]
-        save = open(file_name, 'w')
-        save.write(str(self.all_frames))
+        file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
+        file_path = file[0]
+        # file_name = file_path.split("/")[-1]
+
+        if file:
+            save = open(file_path, 'w')
+            save.write(str(self.all_frames))
 
     def resetAnimation(self):
         self.cube.reset_cube_state()
-
 
     def openFile(self):
         # open file dialog
@@ -289,24 +302,33 @@ class AppWindow(QMainWindow):
         file_name = file_path.split("/")[-1]
 
         if file:
-            self.lastOpenFileLabel.setText("Last open file: " + str(file_name))
+            self.lastOpenFileLabel.setText("Last open file: " + file_name)
             self.lastOpenFileLabel.setWordWrap(True)
             self.lastOpenFileLabel.adjustSize()
-            # self.readyAnimationBox.addItem(file_name)
-            self.readyAnimationBox.insertItem(0, file_name)
-            self.cube.load_animation_from_file(file_path)
+            if file_path != '':
+                self.readyAnimationBox.insertItem(0, file_name)
+                self.cube.load_animation_from_file(file_path)
 
         self.files.append(file_name)
         self.files_path.append(file_path)
 
     # TODO
     def loadSpectrum(self):
+        if self.spectrum_status:
+            # self.SpectrumVisualizer.startVisualisation()
+            self.spectrum_status = False
+            self.loadSpectrumButton.setText("Load spectrum")
+        elif not self.spectrum_status:
+            # self.SpectrumVisualizer.stopVisualisation()
+            self.spectrum_status = True
+            self.loadSpectrumButton.setText("Stop spectrum")
+        else:
+            pass
         # self.s = audio_spectrum.SpectrumVisualizer()
         # if isChecked() -> True
         #       setEnabled() -> False #disable button
         #       self.s.startVisualisation()
         # self.s.stopVisualisation()
-        pass
 
     # TODO
     def stopSpectrum(self):
@@ -325,6 +347,7 @@ class AppWindow(QMainWindow):
             self.colorLabel.setText("Color: ")
 
         self.color_name = color_name
+        self.cube.set_drawing_color(self.color_name)
 
     def inputFps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
@@ -343,8 +366,8 @@ class AppWindow(QMainWindow):
 
         self.fps = fps
 
-    def colorAndFps(self):
-        self.cube.gui_args_builder(self.color_name, self.fps)
+    # def colorAndFps(self):
+    #     self.cube.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
@@ -353,7 +376,6 @@ class AppWindow(QMainWindow):
         self.animationStateLabel.update()
         # audio_spectrum.SpectrumVisualizer.serialSend(self)
         # audio_spectrum.SpectrumVisualizer.wirelessSend(self)
-
 
     # TODO connect it with hardware cube
     def stopAnimation(self):
@@ -384,3 +406,10 @@ class AppWindow(QMainWindow):
         self.cube = cube
         print(self.cube)
 
+
+# app = QApplication(sys.argv)
+# app.setStyleSheet(background_style)
+# win = AppWindow()
+# # win.build_cube(cube)
+# win.show()
+# sys.exit(app.exec_())
