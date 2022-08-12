@@ -264,18 +264,13 @@ class AppWindow(QMainWindow):
     # TODO check binding/unbinding
     def createAnimation(self):
         if self.draw_status:
-            # self.cube.unbind('click')
             self.cube.unbinding()
-            self.draw_status = False
             self.createButton.setText("Create animation")
         elif not self.draw_status:
-            # self.cube.bind('click', self.LEDs_on_click_event)
             self.cube.binding()
-            # self.colorAndFps()
-            self.draw_status = True
             self.createButton.setText("Stop animation")
-        else:
-            pass
+        # self.colorAndFps()
+        self.draw_status = not self.draw_status
 
     def saveFrame(self):
         self.one_frame = self.cube.save_animation_to_frame()
