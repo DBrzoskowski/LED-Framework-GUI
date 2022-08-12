@@ -3,7 +3,7 @@ import time, sys, math
 from collections import deque
 import sounddevice as sd
 
-from Realtime_PyAudio_FFT_lib.utils import *
+from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.utils import *
 
 class Stream_Reader:
     """

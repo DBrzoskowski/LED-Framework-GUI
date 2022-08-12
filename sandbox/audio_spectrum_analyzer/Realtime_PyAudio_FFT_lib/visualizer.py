@@ -2,7 +2,7 @@ import numpy as np
 import time, sys, math
 import pygame
 from collections import deque
-from Realtime_PyAudio_FFT_lib.utils import Button
+from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.utils import Button
 from matplotlib import cm
 
 class Spectrum_Visualizer:

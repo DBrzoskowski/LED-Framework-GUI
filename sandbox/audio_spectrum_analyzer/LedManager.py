@@ -4,8 +4,8 @@ import sys
 from enum import Enum
 import time
 from random import *
-from audio_spectrum import *
-from Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
+from sandbox.audio_spectrum_analyzer.audio_spectrum import *
+from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
 
 # CONFIG
 MAX_PACKETS = 255
@@ -1217,7 +1217,7 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
     return rightMin + (valueScaled * rightSpan)
 
 
-def testAudioSpectrum(infinite=False):
+def testAudioSpectrum(obj, infinite=False):
     ear = Stream_Analyzer(
         device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
         rate=None,  # Audio samplerate, None uses the default source settings
@@ -1238,6 +1238,10 @@ def testAudioSpectrum(infinite=False):
     while True:
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
+            return
+
+        if not obj.get_run_spectrum():
+            ear.visualizer.stop()
             return
 
         start_time_ms = current_milli_time()
@@ -1276,13 +1280,14 @@ def testAudioSpectrum(infinite=False):
 
 if __name__ == '__main__':
     while 1:
+        pass
         #start_spectrum(5000)
         #bouncyvTwo()
         #sinwaveTwo()
         #folder()
         #rainVersionTwo()
         #color_wheel()
-        testAudioSpectrum(infinite=True)
+        #testAudioSpectrum(infinite=True)
         #start_spectrum(TIME_FOR_1_ANIMATIONS_IN_MS)
         #brightness_3_colors()
 

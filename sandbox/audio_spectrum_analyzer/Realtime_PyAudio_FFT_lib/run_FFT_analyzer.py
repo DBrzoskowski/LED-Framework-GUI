@@ -1,5 +1,5 @@
 import argparse
-from Realtime_PyAudio_FFT_lib.stream_analyzer import Stream_Analyzer
+from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.stream_analyzer import Stream_Analyzer
 import time
 
 def parse_args():

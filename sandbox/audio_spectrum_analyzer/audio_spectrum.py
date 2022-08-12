@@ -9,7 +9,7 @@ import matplotlib as mpl
 import serial
 
 #from sandbox.audio_spectrum_analyzer.cube import *
-from LedManager import *
+from sandbox.audio_spectrum_analyzer.LedManager import *
 
 mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 

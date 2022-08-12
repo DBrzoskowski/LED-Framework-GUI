@@ -1,6 +1,9 @@
+from threading import Thread
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
+from sandbox.audio_spectrum_analyzer.LedManager import *
 
 # from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
 import sys
@@ -73,6 +76,8 @@ class AppWindow(QMainWindow):
         self.file_name = None
         self.one_frame = None
         self.all_frames = []
+
+        self.run_spectrum = False
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -312,8 +317,24 @@ class AppWindow(QMainWindow):
         self.files.append(file_name)
         self.files_path.append(file_path)
 
+    def get_run_spectrum(self):
+        return self.run_spectrum
+
     # TODO
     def loadSpectrum(self):
+        if self.run_spectrum:
+            self.run_spectrum = False
+            self.loadSpectrumButton.setText("Start spectrum")
+        else:
+            self.run_spectrum = True
+            self.loadSpectrumButton.setText("Stop spectrum")
+            t1 = Thread(target=testAudioSpectrum(self, True))
+        # t1.daemon = True
+        #t1.start()
+        #time.sleep(5)
+        #self.run_spectrum = False
+        #testAudioSpectrum(infinite=True)
+
         if self.spectrum_status:
             # self.SpectrumVisualizer.startVisualisation()
             self.spectrum_status = False
