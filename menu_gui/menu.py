@@ -56,6 +56,7 @@ class AppWindow(QMainWindow):
 
         # Cube
         self.cube = None
+        self.draw_status = False
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
@@ -256,8 +257,21 @@ class AppWindow(QMainWindow):
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
     # change name
+    # TODO check binding/unbinding
     def createAnimation(self):
-        self.colorAndFps()
+        if self.draw_status:
+            # self.cube.unbind('click')
+            self.cube.unbinding()
+            self.draw_status = False
+            self.createButton.setText("Create animation")
+        elif not self.draw_status:
+            # self.cube.bind('click', self.LEDs_on_click_event)
+            self.cube.binding()
+            self.draw_status = True
+            self.createButton.setText("Stop animation")
+        else:
+            pass
+        # self.colorAndFps()
 
     def saveFrame(self):
         self.one_frame = self.cube.save_animation_to_frame()

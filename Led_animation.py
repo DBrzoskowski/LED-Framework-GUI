@@ -26,8 +26,8 @@ def fps_to_milliseconds(fps):
 class Cube3D(canvas):
     def __init__(self, size, led_radius, spacing, momentumRange, **args):
         super().__init__(**args)
-        self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
-        # self.unbind('click') # Disabled LEDs on click event
+        # self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+        # self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
@@ -72,6 +72,12 @@ class Cube3D(canvas):
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
+
+    def binding(self):
+        self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+
+    def unbinding(self):
+        self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
 
     def LEDs_on_click_event(self, ev):
         #print(ev.event, ev.which)
