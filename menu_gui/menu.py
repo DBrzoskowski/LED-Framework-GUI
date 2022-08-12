@@ -239,6 +239,11 @@ class AppWindow(QMainWindow):
         self.readyAnimationBox.addItem("Outline Inside Ankle")
         self.readyAnimationBox.addItem("Outer Layer")
         self.readyAnimationBox.addItem("Random Color")
+        self.readyAnimationBox.addItem("Bouncy snake")
+        self.readyAnimationBox.addItem("Sin wave")
+        self.readyAnimationBox.addItem("Folder")
+        self.readyAnimationBox.addItem("Rain")
+        self.readyAnimationBox.addItem("Color wheel")
         self.readyAnimationBox.activated[str].connect(self.chooseFromReadyBox)
 
         self.retranslateUi()
@@ -329,11 +334,6 @@ class AppWindow(QMainWindow):
             self.run_spectrum = True
             self.loadSpectrumButton.setText("Stop spectrum")
             t1 = Thread(target=testAudioSpectrum(self, True))
-        # t1.daemon = True
-        #t1.start()
-        #time.sleep(5)
-        #self.run_spectrum = False
-        #testAudioSpectrum(infinite=True)
 
         if self.spectrum_status:
             # self.SpectrumVisualizer.startVisualisation()
@@ -417,6 +417,17 @@ class AppWindow(QMainWindow):
             self.cube.outer_layer_animation()
         elif self.currentNameBox == "Random Color":
             self.cube.random_color_animation()
+        elif self.currentNameBox == "Bouncy snake":
+            self.run_spectrum = True
+            t1 = Thread(target=bouncyvTwo())
+        elif self.currentNameBox == "Sin wave":
+            t1 = Thread(target=sinwaveTwo())
+        elif self.currentNameBox == "Folder":
+            t1 = Thread(target=folder())
+        elif self.currentNameBox == "Rain":
+            t1 = Thread(target=rainVersionTwo())
+        elif self.currentNameBox == "Color wheel":
+            t1 = Thread(target=color_wheel())
         elif self.currentNameBox in self.files:
             x = self.files.index(self.currentNameBox)
             self.cube.load_animation_from_file(self.files_path[x])

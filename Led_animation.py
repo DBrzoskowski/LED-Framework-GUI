@@ -12,6 +12,7 @@ import math
 from random import uniform
 from colormap import hex2rgb
 from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
+from sandbox.audio_spectrum_analyzer.LedManager import *
 import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
@@ -30,8 +31,10 @@ class Cube3D(canvas):
         # self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
+        #self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
+        # self.camera.axis = vector(0,0,0)
         self.caption = """A model of a solid represented as leds connected by interledic bonds.
-
+        
         To rotate "camera", drag with right button or Ctrl-drag.
         To zoom, drag with middle button or Alt/Option depressed, or use scroll wheel.
           On a two-button mouse, middle is left + right.
@@ -61,7 +64,7 @@ class Cube3D(canvas):
             for x in range(0, size, 1):
                 for y in range(0, size, 1):
                     led = sphere()
-                    led.pos = vector(z, y, x) * spacing
+                    led.pos = vector(x, y, z) * spacing
                     led.radius = led_radius
                     if 0 <= x < size and 0 <= y < size and 0 <= z < size:
                         p = vec.random()
@@ -72,6 +75,9 @@ class Cube3D(canvas):
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
+        self.leds[0].color = vector(1,0,0)
+        self.leds[7].color = vector(0,1,0)
+        self.leds[8].color = vector(0,0,1)
 
     def binding(self):
         self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
@@ -324,15 +330,6 @@ class Cube3D(canvas):
             self.drawing_path['pos'].append(hit.pos.value)
             self.drawing_path['color'].append(hit.color.value)
 
-    # def change_drawing_status_from_gui(self, value):
-    #     self.drawing_button_status = value
-    #     if value:
-    #         self.button_drawing.delete()
-    #         self.button_drawing = button(text="Drawing", pos=self.title_anchor, bind=self.drawing_status)
-    #     else:
-    #         self.button_drawing.delete()
-    #         self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
-
     # button
     def drawing_status(self, b):
         self.drawing_button_status = not self.drawing_button_status
@@ -343,18 +340,6 @@ class Cube3D(canvas):
         else:
             b.text = "Not drawing"
 
-    # def run_drawing(self):
-    #     if not self.drawing_button_status:
-    #         self.double_outline_animation(col=vector(1, 0, 0), fps=10)
-    #
-    #         # clear whole cube after test finish
-    #         for i in self.get_visible_leds():
-    #             i.color = vector(0, 0, 0)
-    #         sleep(0.2)
-    #     else:
-    #         if self.drawing_button_status:
-    #             self.drawing()
-
 
 from menu_gui.menu import start_menu, AppWindow
 from threading import Thread
@@ -363,9 +348,5 @@ from multiprocessing import Process
 if __name__ == '__main__':
     c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
     c.background = color.white  # temporarily to see the leds better
-    # d1 = Thread(target=c.run_drawing())
-    # d1.daemon = True
-    # d1.start()
+
     t1 = Thread(target=start_menu(c))
-    # t1.daemon = True
-    t1.start()
