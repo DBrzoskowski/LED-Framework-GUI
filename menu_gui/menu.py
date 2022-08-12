@@ -1,6 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
+
+from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
 import sys
 
 
@@ -57,6 +59,9 @@ class AppWindow(QMainWindow):
         # Cube
         self.cube = None
         self.draw_status = False
+        self.spectrum_status = False
+        self.animation_status = False
+        self.s = SpectrumVisualizer()
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
@@ -267,11 +272,11 @@ class AppWindow(QMainWindow):
         elif not self.draw_status:
             # self.cube.bind('click', self.LEDs_on_click_event)
             self.cube.binding()
+            # self.colorAndFps()
             self.draw_status = True
             self.createButton.setText("Stop animation")
         else:
             pass
-        # self.colorAndFps()
 
     def saveFrame(self):
         self.one_frame = self.cube.save_animation_to_frame()
@@ -315,12 +320,21 @@ class AppWindow(QMainWindow):
 
     # TODO
     def loadSpectrum(self):
+        if self.spectrum_status:
+            self.s.startVisualisation()
+            self.spectrum_status = False
+            self.loadSpectrumButton.setText("Load spectrum")
+        elif not self.spectrum_status:
+            self.s.stopVisualisation()
+            self.spectrum_status = True
+            self.loadSpectrumButton.setText("Stop spectrum")
+        else:
+            pass
         # self.s = audio_spectrum.SpectrumVisualizer()
         # if isChecked() -> True
         #       setEnabled() -> False #disable button
         #       self.s.startVisualisation()
         # self.s.stopVisualisation()
-        pass
 
     # TODO
     def stopSpectrum(self):
@@ -358,8 +372,8 @@ class AppWindow(QMainWindow):
 
         self.fps = fps
 
-    def colorAndFps(self):
-        self.cube.gui_args_builder(self.color_name, self.fps)
+    # def colorAndFps(self):
+    #     self.cube.gui_args_builder(self.color_name, self.fps)
 
     # TODO connect it with hardware cube
     def startAnimation(self):
