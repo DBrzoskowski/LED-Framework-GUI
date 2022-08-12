@@ -304,7 +304,7 @@ class SpectrumVisualizer:
  #       print("Blue:", blue)
   #      sock.sendto(blue, (UDP_IP, UDP_PORT))
 
-
+"""
 plt.xlim([0, 10000])
 plt.ylim(-10, 30)
 plt.xlabel('Frequency [Hz]')
@@ -320,13 +320,4 @@ line_ani = matplotlib.animation.FuncAnimation(
 )
 
 plt.show()
-
 """
-"""
-=======
-
-    def wirelessSend(self):
-        sendFrame(self.frame)
-        time.sleep(0.02)
-        self.frame.clear()
->>>>>>> cube_model
