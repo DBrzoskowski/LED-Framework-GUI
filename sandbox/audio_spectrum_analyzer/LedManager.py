@@ -4,6 +4,9 @@ import sys
 from enum import Enum
 import time
 from random import *
+
+from vpython import vector
+
 from sandbox.audio_spectrum_analyzer.audio_spectrum import *
 from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
 
@@ -62,6 +65,61 @@ class LEDFrame:
     def drawColumn(self, x, y, level, r, g, b):
         for z in range(0, level + 1):
             self.turnOnLed(x, y, z, r, g, b)
+
+    def getLedColor(self, x, y, z):
+        r = 0
+        g = 0
+        b = 0
+
+        if x < 0:
+            return None
+        if x > 7:
+            return None
+        if y < 0:
+            return None
+        if y > 7:
+            return None
+        if z < 0:
+            return None
+        if z > 7:
+            return None
+        if r < 0:
+            return None
+        if r > 15:
+            return None
+        if g < 0:
+            return None
+        if g > 15:
+            return None
+        if b < 0:
+            return None
+        if b > 15:
+            return None
+
+        index = int(((64 * z) + (y * 8) + x) / 8)
+        position = ((64 * z) + (y * 8) + x) % 8
+
+
+        r_bit1 = (self.rgb[index] & (1 << position)) >> position
+        r_bit2 = (self.rgb[index + 64] & (1 << position)) >> position
+        r_bit3 = (self.rgb[index + 128] & (1 << position)) >> position
+        r_bit4 = (self.rgb[index + 192] & (1 << position)) >> position
+
+        g_bit1 = (self.rgb[index + 256] & (1 << position)) >> position
+        g_bit2 = (self.rgb[index + 64 + 256] & (1 << position)) >> position
+        g_bit3 = (self.rgb[index + 128 + 256] & (1 << position)) >> position
+        g_bit4 = (self.rgb[index + 192 + 256] & (1 << position)) >> position
+
+        b_bit1 = (self.rgb[index + 512] & (1 << position)) >> position
+        b_bit2 = (self.rgb[index + 64 + 512] & (1 << position)) >> position
+        b_bit3 = (self.rgb[index + 128 + 512] & (1 << position)) >> position
+        b_bit4 = (self.rgb[index + 192 + 512] & (1 << position)) >> position
+
+        r = r_bit1 | (r_bit2 << 1) | (r_bit3 << 2) | (r_bit4 << 3)
+        g = g_bit1 | (g_bit2 << 1) | (g_bit3 << 2) | (g_bit4 << 3)
+        b = b_bit1 | (b_bit2 << 1) | (b_bit3 << 2) | (b_bit4 << 3)
+
+        return r, g, b
 
     def turnOnLed(self, x, y, z, r, g, b):
         if x < 0:
@@ -254,9 +312,11 @@ def sendBodies(frame_to_send):
         sendBody(packet)
 
 
-def sendFrame(frame_to_send):
+def sendFrame(obj, frame_to_send):
     sendHeader(frame_to_send)
     sendBodies(frame_to_send)
+
+    obj.cube.update_simulated_cube(frame_to_send)
 
     # send header
     # send bodies
@@ -290,7 +350,7 @@ def current_milli_time():
     return round(time.time() * 1000)
 
 
-def color_wheel():
+def color_wheel(obj):
     frame = LEDFrame()
     rr = 1
     gg = 1
@@ -314,7 +374,7 @@ def color_wheel():
             for yy in range(0, 8):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, 0, rany)
-            sendFrame(frame)
+            sendFrame(obj, frame)
             time.sleep(0.050)
 
         ranx = randint(0, 16)
@@ -324,7 +384,7 @@ def color_wheel():
             for yy in range(0, 8):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
-            sendFrame(frame)
+            sendFrame(obj, frame)
             time.sleep(0.050)
 
         ranx = randint(0, 16)
@@ -334,7 +394,7 @@ def color_wheel():
             for yy in range(0, 8):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, 0, ranx, rany)
-            sendFrame(frame)
+            sendFrame(obj, frame)
             time.sleep(0.050)
 
         ranx = randint(0, 16)
@@ -343,7 +403,7 @@ def color_wheel():
             for yy in range(0, 8):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
-            sendFrame(frame)
+            sendFrame(obj, frame)
             time.sleep(0.050)
 
 
@@ -377,7 +437,7 @@ def brightness_3_colors():
         time.sleep(delay)
 
 
-def sinwaveTwo():
+def sinwaveTwo(obj):
     sinewavearray = [0] * 8
     addr = 0
     sinemult = [0] * 8
@@ -481,12 +541,12 @@ def sinwaveTwo():
         for addr in range(0,8):
             sinewavearrayOLD[addr] = sinewavearray[addr]
 
-        sendFrame(frame)
+        sendFrame(obj, frame)
         time.sleep(0.050)
         frame.clear()
 
 
-def rainVersionTwo():
+def rainVersionTwo(obj):
     x = [0] * 64
     y = [0] * 64
     z = [0] * 64
@@ -567,8 +627,8 @@ def rainVersionTwo():
             yold[addr] = y[addr]
             zold[addr] = z[addr]
 
+        sendFrame(obj, frame)
         time.sleep(0.04)
-        sendFrame(frame)
 
         for addr in range(0, leds):
             z[addr] = z[addr] - 1
@@ -600,7 +660,7 @@ def start_spectrum(duration):
     visualiser.startVisualisation(duration)
 
 
-def folder():
+def folder(obj):
     xx = 0
     yy = 0
     zz = 0
@@ -818,7 +878,7 @@ def folder():
                         frame.turnOnLed(xx, yy + oldpullback[yy], 7 - LED_Old[7 - yy], 0, 0, 0)
                         frame.turnOnLed(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
 
-        sendFrame(frame)
+        sendFrame(obj, frame)
         time.sleep(DELAY_5MS)
 
         for xx in range(0, 8):
@@ -830,7 +890,7 @@ def folder():
                 pullback[zz] = pullback[zz] + 1
 
             if pullback[7] == 8: # finished with fold
-                sendFrame(frame)
+                sendFrame(obj, frame)
                 time.sleep(DELAY_10MS)
 
                 ranselect = randint(0, 2)
@@ -1075,7 +1135,7 @@ def folder():
                 folderaddr[zz] = folderaddr[zz] + 1
 
 
-def bouncyvTwo():
+def bouncyvTwo(obj):
     wipex = 0
     wipey = 0
     wipez = 0
@@ -1128,7 +1188,7 @@ def bouncyvTwo():
           oldy[addr] = y[addr]
           oldz[addr] = z[addr]
 
-        sendFrame(frame)
+        sendFrame(obj, frame)
         time.sleep(0.020)
 
         if direct == 0:

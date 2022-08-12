@@ -10,6 +10,7 @@ import json
 import txaio
 import math
 from random import uniform
+from scipy.interpolate import interp1d
 from colormap import hex2rgb
 from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
 from sandbox.audio_spectrum_analyzer.LedManager import *
@@ -75,15 +76,22 @@ class Cube3D(canvas):
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
-        self.leds[0].color = vector(1,0,0)
-        self.leds[7].color = vector(0,1,0)
-        self.leds[8].color = vector(0,0,1)
 
     def binding(self):
         self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
 
     def unbinding(self):
         self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
+
+    def update_simulated_cube(self, frame):
+        for z in range(0, 8):
+            for y in range(0, 8):
+                for x in range(0, 8):
+                    r, g, b = frame.getLedColor(x, y, z)
+                    color = vector(r * 0.066, g * 0.066, b * 0.066)
+                    led_index = x + (y * 8) + (z * 64)
+
+                    self.leds[led_index].color = color
 
     def LEDs_on_click_event(self, ev):
         #print(ev.event, ev.which)
@@ -347,6 +355,6 @@ from multiprocessing import Process
 
 if __name__ == '__main__':
     c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-    c.background = color.white  # temporarily to see the leds better
+    c.background = color.black  # temporarily to see the leds better
 
     t1 = Thread(target=start_menu(c))

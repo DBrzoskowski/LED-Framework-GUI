@@ -303,6 +303,8 @@ class AppWindow(QMainWindow):
 
     def resetAnimation(self):
         self.cube.reset_cube_state()
+        cleanFrame = LEDFrame()
+        sendFrame(self, cleanFrame)
 
     def openFile(self):
         # open file dialog
@@ -335,16 +337,16 @@ class AppWindow(QMainWindow):
             self.loadSpectrumButton.setText("Stop spectrum")
             t1 = Thread(target=testAudioSpectrum(self, True))
 
-        if self.spectrum_status:
-            # self.SpectrumVisualizer.startVisualisation()
-            self.spectrum_status = False
-            self.loadSpectrumButton.setText("Load spectrum")
-        elif not self.spectrum_status:
-            # self.SpectrumVisualizer.stopVisualisation()
-            self.spectrum_status = True
-            self.loadSpectrumButton.setText("Stop spectrum")
-        else:
-            pass
+        #if self.spectrum_status:
+        #    # self.SpectrumVisualizer.startVisualisation()
+        #    self.spectrum_status = False
+        #    self.loadSpectrumButton.setText("Load spectrum")
+        #elif not self.spectrum_status:
+        #    # self.SpectrumVisualizer.stopVisualisation()
+        #    self.spectrum_status = True
+        #    self.loadSpectrumButton.setText("Stop spectrum")
+        #else:
+        #    pass
         # self.s = audio_spectrum.SpectrumVisualizer()
         # if isChecked() -> True
         #       setEnabled() -> False #disable button
@@ -419,15 +421,15 @@ class AppWindow(QMainWindow):
             self.cube.random_color_animation()
         elif self.currentNameBox == "Bouncy snake":
             self.run_spectrum = True
-            t1 = Thread(target=bouncyvTwo())
+            t1 = Thread(target=bouncyvTwo(self))
         elif self.currentNameBox == "Sin wave":
-            t1 = Thread(target=sinwaveTwo())
+            t1 = Thread(target=sinwaveTwo(self))
         elif self.currentNameBox == "Folder":
-            t1 = Thread(target=folder())
+            t1 = Thread(target=folder(self))
         elif self.currentNameBox == "Rain":
-            t1 = Thread(target=rainVersionTwo())
+            t1 = Thread(target=rainVersionTwo(self))
         elif self.currentNameBox == "Color wheel":
-            t1 = Thread(target=color_wheel())
+            t1 = Thread(target=color_wheel(self))
         elif self.currentNameBox in self.files:
             x = self.files.index(self.currentNameBox)
             self.cube.load_animation_from_file(self.files_path[x])
