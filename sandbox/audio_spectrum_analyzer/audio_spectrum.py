@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.animation
 import matplotlib as mpl
 import serial
-from sandbox.audio_spectrum_analyzer.cube import *
+
+#from sandbox.audio_spectrum_analyzer.cube import *
+from LedManager import *
 
 mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
@@ -18,8 +20,8 @@ PRINT_SPECTRUM_LINE = True
 
 # Tuning values
 STARTING_VALUE = 0
-SAMPLE = 12  # Higher - lower number of spectrum's, 1 sample = 50Hz
-FADE_SPEED = 0.4  # Higher - faster fading
+SAMPLE = 1  # Higher - lower number of spectrum's, 1 sample = 50Hz
+FADE_SPEED = 2   # Higher - faster fading
 CUBE_SECTORS = 16
 
 SAMPLE_MAX = 0
@@ -27,7 +29,7 @@ SAMPLE_MAX = 0
 p = pyaudio.PyAudio()
 SPEAKERS = p.get_default_output_device_info()["hostApi"]
 stream = p.open(
-    input_device_index=3,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
+    input_device_index=2,  # Select proper input device index <---------------------------- [!!!!!!!!!!!!!!!!!!!!]
     format=pyaudio.paFloat32,
     channels=1,
     rate=RATE,
@@ -141,8 +143,9 @@ def CLIEqualiser(klatka):
 
 class SpectrumVisualizer:
     def __init__(self):
-        self.frame = Frame()
+        self.frame = LEDFrame()
         self.isActive = False
+        self.duration = 120000
         self.frequencyMap = {0: (0, 0), 1: (0, 1), 2: (0, 2), 3: (0, 3), 4: (1, 0), 5: (1, 1), 6: (1, 2), 7: (1, 3),
                              8: (2, 0),
                              9: (2, 1), 10: (2, 2), 11: (2, 3), 12: (3, 0), 13: (3, 1), 14: (3, 2), 15: (3, 3)}
@@ -150,24 +153,26 @@ class SpectrumVisualizer:
         self.recordedSamples = None
         self.maxSectorsValue = [0 for i in range(28)]
         self.rfft = [0 for i in range(442)]
-        #self.serialcomm = serial.Serial('COM7', 9600)
-        #self.serialcomm.timeout = 1
-
 
     def visualise(self, spectrumList):
         for index, value in enumerate(spectrumList):
             if index > 15:
                 break
-            power = value / 8 if value < 64 else 8
-            self.updateSector(index, power)
+            level = int(value / 8) if value < 64 else 8
+            self.updateSector(index, level)
 
-    def updateSector(self, frequency, power):
+    def updateSector(self, frequency, level):
         xCord, yCord = self.frequencyMap[frequency]
-        for level in range(8):
-            self.frame.updateColumn(level, xCord, yCord, level < power)
 
-    def startVisualisation(self):
+        #for level in range(8):
+        #    self.frame.updateColumn(level, xCord, yCord, level < power)
+
+        self.frame.updateColumn(level, xCord, yCord)
+
+
+    def startVisualisation(self, duration=120000):
         self.isActive = True
+        self.duration = duration
         """self.stream = p.open(
             input_device_index=2,
             format=pyaudio.paFloat32,
@@ -181,11 +186,20 @@ class SpectrumVisualizer:
         self.isActive = False
         self.stream.close()
 
+    def current_milli_time(self):
+        return round(time.time() * 1000)
+
     def startSoundAnalysis(self):
+        start = self.current_milli_time()
+
         while self.isActive:
             global SAMPLE_MAX
             global STARTING_VALUE
             global SAMPLE
+
+            if (self.current_milli_time() - start) > self.duration:
+                self.isActive = False
+                return
 
             try:
                 b = np.fromstring(stream.read(BUFFER), dtype=np.float32)
@@ -211,13 +225,32 @@ class SpectrumVisualizer:
                     STARTING_VALUE += SAMPLE
                     if STARTING_VALUE >= len(self.rfft):
                         STARTING_VALUE = 0
-            maxSamples = np.maximum(self.rfft[::CUBE_SECTORS].real * 10, self.maxSectorsValue)
+
+            maxSamples = self.countFrequency()
             self.fadeCount(maxSamples)
             self.visualise(self.maxSectorsValue)
-            self.serialSend()
-            #self.wirelessSend()
+            # self.serialSend()
+            self.wirelessSend()
 
+    def countFrequency(self):
+        maxSamples = []
 
+        for i in range(4):
+            maxSamples.append(np.maximum(max(self.rfft[i:i + 1].real * 10), self.maxSectorsValue[i]))
+
+        maxSamples.append(np.maximum(max(self.rfft[4:6].real * 10), self.maxSectorsValue[4]))
+        maxSamples.append(np.maximum(max(self.rfft[6:9].real * 10), self.maxSectorsValue[5]))
+        maxSamples.append(np.maximum(max(self.rfft[9:12].real * 10), self.maxSectorsValue[6]))
+        maxSamples.append(np.maximum(max(self.rfft[12:17].real * 10), self.maxSectorsValue[7]))
+        maxSamples.append(np.maximum(max(self.rfft[17:25].real * 10), self.maxSectorsValue[8]))
+        maxSamples.append(np.maximum(max(self.rfft[25:35].real * 10), self.maxSectorsValue[9]))
+        maxSamples.append(np.maximum(max(self.rfft[35:50].real * 10), self.maxSectorsValue[10]))
+        maxSamples.append(np.maximum(max(self.rfft[50:70].real * 10), self.maxSectorsValue[11]))
+        maxSamples.append(np.maximum(max(self.rfft[70:100].real * 10), self.maxSectorsValue[12]))
+        maxSamples.append(np.maximum(max(self.rfft[100:200].real * 10), self.maxSectorsValue[13]))
+        maxSamples.append(np.maximum(max(self.rfft[200:400].real * 10), self.maxSectorsValue[14]))
+        maxSamples.append(np.maximum(max(self.rfft[400:].real * 10), self.maxSectorsValue[15]))
+        return maxSamples
 
     def fadeCount(self, test):
         for index in range(0, len(test) - 1):
@@ -240,7 +273,6 @@ class SpectrumVisualizer:
                 test[index] = 0
 
         self.maxSectorsValue = test
-
 
     def serialSend(self):
         test = int(self.frame.translateBinary()[:2040], 2).to_bytes((len(self.frame.translateBinary()[:2040]) + 7) // 8, byteorder='big')
@@ -291,3 +323,10 @@ plt.show()
 
 """
 """
+=======
+
+    def wirelessSend(self):
+        sendFrame(self.frame)
+        time.sleep(0.02)
+        self.frame.clear()
+>>>>>>> cube_model
