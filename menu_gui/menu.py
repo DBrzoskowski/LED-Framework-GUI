@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import *
 
-from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
+# from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
 import sys
 
 
@@ -61,7 +61,6 @@ class AppWindow(QMainWindow):
         self.draw_status = False
         self.spectrum_status = False
         self.animation_status = False
-        self.s = SpectrumVisualizer()
         # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
         # self.c.background = color.black
 
@@ -291,7 +290,7 @@ class AppWindow(QMainWindow):
         print(self.all_frames)
         file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
         file_path = file[0]
-        file_name = file_path.split("/")[-1]
+        # file_name = file_path.split("/")[-1]
 
         if file:
             save = open(file_path, 'w')
@@ -321,11 +320,11 @@ class AppWindow(QMainWindow):
     # TODO
     def loadSpectrum(self):
         if self.spectrum_status:
-            self.s.startVisualisation()
+            # self.SpectrumVisualizer.startVisualisation()
             self.spectrum_status = False
             self.loadSpectrumButton.setText("Load spectrum")
         elif not self.spectrum_status:
-            self.s.stopVisualisation()
+            # self.SpectrumVisualizer.stopVisualisation()
             self.spectrum_status = True
             self.loadSpectrumButton.setText("Stop spectrum")
         else:

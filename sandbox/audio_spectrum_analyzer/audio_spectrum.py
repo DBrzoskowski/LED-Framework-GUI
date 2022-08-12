@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation
 import matplotlib as mpl
 import serial
-from cube import *
+from sandbox.audio_spectrum_analyzer.cube import *
 
 mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
