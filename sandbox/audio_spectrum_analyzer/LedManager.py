@@ -1192,7 +1192,6 @@ def folder(obj):
             for zz in range(0, 8):
                 folderaddr[zz] = folderaddr[zz] + 1
 
-
 def bouncyvTwo(obj):
     wipex = 0
     wipey = 0
@@ -1233,6 +1232,8 @@ def bouncyvTwo(obj):
 
     frame = LEDFrame()
     start = current_milli_time()
+
+    pygame.init()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
         for event in pygame.event.get():
@@ -1341,7 +1342,7 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
 
 
 def testAudioSpectrum(obj, infinite=False):
-    visualizeAudioSpectrumAnalyze = 1
+    visualizeAudioSpectrumAnalyze = 0
 
     ear = Stream_Analyzer(
         device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
@@ -1359,6 +1360,9 @@ def testAudioSpectrum(obj, infinite=False):
     fps = 50
     barsData = [0] * 64
     start_time = time.time()
+
+    if visualizeAudioSpectrumAnalyze == 0:
+        pygame.init()
 
     while True:
         if visualizeAudioSpectrumAnalyze == 0:

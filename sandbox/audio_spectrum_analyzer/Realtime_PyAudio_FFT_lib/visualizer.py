@@ -115,7 +115,7 @@ class Spectrum_Visualizer:
         del self.bin_font
         del self.screen
         del self.prev_screen
-        pygame.quit()
+        #pygame.quit()
         self._is_running = False
 
     def toggle_display(self):

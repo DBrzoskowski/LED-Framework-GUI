@@ -355,6 +355,7 @@ from multiprocessing import Process
 
 if __name__ == '__main__':
     c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-    c.background = color.black  # temporarily to see the leds better
+    #c.background = color.black  # temporarily to see the leds better
+    c.background = vector(0.08, 0.08, 0.04)
 
     t1 = Thread(target=start_menu(c))
