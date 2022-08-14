@@ -166,7 +166,7 @@ class LEDHeader:
 
     def constructPacket(self):
         packet = self.packet_type + self.version + self.type + self.body_size
-        print(f'Packet: {packet}')
+        #print(f'Packet: {packet}')
         return packet
 
 

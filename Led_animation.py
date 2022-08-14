@@ -44,6 +44,10 @@ class Cube3D(canvas):
         self.lights = []
         self.old_led_color = {}
 
+        self.abort_animation_thread = True
+        self.animation_thread = None
+        self.gui_thread = None
+
         # The part responsible for drawing
         self.drawing_path = {}
         self.drawing_path.setdefault('pos', [])
@@ -349,7 +353,7 @@ class Cube3D(canvas):
             b.text = "Not drawing"
 
 
-from menu_gui.menu import start_menu, AppWindow
+from menu_gui.menu import start_menu, AppWindow, DoStartGUI
 from threading import Thread
 from multiprocessing import Process
 
@@ -358,4 +362,10 @@ if __name__ == '__main__':
     #c.background = color.black  # temporarily to see the leds better
     c.background = vector(0.08, 0.08, 0.04)
 
-    t1 = Thread(target=start_menu(c))
+    c.gui_thread = DoStartGUI(c)
+    c.gui_thread.start()
+
+    # Wait for GUI thread to end
+    c.gui_thread.join()
+    print("Program ended")
+

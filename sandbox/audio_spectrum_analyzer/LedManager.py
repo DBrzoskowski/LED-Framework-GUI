@@ -4,6 +4,7 @@ import sys
 from enum import Enum
 import time
 from random import *
+import threading
 
 import pygame
 from vpython import vector
@@ -260,7 +261,7 @@ class LEDHeader:
 
     def constructPacket(self):
         packet = self.packet_type + self.version + self.type + self.body_size
-        print(f'Packet: {packet}')
+        #print(f'Packet: {packet}')
         return packet
 
 
@@ -278,7 +279,7 @@ def sendHeader(frame_to_send):
     header = LEDHeader(frame_to_send)
     MESSAGE = header.constructPacket()
 
-    print(MESSAGE)
+    #print(MESSAGE)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 
@@ -289,7 +290,7 @@ def sendBody(packet_to_send):
     body = LEDBody(packet_to_send)
 
     MESSAGE = body.constructPacket()
-    print(MESSAGE)
+    #print(MESSAGE)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 
@@ -396,6 +397,15 @@ def current_milli_time():
     return round(time.time() * 1000)
 
 
+class DoColorWheelAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoColorWheelAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        color_wheel(self.obj)
+
+
 def color_wheel(obj):
     frame = LEDFrame()
     rr = 1
@@ -412,8 +422,8 @@ def color_wheel(obj):
     start = current_milli_time()
 
     while current_milli_time() - start < TIME_FOR_1_ANIMATIONS_IN_MS:
-        for event in pygame.event.get():
-            print(event)
+        if obj.cube.abort_animation_thread:
+            return
 
         swiper = randint(0, 3)
         ranx = randint(0, 16)
@@ -486,6 +496,15 @@ def brightness_3_colors():
         time.sleep(delay)
 
 
+class DoSinWaveAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoSinWaveAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        sinwaveTwo(self.obj)
+
+
 def sinwaveTwo(obj):
     sinewavearray = [0] * 8
     addr = 0
@@ -523,8 +542,8 @@ def sinwaveTwo(obj):
     start = current_milli_time()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
-        for event in pygame.event.get():
-            print(event)
+        if obj.cube.abort_animation_thread:
+            return
 
         for addr in range(0, 8):
             if sinewavearray[addr] == 7:
@@ -598,6 +617,15 @@ def sinwaveTwo(obj):
         frame.clear()
 
 
+class DoRainAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoRainAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        rainVersionTwo(self.obj)
+
+
 def rainVersionTwo(obj):
     x = [0] * 64
     y = [0] * 64
@@ -629,8 +657,8 @@ def rainVersionTwo(obj):
     frame = LEDFrame()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
-        for event in pygame.event.get():
-            print(event)
+        if obj.cube.abort_animation_thread:
+            return
 
         if ledcolor < 200:
             for addr in range(0, leds):
@@ -715,6 +743,15 @@ def start_spectrum(duration):
     visualiser.startVisualisation(duration)
 
 
+class DoFolderAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoFolderAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        folder(self.obj)
+
+
 def folder(obj):
     xx = 0
     yy = 0
@@ -759,8 +796,8 @@ def folder(obj):
 
     start = current_milli_time()
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
-        for event in pygame.event.get():
-            print(event)
+        if obj.cube.abort_animation_thread:
+            return
 
         if top == 1:
             if side == 0:
@@ -1192,6 +1229,16 @@ def folder(obj):
             for zz in range(0, 8):
                 folderaddr[zz] = folderaddr[zz] + 1
 
+
+class DoBouncySnakeAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoBouncySnakeAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        bouncyvTwo(self.obj)
+
+
 def bouncyvTwo(obj):
     wipex = 0
     wipey = 0
@@ -1233,11 +1280,9 @@ def bouncyvTwo(obj):
     frame = LEDFrame()
     start = current_milli_time()
 
-    pygame.init()
-
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
-        for event in pygame.event.get():
-            print(event)
+        if obj.cube.abort_animation_thread:
+            return
 
         direct = randint(0, 2)
 
@@ -1317,8 +1362,6 @@ def bouncyvTwo(obj):
           yy[addr] = yy[addr - 1]
           zz[addr] = zz[addr - 1]
 
-    #pygame.quit()
-
 
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)
@@ -1341,9 +1384,16 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
     return rightMin + (valueScaled * rightSpan)
 
 
-def testAudioSpectrum(obj, infinite=False):
-    visualizeAudioSpectrumAnalyze = 0
+class DoSpectrumAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoSpectrumAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
 
+    def run(self):
+        run_pyaudio_fft_spectrum(self.obj, True)
+
+
+def run_pyaudio_fft_spectrum(obj, infinite=False):
     ear = Stream_Analyzer(
         device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
         rate=None,  # Audio samplerate, None uses the default source settings
@@ -1351,7 +1401,7 @@ def testAudioSpectrum(obj, infinite=False):
         updates_per_second=1000,  # How often to read the audio stream for new data
         smoothing_length_ms=150,  # Apply some temporal smoothing to reduce noisy features
         n_frequency_bins=64,  # The FFT features are grouped in bins
-        visualize=visualizeAudioSpectrumAnalyze,  # Visualize the FFT features with PyGame
+        visualize=1,  # Visualize the FFT features with PyGame
         verbose=False,  # Print running statistics (latency, fps, ...)
         height=450,  # Height, in pixels, of the visualizer window,
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
@@ -1361,23 +1411,16 @@ def testAudioSpectrum(obj, infinite=False):
     barsData = [0] * 64
     start_time = time.time()
 
-    if visualizeAudioSpectrumAnalyze == 0:
-        pygame.init()
-
     while True:
-        if visualizeAudioSpectrumAnalyze == 0:
-            for event in pygame.event.get():
-                print(event)
+        #for event in pygame.event.get():
+        #    print(event)
 
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
             return
 
-        if not obj.get_run_spectrum():
-            if visualizeAudioSpectrumAnalyze == 1:
-                ear.visualizer.stop()
-            #else:
-            #    pygame.quit()
+        if obj.cube.abort_animation_thread:
+            ear.visualizer.stop()
             return
 
         start_time_ms = current_milli_time()

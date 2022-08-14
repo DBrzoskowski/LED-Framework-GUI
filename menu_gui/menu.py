@@ -1,3 +1,4 @@
+import threading
 from threading import Thread
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -41,6 +42,13 @@ animationStateLabel_green = """QLabel {
     color: green;
 }"""
 
+class DoStartGUI(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoStartGUI, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        start_menu(self.obj)
 
 def start_menu(cube):
     app = QApplication(sys.argv)
@@ -57,8 +65,6 @@ class AppWindow(QMainWindow):
         self.setFixedSize(843, 549)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
-
-        pygame.init()
 
         # Cube
         self.cube = None
@@ -78,7 +84,7 @@ class AppWindow(QMainWindow):
         self.one_frame = None
         self.all_frames = []
 
-        self.run_spectrum = False
+        self.is_spectrum_running = False
 
         # create buttons
         self.createButton = QtWidgets.QPushButton(self)
@@ -325,34 +331,27 @@ class AppWindow(QMainWindow):
         self.files.append(file_name)
         self.files_path.append(file_path)
 
-    def get_run_spectrum(self):
-        return self.run_spectrum
-
-    # TODO
     def loadSpectrum(self):
-        if self.run_spectrum:
-            self.run_spectrum = False
+        if self.is_spectrum_running:
+            self.is_spectrum_running = False
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
             self.loadSpectrumButton.setText("Start spectrum")
         else:
-            self.run_spectrum = True
+            self.is_spectrum_running = True
             self.loadSpectrumButton.setText("Stop spectrum")
-            t1 = Thread(target=testAudioSpectrum(self, True))
 
-        #if self.spectrum_status:
-        #    # self.SpectrumVisualizer.startVisualisation()
-        #    self.spectrum_status = False
-        #    self.loadSpectrumButton.setText("Load spectrum")
-        #elif not self.spectrum_status:
-        #    # self.SpectrumVisualizer.stopVisualisation()
-        #    self.spectrum_status = True
-        #    self.loadSpectrumButton.setText("Stop spectrum")
-        #else:
-        #    pass
-        # self.s = audio_spectrum.SpectrumVisualizer()
-        # if isChecked() -> True
-        #       setEnabled() -> False #disable button
-        #       self.s.startVisualisation()
-        # self.s.stopVisualisation()
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoSpectrumAnimation(obj=self)
+            self.cube.animation_thread.start()
+
 
     # TODO
     def stopSpectrum(self):
@@ -421,16 +420,60 @@ class AppWindow(QMainWindow):
         elif self.currentNameBox == "Random Color":
             self.cube.random_color_animation()
         elif self.currentNameBox == "Bouncy snake":
-            self.run_spectrum = True
-            t1 = Thread(target=bouncyvTwo(self))
+            self.is_spectrum_running = False
+            self.loadSpectrumButton.setText("Start spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoBouncySnakeAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Sin wave":
-            t1 = Thread(target=sinwaveTwo(self))
+            self.is_spectrum_running = False
+            self.loadSpectrumButton.setText("Start spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoSinWaveAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Folder":
-            t1 = Thread(target=folder(self))
+            self.is_spectrum_running = False
+            self.loadSpectrumButton.setText("Start spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoFolderAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Rain":
-            t1 = Thread(target=rainVersionTwo(self))
+            self.is_spectrum_running = False
+            self.loadSpectrumButton.setText("Start spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoRainAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Color wheel":
-            t1 = Thread(target=color_wheel(self))
+            self.is_spectrum_running = False
+            self.loadSpectrumButton.setText("Start spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoColorWheelAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox in self.files:
             x = self.files.index(self.currentNameBox)
             self.cube.load_animation_from_file(self.files_path[x])
