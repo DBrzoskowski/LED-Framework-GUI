@@ -5,6 +5,7 @@ from enum import Enum
 import time
 from random import *
 
+import pygame
 from vpython import vector
 
 from sandbox.audio_spectrum_analyzer.audio_spectrum import *
@@ -322,7 +323,52 @@ def sendFrame(obj, frame_to_send):
     # send bodies
 
 
-def sendSpectrum(barsData):
+def sendSpectrum(obj, barsData):
+    frame = LEDFrame()
+
+    for i, bar in enumerate(barsData):
+        x = int(i / 8)
+        y = i % 8
+
+        r,g,b = 0,0,0
+
+        if x == 0:
+            r = 1
+            g= 1
+            b = 8
+        elif x == 1:
+            r = 5
+            g = 1
+            b = 10
+        elif x == 2:
+            r = 8
+            g = 1
+            b = 17
+        elif x == 3:
+            r = 11
+            g = 3
+            b = 9
+        elif x == 4:
+            r = 13
+            g = 5
+            b = 7
+        elif x == 5:
+            r = 14
+            g = 7
+            b = 6
+        elif x == 6:
+            r = 15
+            g = 9
+            b = 4
+        elif x == 7:
+            r = 14
+            g = 15
+            g = 3
+
+        frame.drawColumn(x, y, bar, r, g, b)
+
+    obj.cube.update_simulated_cube(frame)
+
     data = [0] * (1 + 32)
     data[0] = TYPE_SPECTRUM
 
@@ -366,6 +412,9 @@ def color_wheel(obj):
     start = current_milli_time()
 
     while current_milli_time() - start < TIME_FOR_1_ANIMATIONS_IN_MS:
+        for event in pygame.event.get():
+            print(event)
+
         swiper = randint(0, 3)
         ranx = randint(0, 16)
         rany = randint(0, 16)
@@ -474,6 +523,9 @@ def sinwaveTwo(obj):
     start = current_milli_time()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+        for event in pygame.event.get():
+            print(event)
+
         for addr in range(0, 8):
             if sinewavearray[addr] == 7:
                 sinemult[addr] = -1
@@ -577,6 +629,9 @@ def rainVersionTwo(obj):
     frame = LEDFrame()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+        for event in pygame.event.get():
+            print(event)
+
         if ledcolor < 200:
             for addr in range(0, leds):
                 frame.turnOnLed(xold[addr], yold[addr], zold[addr], 0, 0, 0)
@@ -704,6 +759,9 @@ def folder(obj):
 
     start = current_milli_time()
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+        for event in pygame.event.get():
+            print(event)
+
         if top == 1:
             if side == 0:
                 # top to left-side
@@ -1177,6 +1235,9 @@ def bouncyvTwo(obj):
     start = current_milli_time()
 
     while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+        for event in pygame.event.get():
+            print(event)
+
         direct = randint(0, 2)
 
         for addr in range(1, ledcount + 1):
@@ -1255,6 +1316,8 @@ def bouncyvTwo(obj):
           yy[addr] = yy[addr - 1]
           zz[addr] = zz[addr - 1]
 
+    #pygame.quit()
+
 
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)
@@ -1278,6 +1341,8 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
 
 
 def testAudioSpectrum(obj, infinite=False):
+    visualizeAudioSpectrumAnalyze = 1
+
     ear = Stream_Analyzer(
         device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
         rate=None,  # Audio samplerate, None uses the default source settings
@@ -1285,7 +1350,7 @@ def testAudioSpectrum(obj, infinite=False):
         updates_per_second=1000,  # How often to read the audio stream for new data
         smoothing_length_ms=150,  # Apply some temporal smoothing to reduce noisy features
         n_frequency_bins=64,  # The FFT features are grouped in bins
-        visualize=1,  # Visualize the FFT features with PyGame
+        visualize=visualizeAudioSpectrumAnalyze,  # Visualize the FFT features with PyGame
         verbose=False,  # Print running statistics (latency, fps, ...)
         height=450,  # Height, in pixels, of the visualizer window,
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
@@ -1296,12 +1361,19 @@ def testAudioSpectrum(obj, infinite=False):
     start_time = time.time()
 
     while True:
+        if visualizeAudioSpectrumAnalyze == 0:
+            for event in pygame.event.get():
+                print(event)
+
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
             return
 
         if not obj.get_run_spectrum():
-            ear.visualizer.stop()
+            if visualizeAudioSpectrumAnalyze == 1:
+                ear.visualizer.stop()
+            #else:
+            #    pygame.quit()
             return
 
         start_time_ms = current_milli_time()
@@ -1327,7 +1399,7 @@ def testAudioSpectrum(obj, infinite=False):
             barsData[i] = int(level + 0.2)
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
-        sendSpectrum(barsData)
+        sendSpectrum(obj, barsData)
         fft_duration_ms = current_milli_time() - start_time_ms
 
         if ((fft_duration_ms / 1000) > (1. / fps)):

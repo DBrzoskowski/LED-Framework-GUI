@@ -58,6 +58,7 @@ class AppWindow(QMainWindow):
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
 
+        pygame.init()
 
         # Cube
         self.cube = None
@@ -259,7 +260,7 @@ class AppWindow(QMainWindow):
         self.openButton.setText(_translate("AppWindow", "Open"))
         self.lastOpenFileLabel.setText(_translate("AppWindow", "Last open file: "))
 
-        self.loadSpectrumButton.setText(_translate("AppWindow", "Load spectrum"))
+        self.loadSpectrumButton.setText(_translate("AppWindow", "Start spectrum"))
         self.colorButton.setText(_translate("AppWindow", "Color"))
         self.colorLabel.setText(_translate("AppWindow", "Color:"))
         self.fpsButton.setText(_translate("AppWindow", "FPS"))
