@@ -60,12 +60,20 @@ def start_menu(cube):
     sys.exit(app.exec_())
 
 
+# def second_window():
+#     second = AnotherWindow()
+#     second.show()
+
+
 class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
-        self.setFixedSize(841, 501)
+        # self.setFixedSize(841, 501)
+        self.setFixedSize(1541, 521)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
+
+        # self.sub_win = AnotherWindow()
 
         # Cube
         self.cube = None
@@ -109,16 +117,16 @@ class AppWindow(QMainWindow):
         # create checkbox
         self.physicalCubeCheckBox = QtWidgets.QCheckBox(self)
 
-        # # create web page view
-        # self.browser = QWebEngineView(self)
+        # create web page view
+        self.browser = QWebEngineView(self)
 
         self.ui()
 
     def ui(self):
-        # # web page view
-        # self.browser.setUrl(QUrl("http://localhost:8980/"))
-        # self.browser.setGeometry(QtCore.QRect(840, 0, 700, 700))
-        # self.browser.show()
+        # web page view
+        self.browser.setUrl(QUrl("http://localhost:8980/"))
+        self.browser.setGeometry(QtCore.QRect(840, 0, 700, 520))
+        self.browser.show()
 
         # buttons
         self.spectrumButton.setGeometry(QtCore.QRect(10, 70, 191, 101))
@@ -418,6 +426,7 @@ class AppWindow(QMainWindow):
                 msg.exec_()
 
         self.fps = fps
+        self.cube.set_drawing_fps(self.fps)
 
     # def colorAndFps(self):
     #     self.cube.gui_args_builder(self.color_name, self.fps)
@@ -499,3 +508,21 @@ class AppWindow(QMainWindow):
     def build_cube(self, cube):
         self.cube = cube
         print(self.cube)
+
+
+# class AnotherWindow(QWebEngineView):
+#     def __init__(self):
+#         super(AnotherWindow, self).__init__()
+#         self.setFixedSize(800, 800)
+#         self.setWindowTitle("Cube")
+#
+#         self.browser = QWebEngineView(self)
+#
+#         self.ui()
+#
+#     def ui(self):
+#         # web page view
+#         self.browser.setUrl(QUrl("http://localhost:8980/"))
+#         self.browser.setGeometry(QtCore.QRect(10, 10, 700, 700))
+#         self.browser.show()
+

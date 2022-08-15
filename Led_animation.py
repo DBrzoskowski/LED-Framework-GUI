@@ -45,8 +45,11 @@ class Cube3D(canvas):
         # self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
         # self.camera.axis = vector(0,0,0)
 
-        self.height = 535
-        self.width = 690
+        # self.height = 535
+        # self.width = 690
+
+        self.height = 500
+        self.width = 650
 
         #self.caption = """A model of a solid represented as leds connected by interledic bonds.
         #
@@ -106,12 +109,11 @@ class Cube3D(canvas):
         self._momentumRange = momentumRange
         #self.initialize()
 
-
     def binding(self):
-        self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
+        self.bind('click', self.led_on_click_event)  # Bind LED on click event
 
     def unbinding(self):
-        self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
+        self.unbind('click', self.led_on_click_event)  # Disabled LEDs on click event
 
     def update_simulated_cube(self, frame):
         for z in range(0, 8):
@@ -123,11 +125,11 @@ class Cube3D(canvas):
 
                     self.leds[led_index].color = color
 
-    def LEDs_on_click_event(self, ev):
+    def led_on_click_event(self, ev):
         # print(ev.event, ev.which)
         print(ev)
         hit = self.mouse.pick
-        self.drawing_path['fps'] = 30
+        self.drawing_path["fps"] = self.drawing_fps
 
         drawing_color = self.hex2vector(self.drawing_color)
 
@@ -137,8 +139,8 @@ class Cube3D(canvas):
 
             hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
 
-            self.drawing_path['pos'].append(hit.pos.value)
-            self.drawing_path['color'].append(hit.color.value)
+            self.drawing_path["pos"].append(hit.pos.value)
+            self.drawing_path["color"].append(hit.color.value)
 
     @staticmethod
     def hex2vector(drawing_color):
@@ -300,15 +302,15 @@ class Cube3D(canvas):
             rate(fps)
 
     def save_animation_to_frame(self, file_path=ANIMATION_FILE, to_file=False):
-        if self.drawing_path['pos'] and self.drawing_path['color']:
+        if self.drawing_path["pos"] and self.drawing_path["color"]:
             return self.drawing_path
 
     def save_animation_frame_list(self):
-        if self.drawing_path['pos'] and self.drawing_path['color']:
+        if self.drawing_path["pos"] and self.drawing_path["color"]:
             copy_dict = copy.deepcopy(self.drawing_path)
             self.drawing_path_list.append(copy_dict)
-            self.drawing_path['pos'] = []
-            self.drawing_path['color'] = []
+            self.drawing_path["pos"] = []
+            self.drawing_path["color"] = []
         return self.drawing_path_list
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
@@ -316,18 +318,18 @@ class Cube3D(canvas):
             for i in f.readlines():
                 line = json.loads(i)
 
-                if line.get('color'):
-                    colors = line.get('color')
+                if line.get("color"):
+                    colors = line.get("color")
 
-                if line.get('pos'):
-                    for pos in line.get('pos'):
+                if line.get("pos"):
+                    for pos in line.get("pos"):
                         # this must be reverse because we start drawing from the z axis
                         # e.g | x, y, z -> (6.0, 0.0, 7.0) | ==> | x, y, z -> (7.0, 0.0, 6.0) |
                         pos.reverse()
                         self.animation_step.append(self.get_led_from_visible(tuple(pos)))
 
-                if line.get('fps'):
-                    fps = line.get('fps')
+                if line.get("fps"):
+                    fps = line.get("fps")
 
                 # animation process
                 for led, col in zip(self.animation_step, colors):
@@ -346,14 +348,17 @@ class Cube3D(canvas):
     def set_drawing_color(self, drawing_color):
         self.drawing_color = drawing_color
 
-    def gui_args_builder(self, drawing_color, fps):
-        self.drawing_color = drawing_color
+    def set_drawing_fps(self, fps):
         self.drawing_fps = fps
-        try:
-            if self.drawing_color and self.drawing_fps:
-                return self.drawing_color, self.drawing_fps
-        except ReferenceError as err:
-            print(f"One of the arguments hasn't been defined -> {err}")
+
+    # def gui_args_builder(self, drawing_color, fps):
+    #     self.drawing_color = drawing_color
+    #     self.drawing_fps = fps
+    #     try:
+    #         if self.drawing_color and self.drawing_fps:
+    #             return self.drawing_color, self.drawing_fps
+    #     except ReferenceError as err:
+    #         print(f"One of the arguments hasn't been defined -> {err}")
 
     # def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
     #     # Get info from GUI about color and fps
@@ -363,7 +368,7 @@ class Cube3D(canvas):
     #
     #     self.waitfor('click')
     #     hit = self.mouse.pick
-    #     self.drawing_path['fps'] = fps
+    #     self.drawing_path["fps"] = fps
     #
     #     drawing_color = self.hex2vector(drawing_color)
     #
@@ -373,18 +378,18 @@ class Cube3D(canvas):
     #
     #         hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
     #
-    #         self.drawing_path['pos'].append(hit.pos.value)
-    #         self.drawing_path['color'].append(hit.color.value)
+    #         self.drawing_path["pos"].append(hit.pos.value)
+    #         self.drawing_path["color"].append(hit.color.value)
 
-    # button
-    def drawing_status(self, b):
-        self.drawing_button_status = not self.drawing_button_status
-        if self.drawing_button_status:
-            b.text = "Drawing"
-            # while self.drawing_button_status:
-            #     self.drawing()
-        else:
-            b.text = "Not drawing"
+    # # button
+    # def drawing_status(self, b):
+    #     self.drawing_button_status = not self.drawing_button_status
+    #     if self.drawing_button_status:
+    #         b.text = "Drawing"
+    #         # while self.drawing_button_status:
+    #         #     self.drawing()
+    #     else:
+    #         b.text = "Not drawing"
 
 
 if __name__ == '__main__':
