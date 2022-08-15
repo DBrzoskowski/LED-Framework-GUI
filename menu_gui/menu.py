@@ -2,8 +2,10 @@ import threading
 from threading import Thread
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
+from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool, QUrl
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import *
+
 from sandbox.audio_spectrum_analyzer.LedManager import *
 
 # from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
@@ -15,8 +17,8 @@ background_style = """AppWindow {
     background-image: url(menu_gui/background.png);
     background-repeat: no-repeat;
     background-position: center;
-    height: 843px;
-    width: 549px;
+    height: 549px;
+    width: 1543px;
 }"""
 
 QPushButton_style = """QPushButton {
@@ -62,7 +64,7 @@ def start_menu(cube):
 class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
-        self.setFixedSize(843, 549)
+        self.setFixedSize(1543, 549)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
 
@@ -71,8 +73,6 @@ class AppWindow(QMainWindow):
         self.draw_status = False
         self.spectrum_status = False
         self.animation_status = False
-        # self.c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-        # self.c.background = color.black
 
         # variables
         self.fps = None
@@ -108,6 +108,12 @@ class AppWindow(QMainWindow):
 
         # create boxes
         self.readyAnimationBox = QtWidgets.QComboBox(self)
+        # create web page view
+        self.browser = QWebEngineView(self)
+        # setting default browser url as google
+        self.browser.setUrl(QUrl("http://localhost:8980/"))
+        self.browser.setGeometry(QtCore.QRect(840, 0, 700, 700))
+        self.browser.show()
 
         self.ui()
 

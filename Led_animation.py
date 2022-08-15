@@ -26,27 +26,33 @@ def fps_to_milliseconds(fps):
 
 
 class Cube3D(canvas):
-    def __init__(self, size, led_radius, spacing, momentumRange, **args):
-        super().__init__(**args)
+
+    def initialize(self):
+        super().__init__()
         # self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
         # self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
-        #self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
+        # self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
         # self.camera.axis = vector(0,0,0)
-        self.caption = """A model of a solid represented as leds connected by interledic bonds.
-        
-        To rotate "camera", drag with right button or Ctrl-drag.
-        To zoom, drag with middle button or Alt/Option depressed, or use scroll wheel.
-          On a two-button mouse, middle is left + right.
-        To pan left/right and up/down, Shift-drag.
-        Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
+
+        self.height = 535
+        self.width = 690
+
+        #self.caption = """A model of a solid represented as leds connected by interledic bonds.
+        #
+        #                        To rotate "camera", drag with right button or Ctrl-drag.
+        #                        To zoom, drag with middle button or Alt/Option depressed, or use scroll wheel.
+        #                          On a two-button mouse, middle is left + right.
+        #                        To pan left/right and up/down, Shift-drag.
+        #                        Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
+
         self.lights = []
         self.old_led_color = {}
 
         self.abort_animation_thread = True
         self.animation_thread = None
-        self.gui_thread = None
+        #self.gui_thread = None
 
         # The part responsible for drawing
         self.drawing_path = {}
@@ -58,28 +64,38 @@ class Cube3D(canvas):
         self.drawing_button_status = False
         self.animation_frame = []
         self.animation_step = []
-        self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
+        #self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
 
-        distant_light(direction=vector(0.22,  0.44,  0.88), color=color.gray(0.8))
+        self.background = vector(0.12, 0.12, 0.06)
+
+        distant_light(direction=vector(0.22, 0.44, 0.88), color=color.gray(0.8))
         distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.gray(0.3))
-        distant_light(direction=vector(65.22,  65.44,  65.88), color=color.gray(0.8))
+        distant_light(direction=vector(65.22, 65.44, 65.88), color=color.gray(0.8))
         distant_light(direction=vector(-65.88, -65.22, -65.44), color=color.gray(0.3))
 
-        for z in range(0, size, 1):
-            for x in range(0, size, 1):
-                for y in range(0, size, 1):
+        for z in range(0, self._size, 1):
+            for x in range(0, self._size, 1):
+                for y in range(0, self._size, 1):
                     led = sphere()
-                    led.pos = vector(x, y, z) * spacing
-                    led.radius = led_radius
-                    if 0 <= x < size and 0 <= y < size and 0 <= z < size:
+                    led.pos = vector(x, y, z) * self._spacing
+                    led.radius = self._led_radius
+                    if 0 <= x < self._size and 0 <= y < self._size and 0 <= z < self._size:
                         p = vec.random()
-                        led.momentum = momentumRange * p
+                        led.momentum = self._momentumRange * p
                         led.color = color.black
                     else:
                         # led.visible = False
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
+
+    def __init__(self, size, led_radius, spacing, momentumRange):
+        self._size = size
+        self._led_radius = led_radius
+        self._spacing = spacing
+        self._momentumRange = momentumRange
+        #self.initialize()
+
 
     def binding(self):
         self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
@@ -92,7 +108,7 @@ class Cube3D(canvas):
             for y in range(0, 8):
                 for x in range(0, 8):
                     r, g, b = frame.getLedColor(x, y, z)
-                    color = vector(r * 0.066, g * 0.066, b * 0.066)
+                    color = vector(r * 0.0625, g * 0.0625, b * 0.0625)
                     led_index = x + (y * 8) + (z * 64)
 
                     self.leds[led_index].color = color
@@ -353,17 +369,22 @@ class Cube3D(canvas):
             b.text = "Not drawing"
 
 
-from menu_gui.menu import start_menu, AppWindow, DoStartGUI
-from threading import Thread
-from multiprocessing import Process
+from menu_gui.menu import DoStartGUI
+
 
 if __name__ == '__main__':
+    # Just create memory for object and pass that to thread
     c = Cube3D(8, 0.15 * 1, 1, 0.1 * 1 * math.sqrt(1 / 1))
-    #c.background = color.black  # temporarily to see the leds better
-    c.background = vector(0.08, 0.08, 0.04)
 
+    # initialize GUI thread, which will start browser listener
     c.gui_thread = DoStartGUI(c)
     c.gui_thread.start()
+
+    # fully initialize cube and open web socket with simulation
+    c.initialize()
+
+    #c.background = color.black  # temporarily to see the leds better
+    #c.background = vector(0.08, 0.08, 0.04)
 
     # Wait for GUI thread to end
     c.gui_thread.join()

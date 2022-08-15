@@ -1,15 +1,15 @@
 import math
 import socket
 import sys
+import webbrowser
 from enum import Enum
 import time
 from random import *
 import threading
 
-import pygame
 from vpython import vector
 
-from sandbox.audio_spectrum_analyzer.audio_spectrum import *
+#from sandbox.audio_spectrum_analyzer.audio_spectrum import *
 from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
 
 # CONFIG
@@ -326,16 +326,17 @@ def sendFrame(obj, frame_to_send):
 
 def sendSpectrum(obj, barsData):
     frame = LEDFrame()
+    #print(barsData)
 
     for i, bar in enumerate(barsData):
         x = int(i / 8)
         y = i % 8
 
-        r,g,b = 0,0,0
+        r, g, b = 0, 0, 0
 
         if x == 0:
             r = 1
-            g= 1
+            g = 1
             b = 8
         elif x == 1:
             r = 5
@@ -364,7 +365,7 @@ def sendSpectrum(obj, barsData):
         elif x == 7:
             r = 14
             g = 15
-            g = 3
+            b = 3
 
         frame.drawColumn(x, y, bar, r, g, b)
 
@@ -1394,6 +1395,7 @@ class DoSpectrumAnimation(threading.Thread):
 
 
 def run_pyaudio_fft_spectrum(obj, infinite=False):
+    visualize = 0
     ear = Stream_Analyzer(
         device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
         rate=None,  # Audio samplerate, None uses the default source settings
@@ -1401,7 +1403,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         updates_per_second=1000,  # How often to read the audio stream for new data
         smoothing_length_ms=150,  # Apply some temporal smoothing to reduce noisy features
         n_frequency_bins=64,  # The FFT features are grouped in bins
-        visualize=1,  # Visualize the FFT features with PyGame
+        visualize=0,  # Visualize the FFT features with PyGame
         verbose=False,  # Print running statistics (latency, fps, ...)
         height=450,  # Height, in pixels, of the visualizer window,
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
@@ -1412,19 +1414,18 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     start_time = time.time()
 
     while True:
-        #for event in pygame.event.get():
-        #    print(event)
-
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
             return
 
         if obj.cube.abort_animation_thread:
-            ear.visualizer.stop()
+            if visualize == 1:
+                ear.visualizer.stop()
             return
 
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
+        #print(max(binned_fft))
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
@@ -1432,12 +1433,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             x = int(i / 8)
             y = i % 8
 
-            max_power = 30
+            max_power = 70 * 1000
 
+            # TODO: automatic power translation
             if int(frequency) > 2500:
-                max_power = 20
+                max_power = 40 * 1000
             elif int(frequency) > 4000:
-                max_power = 14
+                max_power = 20 * 1000
 
             level = translate(power, 0, max_power, 0, 7)
 
@@ -1449,7 +1451,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         sendSpectrum(obj, barsData)
         fft_duration_ms = current_milli_time() - start_time_ms
 
-        if ((fft_duration_ms / 1000) > (1. / fps)):
+        if (fft_duration_ms / 1000) > (1. / fps):
             print('continue')
             time.sleep(0.002)
             continue
@@ -1459,6 +1461,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
 if __name__ == '__main__':
     while 1:
+
         pass
         #start_spectrum(5000)
         #bouncyvTwo()
