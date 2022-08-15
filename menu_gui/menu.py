@@ -1,14 +1,10 @@
-import threading
-from threading import Thread
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool, QUrl
+from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import *
 
 from sandbox.audio_spectrum_analyzer.LedManager import *
 
-# from sandbox.audio_spectrum_analyzer.audio_spectrum import SpectrumVisualizer
 import sys
 
 
@@ -44,6 +40,7 @@ animationStateLabel_green = """QLabel {
     color: green;
 }"""
 
+
 class DoStartGUI(threading.Thread):
     def __init__(self, obj, *args, **kwargs):
         super(DoStartGUI, self).__init__(*args, **kwargs)
@@ -51,6 +48,7 @@ class DoStartGUI(threading.Thread):
 
     def run(self):
         start_menu(self.obj)
+
 
 def start_menu(cube):
     app = QApplication(sys.argv)
@@ -82,6 +80,7 @@ class AppWindow(QMainWindow):
         self.files_path = []
         self.file_name = None
         self.one_frame = None
+        self.one_frame_copy = None
         self.all_frames = []
 
         self.is_spectrum_running = False
@@ -284,9 +283,9 @@ class AppWindow(QMainWindow):
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
 
     # change name
-    # TODO check binding/unbinding
     def createAnimation(self):
         if self.draw_status:
+            self.one_frame = self.cube.save_animation_frame_list()
             self.cube.unbinding()
             self.createButton.setText("Create animation")
         elif not self.draw_status:
@@ -296,23 +295,17 @@ class AppWindow(QMainWindow):
         self.draw_status = not self.draw_status
 
     def saveFrame(self):
-        self.one_frame = self.cube.save_animation_to_frame()
-        # self.cube.drawing_path['pos'] = []
-        # self.cube.drawing_path['color'] = []
-        self.all_frames.append(self.one_frame)
+        pass
 
-    # TODO check it in pyqt5
-    # need drawing function
     def saveAnimation(self):
-        print(self.one_frame)
-        print(self.all_frames)
         file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
         file_path = file[0]
         # file_name = file_path.split("/")[-1]
 
         if file:
             save = open(file_path, 'w')
-            save.write(str(self.all_frames))
+            for i in self.one_frame:
+                save.write(str(i) + "\n")
 
     def resetAnimation(self):
         self.cube.reset_cube_state()
@@ -358,10 +351,6 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread = DoSpectrumAnimation(obj=self)
             self.cube.animation_thread.start()
 
-
-    # TODO
-    def stopSpectrum(self):
-        pass
 
     def colorPicker(self):
         # opening color dialog
@@ -489,11 +478,3 @@ class AppWindow(QMainWindow):
     def build_cube(self, cube):
         self.cube = cube
         print(self.cube)
-
-
-# app = QApplication(sys.argv)
-# app.setStyleSheet(background_style)
-# win = AppWindow()
-# # win.build_cube(cube)
-# win.show()
-# sys.exit(app.exec_())

@@ -15,10 +15,12 @@ import time
 import json
 import txaio
 import math
+import copy
 from random import uniform
 from scipy.interpolate import interp1d
 from colormap import hex2rgb
 from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
+from menu_gui.menu import DoStartGUI
 from sandbox.audio_spectrum_analyzer.LedManager import *
 import asyncio
 # scene.background = vector(0.95, 1, 1) # white background
@@ -26,6 +28,7 @@ txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/qu
 
 ANIMATION_FILE = 'animation_path.txt'
 
+drawing_path = []
 
 def fps_to_milliseconds(fps):
     return 1.0/fps
@@ -70,6 +73,7 @@ class Cube3D(canvas):
         self.drawing_button_status = False
         self.animation_frame = []
         self.animation_step = []
+        self.drawing_path_list = []
         #self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
 
         self.background = vector(0.12, 0.12, 0.06)
@@ -120,7 +124,7 @@ class Cube3D(canvas):
                     self.leds[led_index].color = color
 
     def LEDs_on_click_event(self, ev):
-        #print(ev.event, ev.which)
+        # print(ev.event, ev.which)
         print(ev)
         hit = self.mouse.pick
         self.drawing_path['fps'] = 30
@@ -299,6 +303,14 @@ class Cube3D(canvas):
         if self.drawing_path['pos'] and self.drawing_path['color']:
             return self.drawing_path
 
+    def save_animation_frame_list(self):
+        if self.drawing_path['pos'] and self.drawing_path['color']:
+            copy_dict = copy.deepcopy(self.drawing_path)
+            self.drawing_path_list.append(copy_dict)
+            self.drawing_path['pos'] = []
+            self.drawing_path['color'] = []
+        return self.drawing_path_list
+
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
         with open(file_path, 'r') as f:
             for i in f.readlines():
@@ -343,26 +355,26 @@ class Cube3D(canvas):
         except ReferenceError as err:
             print(f"One of the arguments hasn't been defined -> {err}")
 
-    def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
-        # Get info from GUI about color and fps
-        if self.drawing_color and self.drawing_fps:
-            drawing_color = self.drawing_color
-            fps = self.drawing_fps
-
-        self.waitfor('click')
-        hit = self.mouse.pick
-        self.drawing_path['fps'] = fps
-
-        drawing_color = self.hex2vector(drawing_color)
-
-        if hit:
-            if hit.color != drawing_color:
-                self.old_led_color[hit.idx] = default_color
-
-            hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
-
-            self.drawing_path['pos'].append(hit.pos.value)
-            self.drawing_path['color'].append(hit.color.value)
+    # def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
+    #     # Get info from GUI about color and fps
+    #     if self.drawing_color and self.drawing_fps:
+    #         drawing_color = self.drawing_color
+    #         fps = self.drawing_fps
+    #
+    #     self.waitfor('click')
+    #     hit = self.mouse.pick
+    #     self.drawing_path['fps'] = fps
+    #
+    #     drawing_color = self.hex2vector(drawing_color)
+    #
+    #     if hit:
+    #         if hit.color != drawing_color:
+    #             self.old_led_color[hit.idx] = default_color
+    #
+    #         hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
+    #
+    #         self.drawing_path['pos'].append(hit.pos.value)
+    #         self.drawing_path['color'].append(hit.color.value)
 
     # button
     def drawing_status(self, b):
@@ -373,9 +385,6 @@ class Cube3D(canvas):
             #     self.drawing()
         else:
             b.text = "Not drawing"
-
-
-from menu_gui.menu import DoStartGUI
 
 
 if __name__ == '__main__':
