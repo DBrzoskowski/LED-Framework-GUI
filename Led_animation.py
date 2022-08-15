@@ -65,9 +65,9 @@ class Cube3D(canvas):
 
         # The part responsible for drawing
         self.drawing_path = {}
-        self.drawing_path.setdefault('pos', [])
-        self.drawing_path.setdefault('color', [])
-        self.drawing_path.setdefault('fps', 30)
+        self.drawing_path.setdefault("pos", [])
+        self.drawing_path.setdefault("color", [])
+        self.drawing_path.setdefault("fps", 30)
         self.drawing_color = None
         self.drawing_fps = None
         self.drawing_button_status = False
