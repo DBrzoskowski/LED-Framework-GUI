@@ -5,6 +5,12 @@ based on: https://www.glowscript.org/?fbclid=IwAR1HehsTnNPwcjGUmIz0-uG1XZuka_Syp
 Installation:
     pip install vpython
 """
+
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
 import time
 import json
 import txaio

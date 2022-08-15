@@ -1397,7 +1397,7 @@ class DoSpectrumAnimation(threading.Thread):
 def run_pyaudio_fft_spectrum(obj, infinite=False):
     visualize = 0
     ear = Stream_Analyzer(
-        device=2,  # Pyaudio (portaudio) device index, defaults to first mic input
+        device=1,  # Pyaudio (portaudio) device index, defaults to first mic input
         rate=None,  # Audio samplerate, None uses the default source settings
         FFT_window_size_ms=60,  # Window size used for the FFT transform
         updates_per_second=1000,  # How often to read the audio stream for new data
@@ -1433,13 +1433,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             x = int(i / 8)
             y = i % 8
 
-            max_power = 70 * 1000
+            max_power = 30
 
             # TODO: automatic power translation
             if int(frequency) > 2500:
-                max_power = 40 * 1000
+                max_power = 20
             elif int(frequency) > 4000:
-                max_power = 20 * 1000
+                max_power = 14
 
             level = translate(power, 0, max_power, 0, 7)
 

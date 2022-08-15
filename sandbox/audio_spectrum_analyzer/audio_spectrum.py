@@ -10,6 +10,7 @@ import serial
 
 #from sandbox.audio_spectrum_analyzer.cube import *
 from sandbox.audio_spectrum_analyzer.LedManager import *
+"""
 
 mpl.use('TkAgg')  # or can use 'TkAgg', whatever you have/prefer
 
@@ -303,6 +304,7 @@ class SpectrumVisualizer:
 #        time.sleep(1)
  #       print("Blue:", blue)
   #      sock.sendto(blue, (UDP_IP, UDP_PORT))
+"""
 
 """
 plt.xlim([0, 10000])
