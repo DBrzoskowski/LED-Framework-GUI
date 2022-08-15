@@ -10,11 +10,11 @@ import sys
 
 # css
 background_style = """AppWindow {
-    background-image: url(menu_gui/background.png);
+    background-image: url(menu_gui/background.jpg);
     background-repeat: no-repeat;
     background-position: center;
-    height: 549px;
-    width: 1543px;
+    height: 100%;
+    width: 100%;
 }"""
 
 QPushButton_style = """QPushButton {
@@ -69,7 +69,7 @@ class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
         # self.setFixedSize(841, 501)
-        self.setFixedSize(1541, 521)
+        self.setFixedSize(1501, 511)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
 
