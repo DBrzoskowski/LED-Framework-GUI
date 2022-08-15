@@ -1,3 +1,5 @@
+import json
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
@@ -349,7 +351,7 @@ class AppWindow(QMainWindow):
         if file:
             save = open(file_path, 'w')
             for i in self.one_frame:
-                save.write(str(i) + "\n")
+                save.write(json.dumps(i) + "\n")
 
     def reset_cube(self):
         self.cube.reset_cube_state()
