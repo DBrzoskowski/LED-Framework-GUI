@@ -325,6 +325,28 @@ def sendFrame(obj, frame_to_send):
 
 
 def sendSpectrum(obj, barsData):
+    data = [0] * (1 + 32)
+    data[0] = TYPE_SPECTRUM
+
+    dataIndex = 1
+    for i in range(0, 63, 2):
+        test1 = barsData[i + 1] & 0b1111
+        test2 = barsData[i] & 0b00001111
+
+        # if test1 < 1 or test1 > 7:
+        # print("[ERROR] Wrong bar level")
+
+        # if test2 < 1 or test2 > 7:
+        # print("[ERROR] Wrong bar level")
+
+        data[dataIndex] = ((barsData[i + 1] & 0b1111) << 4) | (barsData[i] & 0b00001111)
+        dataIndex += 1
+
+    MESSAGE = bytes(data)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+    sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+
     frame = LEDFrame()
     #print(barsData)
 
@@ -370,28 +392,6 @@ def sendSpectrum(obj, barsData):
         frame.drawColumn(x, y, bar, r, g, b)
 
     obj.cube.update_simulated_cube(frame)
-
-    data = [0] * (1 + 32)
-    data[0] = TYPE_SPECTRUM
-
-    dataIndex = 1
-    for i in range(0, 63, 2):
-        test1 = barsData[i + 1] & 0b1111
-        test2 = barsData[i] & 0b00001111
-
-        #if test1 < 1 or test1 > 7:
-            #print("[ERROR] Wrong bar level")
-
-        #if test2 < 1 or test2 > 7:
-            #print("[ERROR] Wrong bar level")
-
-        data[dataIndex] = ((barsData[i + 1] & 0b1111) << 4) | (barsData[i] & 0b00001111)
-        dataIndex += 1
-
-    MESSAGE = bytes(data)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-    sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 
 def current_milli_time():
@@ -1403,7 +1403,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         updates_per_second=1000,  # How often to read the audio stream for new data
         smoothing_length_ms=150,  # Apply some temporal smoothing to reduce noisy features
         n_frequency_bins=64,  # The FFT features are grouped in bins
-        visualize=0,  # Visualize the FFT features with PyGame
+        visualize=visualize,  # Visualize the FFT features with PyGame
         verbose=False,  # Print running statistics (latency, fps, ...)
         height=450,  # Height, in pixels, of the visualizer window,
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
