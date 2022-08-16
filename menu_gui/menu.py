@@ -372,8 +372,9 @@ class AppWindow(QMainWindow):
                 self.frame_count = 0
                 self.update_count_frame()
             except Exception as e:
-                QMessageBox.warning(self, 'Error',
-                                    f'The following error occurred:\n{type(e)}: {e}')
+                QMessageBox.information(self, 'Info',
+                                        # f'The following error occurred:\n{type(e)}: {e}')
+                                        f'The animation has not been saved')
                 return
 
     def reset_cube(self):
@@ -398,8 +399,8 @@ class AppWindow(QMainWindow):
                     self.files.append(file_name)
                     self.files_path.append(file_path)
             except Exception as e:
-                QMessageBox.warning(self, 'Error',
-                                    f'The following error occurred:\n{type(e)}: {e}')
+                QMessageBox.information(self, 'Info',
+                                        f'The following error occurred:\n{type(e)}: {e}')
                 return
 
     def load_spectrum(self):
