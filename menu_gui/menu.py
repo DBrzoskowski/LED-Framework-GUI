@@ -84,8 +84,8 @@ class AppWindow(QMainWindow):
         self.animation_status = False
 
         # variables
-        self.fps = None
-        self.color_name = None
+        self.fps = 30
+        self.color_name = "#FFFFFF"
         self.currentNameBox = None
         self.files = []
         self.files_path = []
@@ -94,6 +94,7 @@ class AppWindow(QMainWindow):
         self.one_frame_copy = None
         self.all_frames = []
         self.is_spectrum_running = False
+        self.frame_count = 0
 
         # create buttons
         self.spectrumButton = QtWidgets.QPushButton(self)
@@ -110,6 +111,7 @@ class AppWindow(QMainWindow):
         self.lastOpenFileLabel = QtWidgets.QLabel(self)
         self.readyAnimationLabel = QtWidgets.QLabel(self)
         self.createAnimationLabel = QtWidgets.QLabel(self)
+        self.counterFrameLabel = QtWidgets.QLabel(self)
         self.colorLabel = QtWidgets.QLabel(self)
         self.fpsLabel = QtWidgets.QLabel(self)
 
@@ -265,6 +267,13 @@ class AppWindow(QMainWindow):
         self.createAnimationLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.createAnimationLabel.setObjectName("createAnimationLabel")
 
+        self.counterFrameLabel.setGeometry(QtCore.QRect(20, 440, 171, 31))
+        font = QtGui.QFont()
+        font.setFamily("Dubai Medium")
+        font.setPointSize(16)
+        self.counterFrameLabel.setFont(font)
+        self.counterFrameLabel.setObjectName("counterFrameLabel")
+
         self.colorLabel.setGeometry(QtCore.QRect(230, 440, 171, 31))
         font = QtGui.QFont()
         font.setFamily("Dubai Medium")
@@ -327,31 +336,45 @@ class AppWindow(QMainWindow):
         self.lastOpenFileLabel.setText(_translate("AppWindow", "File:"))
         self.readyAnimationLabel.setText(_translate("AppWindow", "3D LED Framework animations"))
         self.createAnimationLabel.setText(_translate("AppWindow", "CREATE ANIMATION"))
+        self.counterFrameLabel.setText(_translate("AppWindow", "Frame count:"))
         self.colorLabel.setText(_translate("AppWindow", "Color:"))
-        self.fpsLabel.setText(_translate("AppWindow", "FPS:"))
+        self.fpsLabel.setText(_translate("AppWindow", "FPS: 30"))
         # checkbox
         self.physicalCubeCheckBox.setText(_translate("AppWindow", "Send to physical cube"))
 
     def draw_animation(self):
         if self.draw_status:
             self.one_frame = self.cube.save_animation_frame_list()
+            self.frame_count += 1
+            self.update_count_frame()
             self.cube.unbinding()
             self.drawButton.setText("Create animation")
         elif not self.draw_status:
+            self.cube.set_drawing_fps(self.fps)
             self.cube.binding()
             self.drawButton.setText("Stop animation")
-        # self.colorAndFps()
         self.draw_status = not self.draw_status
 
+    def update_count_frame(self):
+        self.counterFrameLabel.setText("Frame count: " + str(self.frame_count))
+
     def save_animation(self):
+        # open file dialog
         file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
         file_path = file[0]
         # file_name = file_path.split("/")[-1]
 
         if file:
-            save = open(file_path, 'w')
-            for i in self.one_frame:
-                save.write(json.dumps(i) + "\n")
+            try:
+                save = open(file_path, 'w')
+                for i in self.one_frame:
+                    save.write(json.dumps(i) + "\n")
+                self.frame_count = 0
+                self.update_count_frame()
+            except Exception as e:
+                QMessageBox.warning(self, 'Error',
+                                    f'The following error occurred:\n{type(e)}: {e}')
+                return
 
     def reset_cube(self):
         self.cube.reset_cube_state()
@@ -361,20 +384,23 @@ class AppWindow(QMainWindow):
     def open_file(self):
         # open file dialog
         file = QFileDialog.getOpenFileName(self, "Open animation file", "", "Text Files (*.txt)")
-        # create file name
         file_path = file[0]
         file_name = file_path.split("/")[-1]
 
         if file:
-            self.lastOpenFileLabel.setText("Last open file: " + file_name)
-            self.lastOpenFileLabel.setWordWrap(True)
-            self.lastOpenFileLabel.adjustSize()
-            if file_path != '':
-                self.readyAnimationBox.insertItem(0, file_name)
-                self.cube.load_animation_from_file(file_path)
-
-        self.files.append(file_name)
-        self.files_path.append(file_path)
+            try:
+                self.lastOpenFileLabel.setText("File: " + file_name)
+                self.lastOpenFileLabel.setWordWrap(True)
+                # self.lastOpenFileLabel.adjustSize()
+                if file_path != '':
+                    self.readyAnimationBox.insertItem(0, file_name)
+                    self.cube.load_animation_from_file(file_path)
+                    self.files.append(file_name)
+                    self.files_path.append(file_path)
+            except Exception as e:
+                QMessageBox.warning(self, 'Error',
+                                    f'The following error occurred:\n{type(e)}: {e}')
+                return
 
     def load_spectrum(self):
         if self.is_spectrum_running:
@@ -403,35 +429,35 @@ class AppWindow(QMainWindow):
         color_name = color.name()
 
         if color.isValid():
+            self.color_name = color_name
             self.colorLabel.setStyleSheet("background-color: " + color_name)
             self.colorLabel.setText("Color: " + color_name)
-            self.colorLabel.adjustSize()
+            # self.colorLabel.adjustSize()
         else:
-            self.colorLabel.setText("Color: ")
+            self.colorLabel.setText("Color: " + self.color_name)
 
-        self.color_name = color_name
         self.cube.set_drawing_color(self.color_name)
 
     def input_fps(self):
         fps_input = QInputDialog.getInt(self, "Input fps", "FPS: ")
         fps = fps_input[0]
-        if input:
-            if 10 <= int(fps_input[0]) <= 60:
-                self.fpsLabel.setText("FPS: " + str(fps))
-                self.lastOpenFileLabel.adjustSize()
+        fps_bool = fps_input[1]
 
+        if fps_bool:
+            if 10 <= int(fps_input[0]) <= 60:
+                self.fps = fps
+                self.fpsLabel.setText("FPS: " + str(fps))
+                # self.fpsLabel.adjustSize()
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle("Error")
                 msg.setIcon(QMessageBox.Critical)
                 msg.setText("FPS value should be between 10 to 60.")
                 msg.exec_()
+        else:
+            self.fpsLabel.setText("FPS: " + str(self.fps))
 
-        self.fps = fps
         self.cube.set_drawing_fps(self.fps)
-
-    # def colorAndFps(self):
-    #     self.cube.gui_args_builder(self.color_name, self.fps)
 
     def choose_from_ready_box(self):
         current = self.readyAnimationBox.currentText()
