@@ -45,6 +45,8 @@ class Cube3D(canvas):
         # self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
         # self.camera.axis = vector(0,0,0)
 
+        self.send_to_cube_flag = False
+
         # self.height = 535
         # self.width = 690
 
@@ -72,7 +74,7 @@ class Cube3D(canvas):
         self.drawing_path.setdefault("color", [])
         self.drawing_path.setdefault("fps", 30)
         self.drawing_color = None
-        self.drawing_fps = None
+        self.drawing_fps = 30
         self.drawing_button_status = False
         self.animation_frame = []
         self.animation_step = []

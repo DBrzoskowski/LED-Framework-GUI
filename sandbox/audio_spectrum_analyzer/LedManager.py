@@ -13,7 +13,7 @@ from vpython import vector
 from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.run_FFT_analyzer import *
 
 # CONFIG
-MAX_PACKETS = 255
+MAX_PACKET_SIZE = 255
 
 UDP_IP = "192.168.0.10"
 UDP_PORT = 4210
@@ -302,10 +302,10 @@ def sendBodies(frame_to_send):
     bytes_to_send = frame_to_send.getTotalSize()
 
     while bytes_to_send > 0:
-        if bytes_to_send > (MAX_PACKETS - 1):
-            packet = frame_to_send.getData(bytes_sent, MAX_PACKETS - 1)
-            bytes_sent += MAX_PACKETS - 1
-            bytes_to_send -= MAX_PACKETS - 1
+        if bytes_to_send > (MAX_PACKET_SIZE - 1):
+            packet = frame_to_send.getData(bytes_sent, MAX_PACKET_SIZE - 1)
+            bytes_sent += MAX_PACKET_SIZE - 1
+            bytes_to_send -= MAX_PACKET_SIZE - 1
         else:
             packet = frame_to_send.getData(bytes_sent, bytes_to_send)
             bytes_sent += bytes_to_send
@@ -315,8 +315,9 @@ def sendBodies(frame_to_send):
 
 
 def sendFrame(obj, frame_to_send):
-    sendHeader(frame_to_send)
-    sendBodies(frame_to_send)
+    if obj.cube.send_to_cube_flag:
+        sendHeader(frame_to_send)
+        sendBodies(frame_to_send)
 
     obj.cube.update_simulated_cube(frame_to_send)
 
@@ -325,13 +326,14 @@ def sendFrame(obj, frame_to_send):
 
 
 def sendSpectrum(obj, barsData):
+
     data = [0] * (1 + 32)
     data[0] = TYPE_SPECTRUM
 
     dataIndex = 1
     for i in range(0, 63, 2):
-        test1 = barsData[i + 1] & 0b1111
-        test2 = barsData[i] & 0b00001111
+        # test1 = barsData[i + 1] & 0b1111
+        # test2 = barsData[i] & 0b00001111
 
         # if test1 < 1 or test1 > 7:
         # print("[ERROR] Wrong bar level")
@@ -342,10 +344,10 @@ def sendSpectrum(obj, barsData):
         data[dataIndex] = ((barsData[i + 1] & 0b1111) << 4) | (barsData[i] & 0b00001111)
         dataIndex += 1
 
-    MESSAGE = bytes(data)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-    sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+    if obj.cube.send_to_cube_flag:
+        MESSAGE = bytes(data)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
     frame = LEDFrame()
     #print(barsData)
@@ -422,7 +424,10 @@ def color_wheel(obj):
 
     start = current_milli_time()
 
-    while current_milli_time() - start < TIME_FOR_1_ANIMATIONS_IN_MS:
+    # while current_milli_time() - start < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
         if obj.cube.abort_animation_thread:
             return
 
@@ -435,7 +440,7 @@ def color_wheel(obj):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, 0, rany)
             sendFrame(obj, frame)
-            time.sleep(0.050)
+            time.sleep(delay)
 
         ranx = randint(0, 16)
         rany = randint(0, 16)
@@ -445,7 +450,7 @@ def color_wheel(obj):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
             sendFrame(obj, frame)
-            time.sleep(0.050)
+            time.sleep(delay)
 
         ranx = randint(0, 16)
         rany = randint(0, 16)
@@ -455,7 +460,7 @@ def color_wheel(obj):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, 0, ranx, rany)
             sendFrame(obj, frame)
-            time.sleep(0.050)
+            time.sleep(delay)
 
         ranx = randint(0, 16)
         rany = randint(0, 16)
@@ -464,7 +469,7 @@ def color_wheel(obj):
                 for zz in range(0, 8):
                     frame.turnOnLed(xx, yy, zz, ranx, rany, 0)
             sendFrame(obj, frame)
-            time.sleep(0.050)
+            time.sleep(delay)
 
 
 def brightness_3_colors():
@@ -542,7 +547,10 @@ def sinwaveTwo(obj):
 
     start = current_milli_time()
 
-    while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    #while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
         if obj.cube.abort_animation_thread:
             return
 
@@ -614,8 +622,10 @@ def sinwaveTwo(obj):
             sinewavearrayOLD[addr] = sinewavearray[addr]
 
         sendFrame(obj, frame)
-        time.sleep(0.050)
         frame.clear()
+
+        time.sleep(delay)
+
 
 
 class DoRainAnimation(threading.Thread):
@@ -657,7 +667,10 @@ def rainVersionTwo(obj):
 
     frame = LEDFrame()
 
-    while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
         if obj.cube.abort_animation_thread:
             return
 
@@ -712,7 +725,7 @@ def rainVersionTwo(obj):
             zold[addr] = z[addr]
 
         sendFrame(obj, frame)
-        time.sleep(0.04)
+        time.sleep(delay)
 
         for addr in range(0, leds):
             z[addr] = z[addr] - 1
@@ -796,7 +809,10 @@ def folder(obj):
     frame = LEDFrame()
 
     start = current_milli_time()
-    while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    #while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
         if obj.cube.abort_animation_thread:
             return
 
@@ -975,7 +991,6 @@ def folder(obj):
                         frame.turnOnLed(xx, yy + pullback[yy], 7 - folderaddr[7 - yy], ranx, rany, ranz)
 
         sendFrame(obj, frame)
-        time.sleep(DELAY_5MS)
 
         for xx in range(0, 8):
             LED_Old[xx] = folderaddr[xx]
@@ -1230,6 +1245,8 @@ def folder(obj):
             for zz in range(0, 8):
                 folderaddr[zz] = folderaddr[zz] + 1
 
+        time.sleep(delay)
+
 
 class DoBouncySnakeAnimation(threading.Thread):
     def __init__(self, obj, *args, **kwargs):
@@ -1281,7 +1298,10 @@ def bouncyvTwo(obj):
     frame = LEDFrame()
     start = current_milli_time()
 
-    while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
         if obj.cube.abort_animation_thread:
             return
 
@@ -1297,7 +1317,6 @@ def bouncyvTwo(obj):
           oldz[addr] = z[addr]
 
         sendFrame(obj, frame)
-        time.sleep(0.020)
 
         if direct == 0:
           x[0] = x[0] + xbit
@@ -1363,6 +1382,9 @@ def bouncyvTwo(obj):
           yy[addr] = yy[addr - 1]
           zz[addr] = zz[addr - 1]
 
+        time.sleep(delay)
+
+
 
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)
@@ -1409,11 +1431,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         window_ratio=24/9  # Float ratio of the visualizer window. e.g. 24/9
     )
 
-    fps = 50
+
     barsData = [0] * 64
     start_time = time.time()
 
     while True:
+        fps = obj.cube.drawing_fps
+
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
             return
@@ -1453,10 +1477,10 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         if (fft_duration_ms / 1000) > (1. / fps):
             print('continue')
-            time.sleep(0.002)
+            time.sleep(0.01)
             continue
 
-        time.sleep((1. / fps) - (fft_duration_ms / 1000))
+        time.sleep(((1. / fps) - (fft_duration_ms / 1000)) / 1000)
 
 
 if __name__ == '__main__':

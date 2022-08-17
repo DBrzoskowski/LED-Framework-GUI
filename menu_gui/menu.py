@@ -94,6 +94,7 @@ class AppWindow(QMainWindow):
         self.one_frame_copy = None
         self.all_frames = []
         self.is_spectrum_running = False
+        self.is_animation_running = False
         self.frame_count = 0
 
         # create buttons
@@ -315,6 +316,7 @@ class AppWindow(QMainWindow):
         font.setPointSize(10)
         self.physicalCubeCheckBox.setFont(font)
         self.physicalCubeCheckBox.setObjectName("physicalCubeCheckBox")
+        self.physicalCubeCheckBox.clicked.connect(self.update_send_to_cube_flag)
 
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -325,7 +327,7 @@ class AppWindow(QMainWindow):
         # buttons
         self.spectrumButton.setText(_translate("AppWindow", "Start spectrum"))
         self.openButton.setText(_translate("AppWindow", "Open Animation File"))
-        self.loadButton.setText(_translate("AppWindow", "Load Animation"))
+        self.loadButton.setText(_translate("AppWindow", "Start Animation"))
         self.resetButton.setText(_translate("AppWindow", "Reset Cube"))
         self.drawButton.setText(_translate("AppWindow", "Start Drawing"))
         self.colorButton.setText(_translate("AppWindow", "Color"))
@@ -358,6 +360,12 @@ class AppWindow(QMainWindow):
     def update_count_frame(self):
         self.counterFrameLabel.setText("Frame count: " + str(self.frame_count))
 
+    def update_send_to_cube_flag(self):
+        if self.physicalCubeCheckBox.isChecked():
+            self.cube.send_to_cube_flag = True
+        else:
+            self.cube.send_to_cube_flag = False
+
     def save_animation(self):
         # open file dialog
         file = QFileDialog.getSaveFileName(self, 'Save animation file', "", "Text Files (*.txt)")
@@ -378,6 +386,18 @@ class AppWindow(QMainWindow):
                 return
 
     def reset_cube(self):
+        if self.cube.animation_thread is not None:
+            self.cube.abort_animation_thread = True
+            self.cube.animation_thread.join()
+
+        if self.is_spectrum_running:
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start spectrum")
+
+        if self.is_animation_running:
+            self.is_animation_running = False
+            self.loadButton.setText("Start animation")
+
         self.cube.reset_cube_state()
         clean_frame = LEDFrame()
         sendFrame(self, clean_frame)
@@ -465,6 +485,20 @@ class AppWindow(QMainWindow):
         self.currentNameBox = current
 
     def load_animation(self):
+        if not self.is_animation_running:
+            self.is_animation_running = True
+            self.loadButton.setText("Stop animation")
+            print("Set to Stop animation")
+        else:
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.is_animation_running = False
+            self.loadButton.setText("Start animation")
+            print("Set to Start animation")
+            return
+
         if self.currentNameBox == "Double Outline":
             self.cube.double_outline_animation()
         elif self.currentNameBox == "Outline Inside Ankle":
