@@ -350,11 +350,11 @@ class AppWindow(QMainWindow):
             self.frame_count += 1
             self.update_count_frame()
             self.cube.unbinding()
-            self.drawButton.setText("Create animation")
+            self.drawButton.setText("Start Drawing")
         elif not self.draw_status:
             self.cube.set_drawing_fps(self.fps)
             self.cube.binding()
-            self.drawButton.setText("Stop animation")
+            self.drawButton.setText("Stop Drawing")
         self.draw_status = not self.draw_status
 
     def update_count_frame(self):
