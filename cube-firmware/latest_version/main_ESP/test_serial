@@ -1,0 +1,27 @@
+
+byte rx_byte;
+byte buffer[3];
+
+if (Serial.available() > 0) {
+    //noInterrupts();
+    Serial.readBytes(buffer, 3);
+    Serial.print("You typed: ");
+    Serial.println(rx_byte);
+    //interrupts();
+
+    for(int z = 0; z < 4; z++) {
+      for(int x = 0; x < 4; x++) {
+        for(int y = 0; y < 4; y++) {
+          frame.allLeds[x][y][z].red = buffer[0];
+          frame.allLeds[x][y][z].green = buffer[1];
+          frame.allLeds[x][y][z].blue = buffer[2];
+        }
+      }
+    }
+
+    //frame.fillAllLedsWithRedColor(rx_byte);
+    //frame.fillAllLedsWithGreenColor(rx_byte);
+    CubeManager::loadFrame(frame);
+    delay(32);
+    
+  }
