@@ -44,7 +44,7 @@ class Cube3D(canvas):
 
     def initialize(self):
         """
-        This function it's necessary to re-init the right one simulation inside GUI
+        This method it's necessary to re-init the right one simulation inside GUI
         """
         super().__init__()
         self.leds = []
