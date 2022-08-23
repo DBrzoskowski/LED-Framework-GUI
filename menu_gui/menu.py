@@ -325,7 +325,7 @@ class AppWindow(QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("AppWindow", "3D LED Framework"))
         # buttons
-        self.spectrumButton.setText(_translate("AppWindow", "Start spectrum"))
+        self.spectrumButton.setText(_translate("AppWindow", "Start Spectrum"))
         self.openButton.setText(_translate("AppWindow", "Open Animation File"))
         self.loadButton.setText(_translate("AppWindow", "Start Animation"))
         self.resetButton.setText(_translate("AppWindow", "Reset Cube"))
@@ -392,11 +392,11 @@ class AppWindow(QMainWindow):
 
         if self.is_spectrum_running:
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
         if self.is_animation_running:
             self.is_animation_running = False
-            self.loadButton.setText("Start animation")
+            self.loadButton.setText("Start Animation")
 
         self.cube.reset_cube_state()
         clean_frame = LEDFrame()
@@ -431,10 +431,10 @@ class AppWindow(QMainWindow):
                 self.cube.abort_animation_thread = True
                 self.cube.animation_thread.join()
 
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
         else:
             self.is_spectrum_running = True
-            self.spectrumButton.setText("Stop spectrum")
+            self.spectrumButton.setText("Stop Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
@@ -487,16 +487,16 @@ class AppWindow(QMainWindow):
     def load_animation(self):
         if not self.is_animation_running:
             self.is_animation_running = True
-            self.loadButton.setText("Stop animation")
-            print("Set to Stop animation")
+            self.loadButton.setText("Stop Animation")
+            # print("Set to Stop animation")
         else:
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
                 self.cube.animation_thread.join()
 
             self.is_animation_running = False
-            self.loadButton.setText("Start animation")
-            print("Set to Start animation")
+            self.loadButton.setText("Start Animation")
+            # print("Set to Start animation")
             return
 
         if self.currentNameBox == "Double Outline":
@@ -509,7 +509,7 @@ class AppWindow(QMainWindow):
             self.cube.random_color_animation()
         elif self.currentNameBox == "Bouncy snake":
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
@@ -520,7 +520,7 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread.start()
         elif self.currentNameBox == "Sin wave":
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
@@ -531,7 +531,7 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread.start()
         elif self.currentNameBox == "Folder":
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
@@ -542,7 +542,7 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread.start()
         elif self.currentNameBox == "Rain":
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
@@ -553,7 +553,7 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread.start()
         elif self.currentNameBox == "Color wheel":
             self.is_spectrum_running = False
-            self.spectrumButton.setText("Start spectrum")
+            self.spectrumButton.setText("Start Spectrum")
 
             if self.cube.animation_thread is not None:
                 self.cube.abort_animation_thread = True
