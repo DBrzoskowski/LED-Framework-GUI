@@ -35,14 +35,6 @@ QPushButton:hover {
     transition: background .3s 0.5s;
 }"""
 
-animationStateLabel_red = """QLabel {
-    color: red;
-}"""
-
-animationStateLabel_green = """QLabel {
-    color: green;
-}"""
-
 
 class DoStartGUI(threading.Thread):
     def __init__(self, obj, *args, **kwargs):
@@ -62,11 +54,6 @@ def start_menu(cube):
     sys.exit(app.exec_())
 
 
-# def second_window():
-#     second = AnotherWindow()
-#     second.show()
-
-
 class AppWindow(QMainWindow):
     def __init__(self):
         super(AppWindow, self).__init__()
@@ -74,8 +61,6 @@ class AppWindow(QMainWindow):
         self.setFixedSize(1501, 511)
         self.setWindowTitle("3D LED Framework")
         self.setWindowIcon(QtGui.QIcon('menu_gui/icon.png'))
-
-        # self.sub_win = AnotherWindow()
 
         # Cube
         self.cube = None
@@ -85,7 +70,7 @@ class AppWindow(QMainWindow):
 
         # variables
         self.fps = 30
-        self.color_name = "#FFFFFF"
+        self.color_name = "#ffffff"
         self.currentNameBox = None
         self.files = []
         self.files_path = []
@@ -571,21 +556,3 @@ class AppWindow(QMainWindow):
     def build_cube(self, cube):
         self.cube = cube
         print(self.cube)
-
-
-# class AnotherWindow(QWebEngineView):
-#     def __init__(self):
-#         super(AnotherWindow, self).__init__()
-#         self.setFixedSize(800, 800)
-#         self.setWindowTitle("Cube")
-#
-#         self.browser = QWebEngineView(self)
-#
-#         self.ui()
-#
-#     def ui(self):
-#         # web page view
-#         self.browser.setUrl(QUrl("http://localhost:8980/"))
-#         self.browser.setGeometry(QtCore.QRect(10, 10, 700, 700))
-#         self.browser.show()
-
