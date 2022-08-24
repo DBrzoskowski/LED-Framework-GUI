@@ -136,33 +136,6 @@ class Cube3D(canvas):
         except TypeError as err:
             print(f"Wrong type {err}")
 
-    def get_visible_leds(self):
-        return [i for i in self.leds if i.visible is True]
-
-    def change_color(self, v):
-        if isinstance(v, str):
-            color_picker = {
-                'black': vector(0, 0, 0),
-                'white': vector(1, 1, 1),
-                'red': vector(1, 0, 0),
-                'green': vector(0, 1, 0),
-                'blue': vector(0, 0, 1),
-                'yellow': vector(1, 1, 0),
-                'cyan': vector(0, 1, 1),
-                'magenta': vector(1, 0, 1),
-                'orange': vector(1, 0.6, 0),
-                'purple': vector(0.4, 0.2, 0.6)
-            }
-            cp = color_picker[v]
-        elif type(v) == vector:
-            cp = v
-        else:
-            print('change_color ERROR')
-            cp = None
-
-        for i in self.get_visible_leds():
-            i.color = cp
-
     def get_led_from_visible(self, position):
         return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
 
@@ -172,8 +145,7 @@ class Cube3D(canvas):
         sleep(0.5)
 
     def random_color_animation(self):
-        leds = self.get_visible_leds()  # 512 visible LEDs
-        for i in leds:
+        for i in self.leds:
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
     def outer_layer_animation(self, col=vector(1, 1, 1), fps=30):
