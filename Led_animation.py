@@ -63,8 +63,6 @@ class Cube3D(canvas):
         self.drawing_path.setdefault("fps", 30)
         self.drawing_color = None
         self.drawing_fps = 30
-        self.drawing_button_status = False
-        self.animation_frame = []
         self.animation_step = []
         self.drawing_path_list = []
 
