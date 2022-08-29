@@ -1,0 +1,5 @@
+#ifndef GUARD
+#define GUARD
+
+constexpr int CUBE_DIMENSION = 8;
+#endif
