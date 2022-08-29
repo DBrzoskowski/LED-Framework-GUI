@@ -23,12 +23,12 @@ from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, dis
 from menu_gui.menu import DoStartGUI
 from sandbox.audio_spectrum_analyzer.LedManager import *
 import asyncio
-# scene.background = vector(0.95, 1, 1) # white background
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 
 ANIMATION_FILE = 'animation_path.txt'
 
 drawing_path = []
+
 
 def fps_to_milliseconds(fps):
     return 1.0/fps
@@ -36,37 +36,30 @@ def fps_to_milliseconds(fps):
 
 class Cube3D(canvas):
 
+    def __init__(self, size, led_radius, spacing, momentum_range):
+        self._size = size
+        self._led_radius = led_radius
+        self._spacing = spacing
+        self._momentum_range = momentum_range
+
     def initialize(self):
+        """
+        This method it's necessary to re-init the right one simulation inside GUI
+        """
         super().__init__()
-        # self.bind('click', self.LEDs_on_click_event)  # Bind LED on click event
-        # self.unbind('click', self.LEDs_on_click_event)  # Disabled LEDs on click event
         self.leds = []
         self.center = 0.5 * (8 - 1) * vector(1, 1, 1)  # camera start view
-        # self.camera.axis = vector(-0.230071, 0.34825, 10.3748)
-        # self.camera.axis = vector(0,0,0)
 
         self.send_to_cube_flag = False
 
-        # self.height = 535
-        # self.width = 690
-
         self.height = 500
         self.width = 650
-
-        #self.caption = """A model of a solid represented as leds connected by interledic bonds.
-        #
-        #                        To rotate "camera", drag with right button or Ctrl-drag.
-        #                        To zoom, drag with middle button or Alt/Option depressed, or use scroll wheel.
-        #                          On a two-button mouse, middle is left + right.
-        #                        To pan left/right and up/down, Shift-drag.
-        #                        Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
 
         self.lights = []
         self.old_led_color = {}
 
         self.abort_animation_thread = True
         self.animation_thread = None
-        #self.gui_thread = None
 
         # The part responsible for drawing
         self.drawing_path = {}
@@ -79,7 +72,6 @@ class Cube3D(canvas):
         self.animation_frame = []
         self.animation_step = []
         self.drawing_path_list = []
-        #self.button_drawing = button(text="Not drawing", pos=self.title_anchor, bind=self.drawing_status)
 
         self.background = vector(0.12, 0.12, 0.06)
 
@@ -96,20 +88,12 @@ class Cube3D(canvas):
                     led.radius = self._led_radius
                     if 0 <= x < self._size and 0 <= y < self._size and 0 <= z < self._size:
                         p = vec.random()
-                        led.momentum = self._momentumRange * p
+                        led.momentum = self._momentum_range * p
                         led.color = color.black
                     else:
-                        # led.visible = False
                         led.momentum = vec(0, 0, 0)
                     led.index = len(self.leds)
                     self.leds.append(led)
-
-    def __init__(self, size, led_radius, spacing, momentumRange):
-        self._size = size
-        self._led_radius = led_radius
-        self._spacing = spacing
-        self._momentumRange = momentumRange
-        #self.initialize()
 
     def binding(self):
         self.bind('click', self.led_on_click_event)  # Bind LED on click event
@@ -128,8 +112,6 @@ class Cube3D(canvas):
                     self.leds[led_index].color = color
 
     def led_on_click_event(self, ev):
-        # print(ev.event, ev.which)
-        print(ev)
         hit = self.mouse.pick
         self.drawing_path["fps"] = self.drawing_fps
 
@@ -154,34 +136,6 @@ class Cube3D(canvas):
         except TypeError as err:
             print(f"Wrong type {err}")
 
-    def get_visible_leds(self):
-        return [i for i in self.leds if i.visible is True]
-
-    def change_color(self, v):
-        leds = self.get_visible_leds()
-        if isinstance(v, str):
-            color_picker = {
-                'black': vector(0, 0, 0),
-                'white': vector(1, 1, 1),
-                'red': vector(1, 0, 0),
-                'green': vector(0, 1, 0),
-                'blue': vector(0, 0, 1),
-                'yellow': vector(1, 1, 0),
-                'cyan': vector(0, 1, 1),
-                'magenta': vector(1, 0, 1),
-                'orange': vector(1, 0.6, 0),
-                'purple': vector(0.4, 0.2, 0.6)
-            }
-            cp = color_picker[v]
-        elif type(v) == vector:
-            cp = v
-        else:
-            print('change_color ERROR')
-            cp = None
-
-        for i in leds:
-            i.color = cp
-
     def get_led_from_visible(self, position):
         return [i for i in self.leds if (i.pos.z, i.pos.y, i.pos.x) == position][0]
 
@@ -191,8 +145,7 @@ class Cube3D(canvas):
         sleep(0.5)
 
     def random_color_animation(self):
-        leds = self.get_visible_leds()  # 512 visible LEDs
-        for i in leds:
+        for i in self.leds:
             i.color = vector(uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
     def outer_layer_animation(self, col=vector(1, 1, 1), fps=30):
@@ -303,10 +256,6 @@ class Cube3D(canvas):
 
             rate(fps)
 
-    def save_animation_to_frame(self, file_path=ANIMATION_FILE, to_file=False):
-        if self.drawing_path["pos"] and self.drawing_path["color"]:
-            return self.drawing_path
-
     def save_animation_frame_list(self):
         if self.drawing_path["pos"] and self.drawing_path["color"]:
             copy_dict = copy.deepcopy(self.drawing_path)
@@ -343,6 +292,7 @@ class Cube3D(canvas):
 
                 # fps after chunk of animation end and waiting for next part
                 rate(fps)
+
         # it's sleep because rate working based on windows time
         # (resolve problem with unexpected speed-up animation)
         sleep(fps_to_milliseconds(fps))
@@ -352,46 +302,6 @@ class Cube3D(canvas):
 
     def set_drawing_fps(self, fps):
         self.drawing_fps = fps
-
-    # def gui_args_builder(self, drawing_color, fps):
-    #     self.drawing_color = drawing_color
-    #     self.drawing_fps = fps
-    #     try:
-    #         if self.drawing_color and self.drawing_fps:
-    #             return self.drawing_color, self.drawing_fps
-    #     except ReferenceError as err:
-    #         print(f"One of the arguments hasn't been defined -> {err}")
-
-    # def drawing(self, drawing_color=color.red, default_color=color.black, fps=30):
-    #     # Get info from GUI about color and fps
-    #     if self.drawing_color and self.drawing_fps:
-    #         drawing_color = self.drawing_color
-    #         fps = self.drawing_fps
-    #
-    #     self.waitfor('click')
-    #     hit = self.mouse.pick
-    #     self.drawing_path["fps"] = fps
-    #
-    #     drawing_color = self.hex2vector(drawing_color)
-    #
-    #     if hit:
-    #         if hit.color != drawing_color:
-    #             self.old_led_color[hit.idx] = default_color
-    #
-    #         hit.color = drawing_color if hit.color == self.old_led_color[hit.idx] else self.old_led_color[hit.idx]
-    #
-    #         self.drawing_path["pos"].append(hit.pos.value)
-    #         self.drawing_path["color"].append(hit.color.value)
-
-    # # button
-    # def drawing_status(self, b):
-    #     self.drawing_button_status = not self.drawing_button_status
-    #     if self.drawing_button_status:
-    #         b.text = "Drawing"
-    #         # while self.drawing_button_status:
-    #         #     self.drawing()
-    #     else:
-    #         b.text = "Not drawing"
 
 
 if __name__ == '__main__':
@@ -404,9 +314,6 @@ if __name__ == '__main__':
 
     # fully initialize cube and open web socket with simulation
     c.initialize()
-
-    #c.background = color.black  # temporarily to see the leds better
-    #c.background = vector(0.08, 0.08, 0.04)
 
     # Wait for GUI thread to end
     c.gui_thread.join()
