@@ -11,18 +11,13 @@ import os
 
 sys.path.append(os.getcwd())
 
-import time
 import json
 import txaio
-import math
 import copy
-from random import uniform
-from scipy.interpolate import interp1d
 from colormap import hex2rgb
-from vpython import canvas, scene, vector, sphere, vec, color, curve, sleep, distant_light, button, rate
+from vpython import canvas, sphere, vec, color, sleep, distant_light, rate
 from menu_gui.menu import DoStartGUI
 from sandbox.audio_spectrum_analyzer.LedManager import *
-import asyncio
 txaio.use_asyncio()  # resolve problem with library https://stackoverflow.com/questions/34157314/autobahn-websocket-issue-while-running-with-twistd-using-tac-file
 
 ANIMATION_FILE = 'animation_path.txt'
