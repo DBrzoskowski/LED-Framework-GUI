@@ -414,10 +414,14 @@ class AppWindow(QMainWindow):
                 self.lastOpenFileLabel.setWordWrap(True)
                 # self.lastOpenFileLabel.adjustSize()
                 if file_path != '':
-                    self.readyAnimationBox.insertItem(0, file_name)
-                    self.cube.load_animation_from_file(file_path)
                     self.files.append(file_name)
                     self.files_path.append(file_path)
+                    self.readyAnimationBox.insertItem(0, file_name)
+                    #self.cube.load_animation_from_file(file_path)
+                    x = self.files.index(file_name)
+                    self.cube.animation_thread = DoAnimationFromFile(obj=self.cube, filename=self.files_path[x], one_iteration=True)
+                    self.cube.animation_thread.start()
+
             except Exception as e:
                 QMessageBox.information(self, 'Info',
                                         f'The following error occurred:\n{type(e)}: {e}')
@@ -603,7 +607,18 @@ class AppWindow(QMainWindow):
             self.cube.animation_thread.start()
         elif self.currentNameBox in self.files:
             x = self.files.index(self.currentNameBox)
-            self.cube.load_animation_from_file(self.files_path[x])
+
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start Spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoAnimationFromFile(obj=self.cube, filename=self.files_path[x])
+            self.cube.animation_thread.start()
+
         else:
             self.pathLabel.setText("outofscope")
 

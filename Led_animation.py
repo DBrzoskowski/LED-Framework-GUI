@@ -258,7 +258,6 @@ class Cube3D(canvas):
         return self.drawing_path_list
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
-        print("asdasd")
         frame = LEDFrame()
         self.abort_animation_thread = False
 
@@ -281,8 +280,8 @@ class Cube3D(canvas):
 
                 fps = self.drawing_fps
 
-                if line.get("fps"):
-                    fps = line.get("fps")
+                #if line.get("fps"):
+                #    fps = line.get("fps")
 
                 delay = (1000.0 / int(fps)) / 1000
 

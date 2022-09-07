@@ -1,3 +1,4 @@
+import json
 import math
 import random
 import socket
@@ -408,6 +409,64 @@ def sendSpectrum(obj, barsData):
 
 def current_milli_time():
     return round(time.time() * 1000)
+
+
+class DoAnimationFromFile(threading.Thread):
+    def __init__(self, obj, filename, one_iteration = False, *args, **kwargs):
+        super(DoAnimationFromFile, self).__init__(*args, **kwargs)
+        self.obj = obj
+        self.filename = filename
+        self.one_iteration = one_iteration
+
+    def run(self):
+        animation_from_file(self.obj, self.filename, self.one_iteration)
+
+
+def animation_from_file(obj, file_path, one_iteration):
+    frame = LEDFrame()
+    obj.abort_animation_thread = False
+
+    while 1:
+        frame.clear()
+        with open(file_path, 'r') as f:
+            if obj.abort_animation_thread:
+                return
+
+            for i in f.readlines():
+                line = json.loads(i)
+
+                if line.get("color"):
+                    colors = line.get("color")
+
+                if line.get("pos"):
+                    for pos in line.get("pos"):
+                        # this must be reverse because we start drawing from the z axis
+                        # e.g | x, y, z -> (6.0, 0.0, 7.0) | ==> | x, y, z -> (7.0, 0.0, 6.0) |
+                        pos.reverse()
+                        obj.animation_step.append(obj.get_led_from_visible(tuple(pos)))
+
+                fps = obj.drawing_fps
+
+                if line.get("fps"):
+                    fps = line.get("fps")
+
+                delay = (1000.0 / int(fps)) / 1000
+
+                # animation process
+                for led, col in zip(obj.animation_step, colors):
+                    r, g, b = col
+                    frame.turnOnLed(int(led.pos.x), int(led.pos.y), int(led.pos.z), int(r / 0.066), int(g / 0.066),
+                                    int(b / 0.066))
+
+                # clear animation step list
+                obj.animation_step = []
+
+                # fps after chunk of animation end and waiting for next part
+                sendFrame(obj, frame, True)
+                time.sleep(delay)
+
+        if one_iteration:
+            return
 
 
 class DoColorWheelAnimation(threading.Thread):
@@ -1630,6 +1689,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
     while True:
         fps = obj.cube.drawing_fps
+        delay = (1000.0 / fps) / 1000
 
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
@@ -1665,7 +1725,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
                 test = 4
 
             level = int(translate(power, 0, test, 0, 7))
-            print(level)
+            #print(level)
             if level > 7:
                 level = 7
             barsData[i] = int(level + 0.2)
@@ -1675,12 +1735,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         sendSpectrum(obj, barsData)
         fft_duration_ms = current_milli_time() - start_time_ms
 
-        if (fft_duration_ms / 1000) > (1. / fps):
-            print('continue')
-            time.sleep(0.01)
-            continue
+        #if (fft_duration_ms / 1000) > (1. / fps):
+        #    print('continue')
+        #    time.sleep(0.01)
+        #    continue
 
-        time.sleep(((1. / fps) - (fft_duration_ms / 1000)) / 1000)
+        #time.sleep(((1. / fps) - (fft_duration_ms / 1000)) / 1000)
+        time.sleep(delay)
 
 
 if __name__ == '__main__':
