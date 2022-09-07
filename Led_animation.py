@@ -258,7 +258,14 @@ class Cube3D(canvas):
         return self.drawing_path_list
 
     def load_animation_from_file(self, file_path=ANIMATION_FILE):
+        print("asdasd")
+        frame = LEDFrame()
+        self.abort_animation_thread = False
+
         with open(file_path, 'r') as f:
+            if self.abort_animation_thread:
+                return
+
             for i in f.readlines():
                 line = json.loads(i)
 
@@ -272,23 +279,28 @@ class Cube3D(canvas):
                         pos.reverse()
                         self.animation_step.append(self.get_led_from_visible(tuple(pos)))
 
+                fps = self.drawing_fps
+
                 if line.get("fps"):
                     fps = line.get("fps")
+
+                delay = (1000.0 / int(fps)) / 1000
 
                 # animation process
                 for led, col in zip(self.animation_step, colors):
                     r, g, b = col
-                    led.color = vector(r, g, b)
+                    frame.turnOnLed(int(led.pos.x), int(led.pos.y), int(led.pos.z), int(r / 0.066), int(g / 0.066), int(b / 0.066))
 
                 # clear animation step list
                 self.animation_step = []
 
                 # fps after chunk of animation end and waiting for next part
-                rate(fps)
+                sendFrame(self, frame, True)
+                time.sleep(delay)
 
         # it's sleep because rate working based on windows time
         # (resolve problem with unexpected speed-up animation)
-        sleep(fps_to_milliseconds(fps))
+        #sleep(fps_to_milliseconds(fps))
 
     def set_drawing_color(self, drawing_color):
         self.drawing_color = drawing_color

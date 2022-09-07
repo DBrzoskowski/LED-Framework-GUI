@@ -315,15 +315,24 @@ def sendBodies(frame_to_send):
         sendBody(packet)
 
 
-def sendFrame(obj, frame_to_send):
-    if obj.cube.send_to_cube_flag:
-        sendHeader(frame_to_send)
-        sendBodies(frame_to_send)
+def sendFrame(obj, frame_to_send, different_object = False):
+    if different_object:
+        try:
+            if obj.send_to_cube_flag:
+                sendHeader(frame_to_send)
+                sendBodies(frame_to_send)
 
-    obj.cube.update_simulated_cube(frame_to_send)
+            obj.update_simulated_cube(frame_to_send)
+        except:
+            print("exception")
+            pass
+    else:
+        if obj.cube.send_to_cube_flag:
+            sendHeader(frame_to_send)
+            sendBodies(frame_to_send)
 
-    # send header
-    # send bodies
+        obj.cube.update_simulated_cube(frame_to_send)
+
 
 
 def sendSpectrum(obj, barsData):
