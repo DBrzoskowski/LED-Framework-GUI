@@ -1395,16 +1395,13 @@ def rgb(minimum, maximum, value):
     return r, g, b
 
 
-def translate(value, leftMin, leftMax, rightMin, rightMax):
-    # Figure out how 'wide' each range is
-    leftSpan = leftMax - leftMin
-    rightSpan = rightMax - rightMin
+def translate(value, fromMin, fromMax, toMin, toMax):
+    fromSpan = fromMax - fromMin
+    toSpan = toMax - toMin
 
-    # Convert the left range into a 0-1 range (float)
-    valueScaled = float(value - leftMin) / float(leftSpan)
+    scale = toSpan / fromSpan
 
-    # Convert the 0-1 range into a value in the right range.
-    return rightMin + (valueScaled * rightSpan)
+    return (value - fromMin) * scale
 
 
 class DoSpectrumAnimation(threading.Thread):
@@ -1449,7 +1446,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
-        #print(max(binned_fft))
+        #print(f"max{max(binned_fft)}")
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
@@ -1465,8 +1462,8 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             elif int(frequency) > 4000:
                 max_power = 14
 
-            level = translate(power, 0, max_power, 0, 7)
-
+            level = int(translate(power, 0, max(binned_fft), 0, 7))
+            print(level)
             if level > 7:
                 level = 7
             barsData[i] = int(level + 0.2)
