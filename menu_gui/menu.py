@@ -485,6 +485,9 @@ class AppWindow(QMainWindow):
         self.currentNameBox = current
 
     def load_animation(self):
+        if self.currentNameBox is None:
+            self.currentNameBox = "Double Outline"
+
         if not self.is_animation_running:
             self.is_animation_running = True
             self.loadButton.setText("Stop Animation")
@@ -500,13 +503,49 @@ class AppWindow(QMainWindow):
             return
 
         if self.currentNameBox == "Double Outline":
-            self.cube.double_outline_animation()
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start Spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoDoubleOutlineAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Outline Inside Ankle":
-            self.cube.outline_inside_ankle_animation()
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start Spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoOutlineInsideAnkleAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Outer Layer":
-            self.cube.outer_layer_animation()
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start Spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoOuterLayerAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Random Color":
-            self.cube.random_color_animation()
+            self.is_spectrum_running = False
+            self.spectrumButton.setText("Start Spectrum")
+
+            if self.cube.animation_thread is not None:
+                self.cube.abort_animation_thread = True
+                self.cube.animation_thread.join()
+
+            self.cube.abort_animation_thread = False
+            self.cube.animation_thread = DoRandomColorAnimation(obj=self)
+            self.cube.animation_thread.start()
         elif self.currentNameBox == "Bouncy snake":
             self.is_spectrum_running = False
             self.spectrumButton.setText("Start Spectrum")

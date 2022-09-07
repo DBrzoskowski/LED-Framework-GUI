@@ -1,4 +1,5 @@
 import math
+import random
 import socket
 import sys
 import webbrowser
@@ -1248,6 +1249,192 @@ def folder(obj):
         time.sleep(delay)
 
 
+class DoRandomColorAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoRandomColorAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        randomColor(self.obj)
+
+
+def randomColor(obj):
+    frame = LEDFrame()
+    start = current_milli_time()
+
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        frame.clear()
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
+        if obj.cube.abort_animation_thread:
+            return
+
+        for i in obj.cube.leds:
+            frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), randint(0, 15), randint(0, 15), randint(0, 15))
+
+        time.sleep(delay * 50)
+
+
+class DoOuterLayerAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoOuterLayerAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        outerLayer(self.obj)
+
+
+def outerLayer(obj):
+    frame = LEDFrame()
+    start = current_milli_time()
+
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        frame.clear()
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
+        if obj.cube.abort_animation_thread:
+            return
+
+        for y in range(0, 8):
+            get_all = [obj.cube.get_led_from_visible((0, y, i)) for i in range(0, 8)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in range(0, 8):
+            get_all = [obj.cube.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in reversed(range(0, 8)):
+            get_all = [obj.cube.get_led_from_visible((7, y, i)) for i in range(0, 8)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in reversed(range(0, 8)):
+            get_all = [obj.cube.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+
+class DoOutlineInsideAnkleAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoOutlineInsideAnkleAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        outlineInsideAnkle(self.obj)
+
+
+def outlineInsideAnkle(obj):
+    frame = LEDFrame()
+    start = current_milli_time()
+
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        frame.clear()
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
+        if obj.cube.abort_animation_thread:
+            return
+
+        for y in range(2, 6):
+            get_all = [obj.cube.get_led_from_visible((2, y, i)) for i in range(2, 6)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in range(2, 6):
+            get_all = [obj.cube.get_led_from_visible((y, 5, i)) for i in range(2, 6)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in reversed(range(2, 6)):
+            get_all = [obj.cube.get_led_from_visible((5, y, i)) for i in range(2, 6)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in reversed(range(2, 6)):
+            get_all = [obj.cube.get_led_from_visible((y, 2, i)) for i in range(2, 6)]
+            for i in get_all:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+
+class DoDoubleOutlineAnimation(threading.Thread):
+    def __init__(self, obj, *args, **kwargs):
+        super(DoDoubleOutlineAnimation, self).__init__(*args, **kwargs)
+        self.obj = obj
+
+    def run(self):
+        doubleOutline(self.obj)
+
+
+def doubleOutline(obj):
+    frame = LEDFrame()
+    start = current_milli_time()
+
+    # while (current_milli_time() - start) < TIME_FOR_1_ANIMATIONS_IN_MS:
+    while 1:
+        frame.clear()
+        delay = (1000.0 / obj.cube.drawing_fps) / 1000
+
+        if obj.cube.abort_animation_thread:
+            return
+
+        for y in range(0, 8):
+            get_all_1 = [obj.cube.get_led_from_visible((0, y, i)) for i in range(0, 8)]
+            get_all_2 = [obj.cube.get_led_from_visible((2, y, i)) for i in range(2, 6) if y in [2, 3, 4, 5]]
+
+            for i in get_all_1:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+
+            for i in get_all_2:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 0, 0)
+
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in range(0, 8):
+            get_all_1 = [obj.cube.get_led_from_visible((y, 7, i)) for i in range(0, 8)]
+            get_all_2 = [obj.cube.get_led_from_visible((y, 5, i)) for i in range(2, 6) if y in [3, 4, 5]]
+            for i in get_all_1:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+
+            for i in get_all_2:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 0, 0)
+
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+        for y in reversed(range(0, 8)):
+            get_all_1 = [obj.cube.get_led_from_visible((y, 0, i)) for i in range(0, 8)]
+            get_all_2 = [obj.cube.get_led_from_visible((y, 2, i)) for i in range(2, 6) if y in [3, 4, 5]]
+            for i in get_all_1:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 15, 15)
+
+            for i in get_all_2:
+                frame.turnOnLed(int(i.pos.x), int(i.pos.y), int(i.pos.z), 15, 0, 0)
+
+            sendFrame(obj, frame)
+            time.sleep(delay)
+
+
 class DoBouncySnakeAnimation(threading.Thread):
     def __init__(self, obj, *args, **kwargs):
         super(DoBouncySnakeAnimation, self).__init__(*args, **kwargs)
@@ -1461,12 +1648,19 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
                 max_power = 20
             elif int(frequency) > 4000:
                 max_power = 14
+            
 
-            level = int(translate(power, 0, max(binned_fft), 0, 7))
+            test = max(binned_fft)
+
+            if test < 4:
+                test = 4
+
+            level = int(translate(power, 0, test, 0, 7))
             print(level)
             if level > 7:
                 level = 7
             barsData[i] = int(level + 0.2)
+            
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
         sendSpectrum(obj, barsData)
