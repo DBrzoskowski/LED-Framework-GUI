@@ -1651,6 +1651,8 @@ def rgb(minimum, maximum, value):
 
 
 def translate(value, fromMin, fromMax, toMin, toMax):
+    if fromMax == 0:
+        return 0
     fromSpan = fromMax - fromMin
     toSpan = toMax - toMin
 
@@ -1702,7 +1704,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
-        #print(f"max{max(binned_fft)}")
+        print(f"max{max(binned_fft)}")
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
@@ -1710,8 +1712,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             x = int(i / 8)
             y = i % 8
 
-            max_power = 30
+            level = translate(power, 0, max(binned_fft), 0, 23)
+            if level == None:
+                level = 0
+            else :
+                level = int(level)
 
+            """
             # TODO: automatic power translation
             if int(frequency) > 2500:
                 max_power = 20
@@ -1729,8 +1736,26 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             if level > 7:
                 level = 7
             barsData[i] = int(level + 0.2)
-            
-            #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
+            #
+            """
+            if level > 20:
+                level = 7
+            elif 20 >= level >= 18:
+                level = 6
+            elif 18 > level >= 15:
+                level = 5
+            elif 15 > level >= 12:
+                level = 4
+            elif 12 > level >= 9:
+                level = 3
+            elif 9 > level >= 6:
+                level = 2
+            elif 6 > level >= 3:
+                level = 1
+            else:
+                level = 0
+
+            barsData[i] = level
 
         sendSpectrum(obj, barsData)
         fft_duration_ms = current_milli_time() - start_time_ms
