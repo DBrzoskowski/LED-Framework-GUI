@@ -165,27 +165,27 @@ void animateRain() {
 }
 
 void loop() {
-/*
-  animateRain();
 
+  //animateRain();
+/*
   LOG("clear");
-  gCubeManager.current_frame->clear();
+  frame_new.clear();
   delay(1000);
 
   LOG("white");
-  gCubeManager.current_frame->setWhite();
+  frame_new.setWhite();
   delay(1000);
-  
+
   LOG("red");
-  gCubeManager.current_frame->setRed();
+  frame_new.setRed();
   delay(1000);
 
   LOG("green");
-  gCubeManager.current_frame->setGreen();
+  frame_new.setGreen();
   delay(1000);
 
   LOG("blue");
-  gCubeManager.current_frame->setBlue();
+  frame_new.setBlue();
   delay(1000);
 */
 delay(500);
