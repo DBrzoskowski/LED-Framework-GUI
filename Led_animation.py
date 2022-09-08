@@ -104,6 +104,13 @@ class Cube3D(canvas):
 
                     self.leds[led_index].color = color
 
+    def update_physical_cube(self):
+        frame = LEDFrame()
+        for led in self.leds:
+            rgb = led.color
+            frame.turnOnLed(int(led.pos.x), int(led.pos.y), int(led.pos.z), int(rgb.x / 0.066), int(rgb.y / 0.066), int(rgb.z / 0.066))
+        sendFrame(self, frame, True, False)
+
     def led_on_click_event(self, ev):
         hit = self.mouse.pick
         self.drawing_path["fps"] = self.drawing_fps
@@ -118,6 +125,8 @@ class Cube3D(canvas):
 
             self.drawing_path["pos"].append(hit.pos.value)
             self.drawing_path["color"].append(hit.color.value)
+
+        self.update_physical_cube()
 
     @staticmethod
     def hex2vector(drawing_color):

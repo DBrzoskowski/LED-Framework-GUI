@@ -17,7 +17,7 @@ from sandbox.audio_spectrum_analyzer.Realtime_PyAudio_FFT_lib.run_FFT_analyzer i
 # CONFIG
 MAX_PACKET_SIZE = 255
 
-UDP_IP = "192.168.0.10"
+UDP_IP = "192.168.0.137"
 UDP_PORT = 4210
 
 TYPE_HEADER = 0xFE
@@ -316,14 +316,14 @@ def sendBodies(frame_to_send):
         sendBody(packet)
 
 
-def sendFrame(obj, frame_to_send, different_object = False):
+def sendFrame(obj, frame_to_send, different_object = False, update_simulation = True):
     if different_object:
         try:
             if obj.send_to_cube_flag:
                 sendHeader(frame_to_send)
                 sendBodies(frame_to_send)
-
-            obj.update_simulated_cube(frame_to_send)
+            if update_simulation:
+                obj.update_simulated_cube(frame_to_send)
         except:
             print("exception")
             pass
@@ -331,8 +331,8 @@ def sendFrame(obj, frame_to_send, different_object = False):
         if obj.cube.send_to_cube_flag:
             sendHeader(frame_to_send)
             sendBodies(frame_to_send)
-
-        obj.cube.update_simulated_cube(frame_to_send)
+        if update_simulation:
+            obj.cube.update_simulated_cube(frame_to_send)
 
 
 
