@@ -1669,13 +1669,16 @@ class DoSpectrumAnimation(threading.Thread):
     def run(self):
         run_pyaudio_fft_spectrum(self.obj, True)
 
-def fadeBars(fadeData, barsData):
+def fadeBars(fadeData, barsData, slowFade):
     fadedBars = [0] * 64
     index = 0
 
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
-            fadedBars[index] = fadeBar - 1
+            if slowFade == 10:
+                fadedBars[index] = fadeBar - 1
+            else:
+                fadedBars[index] = fadeBar
         else:
             fadedBars[index] = incomingBar
         index += 1
@@ -1702,7 +1705,12 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     fadedBars = [0] * 64
     start_time = time.time()
 
+    slowFade = 0
+
     while True:
+        if slowFade > 11:
+            slowFade = 0
+        slowFade += 1
         fps = obj.cube.drawing_fps
 
         current_time = time.time()
@@ -1719,7 +1727,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         print(f"max{max(binned_fft)}")
 
         for i, frequency in enumerate(binned_fftx):
-            power = binned_fft[i]
+            power = binned_fft[i] * (i * 0.1)
 
             x = int(i / 8)
             y = i % 8
@@ -1750,7 +1758,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             barsData[i] = level
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
-        fadedBars = fadeBars(fadedBars, barsData)
+        fadedBars = fadeBars(fadedBars, barsData, slowFade)
         for i in fadedBars:
             print(i)
         sendSpectrum(obj, fadedBars)
