@@ -1740,15 +1740,15 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
             if 23 >= level > 18:
                 level = 7
-            elif 18 >= level > 14:
+            elif 18 >= level > 15:
                 level = 6
-            elif 14 > level > 10:
+            elif 15 > level > 12:
                 level = 5
-            elif 10 >= level > 8:
+            elif 12 >= level > 9:
                 level = 4
-            elif 8 >= level > 5:
+            elif 9 >= level > 6:
                 level = 3
-            elif 5 >= level >= 3:
+            elif 6 >= level >= 3:
                 level = 2
             elif 3 >= level >= 1:
                 level = 1
