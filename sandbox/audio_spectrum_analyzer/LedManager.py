@@ -1669,6 +1669,18 @@ class DoSpectrumAnimation(threading.Thread):
     def run(self):
         run_pyaudio_fft_spectrum(self.obj, True)
 
+def fadeBars(fadeData, barsData):
+    fadedBars = [0] * 64
+    index = 0
+
+    for fadeBar, incomingBar in zip(fadeData, barsData):
+        if fadeBar > incomingBar:
+            fadedBars[index] = fadeBar - 1
+        else:
+            fadedBars[index] = incomingBar
+        index += 1
+
+    return fadedBars
 
 def run_pyaudio_fft_spectrum(obj, infinite=False):
     visualize = 0
@@ -1687,11 +1699,11 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
 
     barsData = [0] * 64
+    fadedBars = [0] * 64
     start_time = time.time()
 
     while True:
         fps = obj.cube.drawing_fps
-        delay = (1000.0 / fps) / 1000
 
         current_time = time.time()
         if not infinite and (current_time - start_time > 5):
@@ -1718,26 +1730,6 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             else :
                 level = int(level)
 
-            """
-            # TODO: automatic power translation
-            if int(frequency) > 2500:
-                max_power = 20
-            elif int(frequency) > 4000:
-                max_power = 14
-            
-
-            test = max(binned_fft)
-
-            if test < 4:
-                test = 4
-
-            level = int(translate(power, 0, test, 0, 7))
-            #print(level)
-            if level > 7:
-                level = 7
-            barsData[i] = int(level + 0.2)
-            #
-            """
             if level > 20:
                 level = 7
             elif 20 >= level >= 18:
@@ -1756,17 +1748,20 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
                 level = 0
 
             barsData[i] = level
+            #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
-        sendSpectrum(obj, barsData)
+        fadedBars = fadeBars(fadedBars, barsData)
+        for i in fadedBars:
+            print(i)
+        sendSpectrum(obj, fadedBars)
         fft_duration_ms = current_milli_time() - start_time_ms
 
-        #if (fft_duration_ms / 1000) > (1. / fps):
-        #    print('continue')
-        #    time.sleep(0.01)
-        #    continue
+        if (fft_duration_ms / 1000) > (1. / fps):
+            print('continue')
+            time.sleep(0.01)
+            continue
 
-        #time.sleep(((1. / fps) - (fft_duration_ms / 1000)) / 1000)
-        time.sleep(delay)
+        time.sleep(((1. / fps) - (fft_duration_ms / 1000)) / 1000)
 
 
 if __name__ == '__main__':
