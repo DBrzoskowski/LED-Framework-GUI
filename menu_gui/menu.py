@@ -239,7 +239,7 @@ class AppWindow(QMainWindow):
 
         self.lastOpenFileLabel.setGeometry(QtCore.QRect(230, 180, 171, 31))
         self.lastOpenFileLabel.setMinimumSize(QtCore.QSize(171, 31))
-        self.lastOpenFileLabel.setMaximumSize(QtCore.QSize(171, 31))
+        # self.lastOpenFileLabel.setMaximumSize(QtCore.QSize(171, 31))
         font = QtGui.QFont()
         font.setFamily("Dubai Medium")
         font.setPointSize(16)
@@ -412,7 +412,7 @@ class AppWindow(QMainWindow):
             try:
                 self.lastOpenFileLabel.setText("File: " + file_name)
                 self.lastOpenFileLabel.setWordWrap(True)
-                # self.lastOpenFileLabel.adjustSize()
+                self.lastOpenFileLabel.adjustSize()
                 if file_path != '':
                     self.readyAnimationBox.insertItem(0, file_name)
                     self.cube.load_animation_from_file(file_path)
