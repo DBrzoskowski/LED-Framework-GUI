@@ -1675,7 +1675,7 @@ def fadeBars(fadeData, barsData, slowFade):
 
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
-            if slowFade == 10:
+            if slowFade == 30:
                 fadedBars[index] = fadeBar - 1
             else:
                 fadedBars[index] = fadeBar
@@ -1708,7 +1708,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     slowFade = 0
 
     while True:
-        if slowFade > 11:
+        if slowFade > 31:
             slowFade = 0
         slowFade += 1
         fps = obj.cube.drawing_fps
@@ -1727,7 +1727,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         print(f"max{max(binned_fft)}")
 
         for i, frequency in enumerate(binned_fftx):
-            power = binned_fft[i] * (i * 0.1)
+            power = binned_fft[i]
 
             x = int(i / 8)
             y = i % 8
@@ -1738,19 +1738,19 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             else :
                 level = int(level)
 
-            if level > 20:
+            if level == 23:
                 level = 7
-            elif 20 >= level >= 18:
+            elif level == 22:
                 level = 6
-            elif 18 > level >= 15:
+            elif 22 > level >= 20:
                 level = 5
-            elif 15 > level >= 12:
+            elif 20 > level >= 15:
                 level = 4
-            elif 12 > level >= 9:
+            elif 15 > level >= 12:
                 level = 3
-            elif 9 > level >= 6:
+            elif 12 > level >= 6:
                 level = 2
-            elif 6 > level >= 3:
+            elif 6 > level >= 1:
                 level = 1
             else:
                 level = 0
