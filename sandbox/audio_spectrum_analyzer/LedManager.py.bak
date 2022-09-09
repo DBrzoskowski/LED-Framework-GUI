@@ -1669,13 +1669,13 @@ class DoSpectrumAnimation(threading.Thread):
     def run(self):
         run_pyaudio_fft_spectrum(self.obj, True)
 
-def fadeBars(fadeData, barsData, slowFade):
+def fadeBars(fadeData, barsData, slowFade, fade_speed):
     fadedBars = [0] * 64
     index = 0
 
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
-            if slowFade == 18:
+            if slowFade == fade_speed:
                 fadedBars[index] = fadeBar - 1
             else:
                 fadedBars[index] = fadeBar
@@ -1709,9 +1709,13 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
     max_value = 0
     max_values = [0] * 64
-
+    
+    fade_speed = 3
+    
+    current_max = 100
+    
     while True:
-        if slowFade > 18:
+        if slowFade > fade_speed:
             slowFade = 0
         slowFade += 1
         fps = obj.cube.drawing_fps
@@ -1727,7 +1731,9 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
-        print(f"max{max(binned_fft)}")
+        print(f"max{current_max}")
+
+        current_max = current_max * 0.80
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
@@ -1735,36 +1741,40 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             x = int(i / 8)
             y = i % 8
             
-            print(i)
-            if max(binned_fft) > max_values[i]:
-                max_values[i] = max(binned_fft)
+            if max(binned_fft) > current_max:
+                current_max = max(binned_fft)
+            
+            if current_max > max_values[i]:
+                max_values[i] = current_max
             
             if max(binned_fft) > max_value:
-                max_value = max(binned_fft)
+                max_value = current_max
             
             level = 0
-            if power <= (max_values[i] * 0.001):
+            if power <= (max_value * 0.001):
                 level = 0
             else:
-                level = translate(power, 0, max(binned_fft), 0, 23)
+                level = translate(power, 0, current_max, 0, 23)
                 if level == None:
                     level = 0
                 else :
                     level = int(level)
-
-                if 23 >= level > 18:
+                
+                multiplier = 0.8 - (int(i / 4) * 0.04)
+                
+                if (23 * multiplier) >= level > (18 * multiplier):
                     level = 7
-                elif 18 >= level > 14:
+                elif (18 * multiplier) >= level > (14 * multiplier):
                     level = 6
-                elif 14 > level > 9:
+                elif (14 * multiplier) > level > (9 * multiplier):
                     level = 5
-                elif 9 >= level > 6:
+                elif (9 * multiplier) >= level > (6 * multiplier):
                     level = 4
-                elif 6 >= level > 4:
+                elif (6 * multiplier) >= level > (4 * multiplier):
                     level = 3
-                elif 4 >= level >= 2:
+                elif (4 * multiplier) >= level == (2 * multiplier):
                     level = 2
-                elif 2 >= level >= 1:
+                elif (2 * multiplier) >= level >= (1 * multiplier):
                     level = 1
                 else:
                     level = 0
@@ -1772,7 +1782,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
             barsData[i] = level
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
 
-        fadedBars = fadeBars(fadedBars, barsData, slowFade)
+        fadedBars = fadeBars(fadedBars, barsData, slowFade, fade_speed)
         sendSpectrum(obj, fadedBars)
         fft_duration_ms = current_milli_time() - start_time_ms
 
