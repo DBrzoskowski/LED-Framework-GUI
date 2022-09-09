@@ -1676,7 +1676,10 @@ def fadeBars(fadeData, barsData, slowFade, fade_speed):
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
             if slowFade == fade_speed:
-                fadedBars[index] = fadeBar - 1
+                if fadeBar > 1:
+                    fadedBars[index] = fadeBar - 1
+                else:
+                    fadedBars[index] = 0
             else:
                 fadedBars[index] = fadeBar
         else:
@@ -1712,7 +1715,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     
     fade_speed = 3
     
-    current_max = 100
+    current_max = 10000
     
     while True:
         if slowFade > fade_speed:
@@ -1731,9 +1734,12 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
-        print(f"max{current_max}")
-
-        current_max = current_max * 0.80
+        #print(f"max{current_max}")
+        
+        if current_max < 3000:
+            current_max = 3000
+        else:
+            current_max = current_max * 0.80
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]

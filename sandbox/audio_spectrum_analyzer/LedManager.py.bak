@@ -1676,7 +1676,10 @@ def fadeBars(fadeData, barsData, slowFade, fade_speed):
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
             if slowFade == fade_speed:
-                fadedBars[index] = fadeBar - 1
+                if fadeBar > 1:
+                    fadedBars[index] = fadeBar - 1
+                else:
+                    fadedBars[index] = 0
             else:
                 fadedBars[index] = fadeBar
         else:
@@ -1712,7 +1715,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     
     fade_speed = 3
     
-    current_max = 100
+    current_max = 10000
     
     while True:
         if slowFade > fade_speed:
@@ -1732,8 +1735,11 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
         start_time_ms = current_milli_time()
         raw_fftx, raw_fft, binned_fftx, binned_fft = ear.get_audio_features()
         print(f"max{current_max}")
-
-        current_max = current_max * 0.80
+        
+        if current_max < 3000:
+            current_max = 3000
+        else:
+            current_max = current_max * 0.80
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
@@ -1762,19 +1768,19 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
                 
                 multiplier = 0.8 - (int(i / 4) * 0.04)
                 
-                if (23 * multiplier) >= level > (18 * multiplier):
+                if level > (18 * multiplier):
                     level = 7
-                elif (18 * multiplier) >= level > (14 * multiplier):
+                elif level > (14 * multiplier):
                     level = 6
-                elif (14 * multiplier) > level > (9 * multiplier):
+                elif level > (9 * multiplier):
                     level = 5
-                elif (9 * multiplier) >= level > (6 * multiplier):
+                elif level > (6 * multiplier):
                     level = 4
-                elif (6 * multiplier) >= level > (4 * multiplier):
+                elif level > (4 * multiplier):
                     level = 3
-                elif (4 * multiplier) >= level == (2 * multiplier):
+                elif level == (2 * multiplier):
                     level = 2
-                elif (2 * multiplier) >= level >= (1 * multiplier):
+                elif level >= (1 * multiplier):
                     level = 1
                 else:
                     level = 0
