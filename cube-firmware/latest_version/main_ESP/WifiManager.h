@@ -165,20 +165,24 @@ IRAM_ATTR void verifyPacket(byte packet_size) {
 
 int bytes_to_read = 0;
 IRAM_ATTR void checkUdpPackets() {
-  //wifiTicker.detach();
-  do {
-    bytes_to_read = Udp.parsePacket();
+  //for (int i = 0; i < 5; i++) {
+    //wifiTicker.detach();
+    do {
+      bytes_to_read = Udp.parsePacket();
 
-    if(bytes_to_read > 0) {
-      byte bytes_read = Udp.read(&buffer[0], bytes_to_read);
+      if(bytes_to_read > 0) {
+        byte bytes_read = Udp.read(&buffer[0], bytes_to_read);
 
-      verifyPacket(bytes_read);
+        verifyPacket(bytes_read);
 
-      Udp.endPacket();
+        Udp.endPacket();
+      }
     }
-  }
-  while(bytes_to_read > 0);
-  
+    while(bytes_to_read > 0);
+
+  //  delayMicroseconds(1);
+  //}
+
   //wifiTicker.attach(0.03, checkUdpPackets);
-  wifiTicker.once_ms(3, checkUdpPackets); // Initialize Ticker every 0.005s
+  wifiTicker.once_ms(1, checkUdpPackets); // Initialize Ticker every 0.005s
 }
