@@ -1651,7 +1651,7 @@ def rgb(minimum, maximum, value):
 
 
 def translate(value, fromMin, fromMax, toMin, toMax):
-    if fromMax == 0:
+    if fromMax == 1:
         return 0
     fromSpan = fromMax - fromMin
     toSpan = toMax - toMin
@@ -1675,7 +1675,7 @@ def fadeBars(fadeData, barsData, slowFade):
 
     for fadeBar, incomingBar in zip(fadeData, barsData):
         if fadeBar > incomingBar:
-            if slowFade == 25:
+            if slowFade == 18:
                 fadedBars[index] = fadeBar - 1
             else:
                 fadedBars[index] = fadeBar
@@ -1708,7 +1708,7 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
     slowFade = 0
 
     while True:
-        if slowFade > 26:
+        if slowFade > 18:
             slowFade = 0
         slowFade += 1
         fps = obj.cube.drawing_fps
@@ -1740,17 +1740,17 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
             if 23 >= level > 18:
                 level = 7
-            elif 18 >= level > 16:
+            elif 18 >= level > 14:
                 level = 6
-            elif 16 > level > 13:
+            elif 14 > level > 9:
                 level = 5
-            elif 13 >= level > 10:
+            elif 9 >= level > 6:
                 level = 4
-            elif 10 >= level > 7:
+            elif 6 >= level > 4:
                 level = 3
-            elif 7 >= level >= 4:
+            elif 4 >= level >= 2:
                 level = 2
-            elif 4 >= level >= 1:
+            elif 2 >= level >= 1:
                 level = 1
             else:
                 level = 0
