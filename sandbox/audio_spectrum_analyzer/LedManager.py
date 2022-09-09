@@ -1651,7 +1651,7 @@ def rgb(minimum, maximum, value):
 
 
 def translate(value, fromMin, fromMax, toMin, toMax):
-    if fromMax == 1:
+    if fromMax <= 1:
         return 0
     fromSpan = fromMax - fromMin
     toSpan = toMax - toMin
@@ -1707,6 +1707,9 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
     slowFade = 0
 
+    max_value = 0
+    max_values = [0] * 64
+
     while True:
         if slowFade > 18:
             slowFade = 0
@@ -1728,32 +1731,43 @@ def run_pyaudio_fft_spectrum(obj, infinite=False):
 
         for i, frequency in enumerate(binned_fftx):
             power = binned_fft[i]
-
+             
             x = int(i / 8)
             y = i % 8
-
-            level = translate(power, 0, max(binned_fft), 0, 23)
-            if level == None:
+            
+            print(i)
+            if max(binned_fft) > max_values[i]:
+                max_values[i] = max(binned_fft)
+            
+            if max(binned_fft) > max_value:
+                max_value = max(binned_fft)
+            
+            level = 0
+            if power <= (max_value * 0.001):
                 level = 0
-            else :
-                level = int(level)
-
-            if 23 >= level > 18:
-                level = 7
-            elif 18 >= level > 14:
-                level = 6
-            elif 14 > level > 9:
-                level = 5
-            elif 9 >= level > 6:
-                level = 4
-            elif 6 >= level > 4:
-                level = 3
-            elif 4 >= level >= 2:
-                level = 2
-            elif 2 >= level >= 1:
-                level = 1
             else:
-                level = 0
+                level = translate(power, 0, max(binned_fft), 0, 23)
+                if level == None:
+                    level = 0
+                else :
+                    level = int(level)
+
+                if 23 >= level > 18:
+                    level = 7
+                elif 18 >= level > 14:
+                    level = 6
+                elif 14 > level > 9:
+                    level = 5
+                elif 9 >= level > 6:
+                    level = 4
+                elif 6 >= level > 4:
+                    level = 3
+                elif 4 >= level >= 2:
+                    level = 2
+                elif 2 >= level >= 1:
+                    level = 1
+                else:
+                    level = 0
 
             barsData[i] = level
             #frame.drawColumn(x, y, level, int(r / 17), int(g / 17), int(b / 17))
